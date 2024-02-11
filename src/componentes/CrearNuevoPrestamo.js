@@ -38,7 +38,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     const [contratoRaw, set_contratoRaw] = useState(false);
     const [contratoFinal, set_contratoFinal] = useState(false);
     const [validadoParaContrato, set_validadoParaContrato] = useState(false);
-    
+    const [openVentanaCalculadora, set_openVentanaCalculadora] = useState(false);
     
     // const [permisoP, set_permisoP] = useState(false);
     // const [cargandoPermisoP, set_cargandoPermisoP] = useState(false);
@@ -115,7 +115,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         })
         .then((res) => {
             if(res.data.status === "ER"){
-                console.log(res.data.payload.message);
+                // console.log(res.data.payload.message);
             }
             if(res.data.status === "ERS"){
                 localStorage.removeItem('arani_session_id');
@@ -191,43 +191,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         }
 
     }, [inputPeriodo, inputCantidadDinero, inputAceptoContrato, inputAceptoBanco]);
-
-
-    // useEffect(()=>{
-    //     set_cargandoPermisoP(true);
-    //     axios.request({
-    //         url: "https://app.arani.hn/api/app/getPriceList.php",
-    //         method: "post",
-    //         withCredentials: true,
-    //         data: {
-    //             sid: gContext.logeado.token,
-    //             productId: params.productSelected.ProCod,
-    //           },
-    //     })
-    //     .then((res) => {
-    //         set_cargandoPermisoP(false);
-    //         if(res.data.status === "ER"){
-    //         }
-    //         if(res.data.status === "OK"){
-    //             console.log(res.data.payload[params.productSelected.ProCod]);
-    //             let datarango = res.data.payload[params.productSelected.ProCod];
-    //             if(datarango){
-    //                 set_permisoP(true);
-    //                 set_params.pricelistData({
-    //                     PriMntDes: datarango.PriMntDes,
-    //                     PriMntHas: datarango.PriMntHas,
-    //                     PriTerDes: datarango.PriTerDes,
-    //                     PriTerHas: datarango.PriTerHas,
-    //                 });
-    //             }else{
-    //                 set_permisoP(false);
-    //             }
-    //         }
-    //     }).catch(err => {
-    //         console.log(err.message);
-    //     });
-    //     // eslint-disable-next-line
-    // },[]);
     
     useEffect(()=>{
 
@@ -267,11 +230,13 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             }
             set_listadoPeriodos(arrayPersSelect);
 
+            console.log("priceListData", params.pricelistData);
+
             // Sacamos el interes por periodo
             var interesPeriodo = params.pricelistData.PriInt;
-            if(tipo === 'semanal') set_interesPeriodo(numeral(interesPeriodo/52.1429).format('0,0.00'));
-            if(tipo === 'quincenal') set_interesPeriodo(numeral(interesPeriodo/26.0714).format('0,0.00'));
-            if(tipo === 'mensual') set_interesPeriodo(numeral(interesPeriodo/12).format('0,0.00'));
+            if(tipo === 'semanal') set_interesPeriodo((interesPeriodo/52).toFixed(10));
+            if(tipo === 'quincenal') set_interesPeriodo((interesPeriodo/26).toFixed(10));
+            if(tipo === 'mensual') set_interesPeriodo((interesPeriodo/12).toFixed(10));
         }
 
     // eslint-disable-next-line
@@ -478,10 +443,10 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
                    
 
-                    <Grid item xs={12} sm={12}>
-                        Tasa {params.productSelected.ProTip} es de {interesPeriodo}%
+                    <Grid item xs={12} sm={6}>
+                        {/* <Typography variant="body2" sx={{pt: 1, pb: 1}} >La tasa {params.productSelected.ProTip} es de {interesPeriodo}%</Typography> */}
+                        <Button variant="contained" onClick={()=>{set_openVentanaCalculadora(true)}} disabled={!validadoParaContrato} size="small">Calculadora de cuotas</Button>
                     </Grid>
-                    
                    
                     <Grid onClick={()=>{set_yaIntentoEnviar(true)}} item xs={12} sm={12}>
                         <Button onClick={crearPrestamoApi} disabled={!botonEnviarHabilitado} variant="contained" sx={{ mt: 1, mr: 1 }} >Enviar solicitud</Button>
@@ -490,14 +455,22 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                 </Grid>
                 </>
                 }
-                {/* {(!enviandoAlApi && !seRegistro && !permisoP) && <>
-                    <Typography component={"div"} variant="body2" sx={{p: '0 0 2rem 0'}} >
-                        {(cargandoPermisoP)?
-                        <div>Cargando....</div>:
-                        <><div>Tu perfil actual no permite solicitar este tipo de préstamo.</div><Button onClick={()=>{cerrarVentana()}} variant="contained" sx={{ mt: 1, mr: 1 }} >Cerrar</Button></>
-                        }
-                    </Typography>
-                </>} */}
+                <Dialog
+                    open={openVentanaCalculadora}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                    maxWidth="xs"
+                >
+                    <DialogContent>
+                        <Calculadora
+                            setOpen={set_openVentanaCalculadora} 
+                            inputCantidadDinero={inputCantidadDinero} 
+                            inputPeriodo={inputPeriodo} 
+                            interesPeriodo={interesPeriodo} 
+                            diasPorPerSel={diasPorPerSel} 
+                            params={params} />
+                    </DialogContent>
+                </Dialog>
             </Box>
         </Box>
     );
@@ -520,6 +493,70 @@ function CrearNuevoPrestamo({open, todosaliobienfn, cerrarVentana, params}){
     );
 }
 
+
+function Calculadora({setOpen, inputCantidadDinero, inputPeriodo, interesPeriodo, diasPorPerSel, params}){
+
+    const [cuota, set_cuota] = useState(parseInt(params.pricelistData.PriInt));
+    const [interesTotal, set_interesTotal] = useState(0);
+    const [gastosAdministrativos, set_gastosAdministrativos] = useState(0);
+    const [interesEnDinero, set_interesEnDinero] = useState(0);
+
+    useEffect(()=>{
+        // console.log('inputCantidadDinero', inputCantidadDinero);
+        // console.log('inputPeriodo', inputPeriodo);
+        // console.log('interesPeriodo', interesPeriodo);
+        // console.log('diasPorPerSel', diasPorPerSel);
+        // console.log('params', params);
+
+        let totalPrestamo = inputCantidadDinero.valor;
+        let numeroDePagos = inputPeriodo.valor/diasPorPerSel;
+        let interesTotalPer = interesPeriodo * numeroDePagos / 100;
+        // let cuota = totalPrestamo * (interesTotalPer + 1) / numeroDePagos;
+        let gastosAdministrativos = (totalPrestamo * 0.05) / numeroDePagos;
+        let intDinero = (totalPrestamo * interesTotalPer) / numeroDePagos;
+        let cuota = (totalPrestamo + (gastosAdministrativos * numeroDePagos) + (intDinero * numeroDePagos)) / numeroDePagos;
+        set_cuota(cuota + gastosAdministrativos + intDinero);
+        set_interesTotal(interesTotalPer);
+        set_gastosAdministrativos(gastosAdministrativos);
+        set_interesEnDinero(intDinero);
+        // console.log('cuota', cuota);
+        // console.log('intDinero', intDinero);
+        // console.log('interesTotalPer', cuota * (interesPeriodo/100));
+        // console.log('totalPrestamo', totalPrestamo);
+        // console.log('gastosAdministrativos', gastosAdministrativos);
+        console.log('interesPeriodo', interesPeriodo);
+    }, [inputCantidadDinero, inputPeriodo, interesPeriodo, diasPorPerSel, params]);
+
+
+
+    return (
+    <>
+        <Grid container spacing={2}>
+            <Grid item xs={12} sm={12}>
+                <Typography variant="h5" sx={{pt: 1, pb: 0}} >Calculadora</Typography>
+                <Typography variant="body2" sx={{pt: 1, pb: 5}} >Aqui encontrara información adicional sobre sus cuotas y los calculos generales aproximados de sus intereses.</Typography>
+                <Typography variant="body2" sx={{}} >Detalle</Typography>
+                <Divider sx={{ mb: 1, mt: 1 }}></Divider>
+                {/* <Typography variant="body2" sx={{}} >Cantidad: L {numeral(inputCantidadDinero.valor).format('0,0.00')}</Typography> */}
+                <Typography variant="body2" sx={{}} >Cuota {params.productSelected.ProTip}: <b>L {numeral(cuota).format('0,0.00')}</b></Typography>
+                <Typography variant="body2" sx={{}} >Total de pagos: <b>{inputPeriodo.valor/diasPorPerSel}</b></Typography>
+                <Typography variant="body2" sx={{}} >Periodicidad: <b>{params.productSelected.ProTip}</b></Typography>
+                <Typography variant="body2" sx={{}} >Gastos administrativo: <b>L {gastosAdministrativos}</b></Typography>
+                <Typography variant="body2" sx={{}} >Interes: <b>L {numeral(interesEnDinero).format("0,0.00")}</b></Typography>
+                {/* <Typography variant="body2" sx={{}} >Interes <b>{params.productSelected.ProTip}: {interesPeriodo}%</b></Typography> */}
+                <Typography variant="body2" sx={{}} >Interes total: <b>{numeral(interesTotal*100).format("0.0")}%</b></Typography>
+                {/* <Typography>params.pricelistData.PriInt {params.pricelistData.PriInt}</Typography> */}
+                <Divider sx={{ mb: 6, mt: 1 }}></Divider>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+                <Button variant="outlined" fullWidth onClick={()=>{setOpen(false)}}>Ok</Button>
+            </Grid>
+        </Grid>
+    </>
+    );
+}
 
 export default CrearNuevoPrestamo;
 
@@ -805,7 +842,3 @@ function FormCambiarBanco({setOpen}){
 }
 
 
-
-// function textContrato(){
-//     return "<h1>CONTRATO DE PRESTAMO</h1> Yo, $$NOMBRE COMPLETO$$, mayor de edad, HONDUREÑO, $$ESTADO CIVIL$$, con domicilio en $$CIUDAD$$, $$$DEPARTAMENTO$ y con IDENTIDAD No. $$IDENTIDAD$$, en adelante y para los efectos del presente contrato denominado como EL PRESTATARIO, declaro que he recibido en Préstamo de ARANI INVESTMENT S.A., que en lo sucesivo se denominará únicamente por abreviatura ARANI con Registro Tributario Nacional número 0801198100530, hemos convenido celebrar y en efecto celebramos un contrato de préstamo, que se regirá por las estipulaciones que a continuación se consignan: PRIMERO: CONDICIONES GENERALES DEL PRÉSTAMO A. Monto: ARANI otorga en calidad de préstamo al prestatario la suma de $$MONTO$$: B. Plazo: El plazo del préstamo será de $$PLAZOS$$. C. Forma de Pago: EL PRÉSTAMO SERÁ AMORTIZADO MEDIANTE CUOTAS $$NUMERO de CUOTAS$$ de CUOTAS FIJAS calculadas por ARANI una vez recaudados los fondos más el importe de los seguros que correspondan y ARANI considere necesarios anexados al plan de pagos y se compromete a pagarlo bajo los términos que ARANI estime conveniente, El préstamo cuenta con un seguro de deuda. D. Lugar de Pago: El prestatario pagará el préstamo en cualquiera de los medios digitales establecidos por ARANI, y demás formas que designe, sin necesidad de requerimiento alguno. E. Intereses. El préstamo devengará un interés del $$INTERESES$$ % calculado de acuerdo con las políticas de ARANI. Siendo convenido y entendido, e incondicionalmente aceptado que esta tasa de interés queda sujeta a la revisión periódica, a las variaciones tanto del Banco Central de Honduras, como a la política crediticia interna , a la flotación o liberación de tasas, a la fluctuación del Lempira y otras causas, en consecuencia, la tasa de interés se fijará en documento unilateral a juicio exclusivo de ARANI, sin comunicación previa al prestatario y de conformidad a los cambios que pudieran producirse en la fijación de la tasa de interés para operaciones activas. F. Destino: INVERSION $$MONTO$$ si el prestatario ha destinado los fondos a una finalidad distinta a la pactada en este contrato, ARANI aplicará un incremento a la tasa de interés de conformidad al uso que el prestatario le dio a la inversión según los productos financieros de ARANI y según su garantía. G. Capitalización: Se deducirá un porcentaje único del monto del préstamo a refinanciar, las comisiones de desembolso estipuladas según reglamento de crédito. H. Desembolsos: Al prestatario se le desembolsará el préstamo de acuerdo con las condiciones descritas en la resolución del crédito. I. Mora: a) Constituirá mora la falta de pago de una (1) cuota o más  en la fecha estipulada ya sea en capital o intereses y se le aplicará un recargo del $$MORA$$ % semanal calculado sobre el monto  del capital prestado , de igual manera queda claro que a la falta de pago de dos meses consecutivos ARANI dará derecho a ejecución judicial sin necesidad de requerimiento corriendo por cuenta del prestatario todos los gastos ocasionados por el proceso judicial.: En el presente contrato quedan ambas partes a dar fiel cumplimiento a todos y cada uno de los términos establecidos en el presente contrato. Para constancia firman este contrato en $$CIUDAD$$, A LOS $$DIAS EN LETRAS$$  DIAS DEL MES DE $$NOMBRE MES$$ DEL AÑO $$AÑO$$. Dicha fecha puede cambiar una vez liberados los fondos por parte de ARANI.";
-// }

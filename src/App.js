@@ -21,7 +21,7 @@ export const AppContext = createContext();
 // Actualizador de versiones en el cliente
 // ----------------------------------------------
 // ----------------------------------------------
-var versionJS = '0.2.9';
+var versionJS = '0.3.0';
 
 setInterval(() => { 
         var time = new Date().getTime();
@@ -99,7 +99,7 @@ function App() {
                             <Route path="/plan" element={(logeado.estado)?<Plan />:<Login />} />
                             <Route path="/plan/:idprestamoparam" element={(logeado.estado)?<Plan />:<Login />} />
                             <Route path="/historial" element={(logeado.estado)?<Historial />:<Login />} />
-                            <Route path="/validarmail/:codigovalidacion" element={<ValidarMail />} />
+                            <Route path="/validarmail/:token" element={<ValidarMail />} />
                             <Route path="*" element={<NoExiste />} />
                         </Routes>
                     </HashRouter>

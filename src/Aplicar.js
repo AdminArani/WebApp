@@ -248,6 +248,7 @@ function RegistradoCore({todosaliobienfn, usuarioAprobadoManual, datosEnviadosAr
                 // -------------------------------------------
                 // -------------------------------------------
                 // set_tieneOtroPrestamo(false);
+                // BORRAR ESTO DESPUES DE PROBAR
                 
             }
             if(res.data.status === 500){
