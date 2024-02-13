@@ -544,7 +544,7 @@ function Calculadora({setOpen, inputCantidadDinero, inputPeriodo, interesPeriodo
                 <Typography variant="body2" sx={{}} >Gastos administrativo: <b>L {gastosAdministrativos}</b></Typography>
                 <Typography variant="body2" sx={{}} >Interes: <b>L {numeral(interesEnDinero).format("0,0.00")}</b></Typography>
                 {/* <Typography variant="body2" sx={{}} >Interes <b>{params.productSelected.ProTip}: {interesPeriodo}%</b></Typography> */}
-                <Typography variant="body2" sx={{}} >Interes total: <b>{numeral(interesTotal*100).format("0.0")}%</b></Typography>
+                <Typography variant="body2" sx={{}} >Tasa de interés: <b>{numeral(interesTotal*100).format("0.0")}%</b></Typography>
                 {/* <Typography>params.pricelistData.PriInt {params.pricelistData.PriInt}</Typography> */}
                 <Divider sx={{ mb: 6, mt: 1 }}></Divider>
             </Grid>
