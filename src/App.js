@@ -21,7 +21,7 @@ export const AppContext = createContext();
 // Actualizador de versiones en el cliente
 // ----------------------------------------------
 // ----------------------------------------------
-var versionJS = '0.3.0';
+var versionJS = '0.3.1';
 
 setInterval(() => { 
         var time = new Date().getTime();
