@@ -19,6 +19,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CircularProgress from '@mui/material/CircularProgress';
 import Avatar from '@mui/material/Avatar';
+import ConfirmarCorreo from "./componentes/ConfirmarCorreo";
 
 function Perfil() {
     const gContext = useContext(AppContext);
@@ -77,6 +78,7 @@ function Perfil() {
                 if(t18?.dir) set_urlImagenPerfilTerminada('https://app.arani.hn'+t18?.dir);
                 
                 console.log('usuarioDetalleFullR.datasend', usuarioDetalleFullR.datasend);
+                console.log('usuarioDetalleFullR', usuarioDetalleFullR);
             }
             if(res.data.status === 500){
                 console.log("res.data.status === 500");
@@ -425,9 +427,10 @@ function Perfil() {
                                         <ListItemIcon>
                                             <span className="material-symbols-outlined">mail</span>
                                         </ListItemIcon>
-                                        <ListItemText primary={usuarioDetalle.email||"----"} secondary="Correo electrónico" />
+                                        <ListItemText primary={usuarioDetalle.email||"----"} secondary={<>{(usuarioDetalleFullR.MailEst === "CMP")?"Correo (Confirmado)":"Correo (Sin confirmar)"}</>} />
                                     </ListItemButton>
                                 </List>
+                                <ConfirmarCorreo estadoMail={usuarioDetalleFullR.MailEst} nombreMail={usuarioDetalle.email} />
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <List>
