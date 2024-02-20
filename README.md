@@ -43,3 +43,6 @@ Para generar los archivos necesarios para subir a produccion es necesario compil
 |componentes/utilidades.js|Procesadores de estados|
 |componentes/TerminarRegistro.js|Pantalla de legado que pedia datos para terminar de registrar los usuarios, actualmente no esta en uso|
 |ValidarMail.js|Pantalla que valida automaticamente el correo de un usuario pasandole un parametro|
+
+## Historial de cambios
+1. Vinculación del repositorio git al servidor 
