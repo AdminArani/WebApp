@@ -45,4 +45,4 @@ Para generar los archivos necesarios para subir a produccion es necesario compil
 |ValidarMail.js|Pantalla que valida automaticamente el correo de un usuario pasandole un parametro|
 
 ## Historial de cambios
-1. Vinculación del repositorio git al servidor 
+1. Vinculación del repositorio git al servidor 20/02/2024
