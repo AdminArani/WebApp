@@ -42,6 +42,46 @@ function Perfil() {
 
     const navigate = useNavigate();
 
+    const [showAplicarLink, setShowAplicarLink] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                const departamento = data.address.state || data.address.county || '';
+                const pais = data.address.country || '';
+
+                // Lista de ubicaciones permitidas
+                const ubicacionesPermitidas = [
+                    "Tegucigalpa, Honduras",
+                    "Comayagüela, Honduras",
+                    "Choloma, Honduras",
+                    "La lima, Honduras",
+                    "Villanueva, Honduras",
+                    "Progreso, Honduras",
+                    "San Pedro Sula, Honduras",
+                    
+                ];
+
+                // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
+                if (ubicacionesPermitidas.includes(`${departamento}, ${pais}`)) {
+                    setShowAplicarLink(true);
+                } else {
+                    setErrorMessage('Lo sentimos, nuestro servicio no está disponible en tu ubicación por el momento.');
+                }
+            } catch (error) {
+                console.error('Error al obtener la ubicación:', error);
+                setErrorMessage('Error al obtener la ubicación. Por favor, inténtalo de nuevo más tarde.');
+            }
+        });
+    }, []);
+
     function validarPerfilEnCore(callback){ // Para saber si ya esta registrado en el CORE o no
         axios.request({
             url: "https://app.arani.hn/api/app/getProfile.php",
@@ -329,7 +369,11 @@ function Perfil() {
                         {usuarioAprobadoManual && 
                             <Box>
                                 <Typography variant="body2" sx={{color: '#64d164'}}>Tu cuenta esta habilitada para solicitar préstamos.</Typography>
-                                <Button component={Link} to="/aplicar" variant="contained" sx={{ mt: 1, mr: 1 }} >Solicitar préstamo</Button>
+                                {showAplicarLink ? (
+                                    <Button component={Link} to="/aplicar" variant="contained" sx={{ mt: 1, mr: 1 }}>Solicitar préstamo</Button>
+                                ) : (
+                                    <p style={{ color: 'red' }}>{errorMessage}</p>
+                                )}
                             </Box>
                         }
                         <Grid container>
