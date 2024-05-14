@@ -35,7 +35,45 @@ function Plan() {
     const [cargandoEnviandoComprobante, set_cargandoEnviandoComprobante] = useState(false);
     const [ventanaContrato, set_ventanaContrato] = useState(false);
     const [contratoPrestamo, set_contratoPrestamo] = useState(false);
+   
+    const [showAplicarLink, setShowAplicarLink] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [ubicacion, setUbicacion] = useState('');
+
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
     
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                console.log(data);
+    
+                const ciudad = data.address.city || data.address.town || data.address.village || ''; // Cambio aquí
+                const pais = data.address.country || '';
+                setUbicacion(`${ciudad}, ${pais}`);
+    
+                // Lista de ubicaciones permitidas
+                const ubicacionesPermitidas = [
+                    "Tegucigalpa, Honduras",
+                    "Comayagüela, Honduras",
+                    "Choloma, Honduras",
+                    "La lima, Honduras",
+                    "Villanueva, Honduras",
+                    "Progreso, Honduras",
+                    "San Pedro Sula, Honduras",
+                ];
+    
+                // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
+                if (ubicacionesPermitidas.includes(`${ciudad}, ${pais}`)) { // Cambio aquí
+                    setShowAplicarLink(true);
+                }
+            } catch (error) {
+                console.error('Error al obtener la ubicación:', error);
+            }
+        });
+    }, []);
 
     function getApplicationProfile(){
         axios.request({
@@ -385,7 +423,11 @@ function Plan() {
                 </Dialog>
                     {(!cargando && !prestamoSeleccionado) && <Box sx={{m: '8rem 0', textAlign: 'center', color: 'silver'}}>
                         <Typography variant="body2" sx={{maxWidth: '30rem', display: 'block', margin: '0 auto', pb: 3}} component={"div"} >No tienes préstamos aprobados aún, puedes solicitar un nuevo préstamo o ver el estado de tu solicitud.</Typography>
-                        <Button component={Link} to="/aplicar" variant="contained" sx={{mr: 1}}>Aplicar</Button>
+                        {showAplicarLink ? (
+                            <Button component={Link} to="/aplicar" variant="contained" sx={{mr: 1}}>Aplicar</Button>
+                        ) : (
+                            <p style={{ color: 'red' }}>{errorMessage}</p>
+                        )}  
                         <Button component={Link} to="/historial" variant="contained">Historial</Button>
                     </Box>}
                 </Paper>

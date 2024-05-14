@@ -16,22 +16,34 @@ import BarraApp from "./componentes/BarraApp.js";
 function Main() {
     const gContext = useContext(AppContext);
     const [showAplicarLink, setShowAplicarLink] = useState(false);
+    const [ubicacion, setUbicacion] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setLoading(false);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
             const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
-
+    
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
-
-                const departamento = data.address.state || data.address.county || '';
+                console.log(data);
+    
+                const ciudad = data.address.city || data.address.town || data.address.village || ''; // Cambio aquí
                 const pais = data.address.country || '';
-
+                setUbicacion(`${ciudad}, ${pais}`); // Cambio aquí
+    
                 // Lista de ubicaciones permitidas
                 const ubicacionesPermitidas = [
-                    "Tegucigalpa, Honduras", 
+                    "Tegucigalpa, Honduras",
                     "Comayagüela, Honduras",
                     "Choloma, Honduras",
                     "La lima, Honduras",
@@ -39,9 +51,9 @@ function Main() {
                     "Progreso, Honduras",
                     "San Pedro Sula, Honduras",
                 ];
-
+    
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
-                if (ubicacionesPermitidas.includes(`${departamento}, ${pais}`)) {
+                if (ubicacionesPermitidas.includes(`${ciudad}, ${pais}`)) { // Cambio aquí
                     setShowAplicarLink(true);
                 }
             } catch (error) {
@@ -60,12 +72,16 @@ function Main() {
         myLandbot.open();
     };
 
-    return (
-        <Container disableGutters sx={{ minHeight: '100vh', display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }} component="main" maxWidth="md">
+    return (   
+            <Container disableGutters sx={{ minHeight: '100vh', display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }} component="main" maxWidth="md">
+            {loading ? (
+                 <img src={process.env.PUBLIC_URL + '/logo512.png'} className="spin" alt="loading" />
+            ) : (
             <Box sx={{ p: '4px' }}>
                 <Paper elevation={6} sx={{ p: 6 }}>
                     <BarraApp />
                     <Typography variant="h5" sx={{ mt: 6 }}>Inicio</Typography>
+                    <p>{ubicacion}</p> 
                     <div className="contetilebotonpri">
                         <Link to="/perfil" className="tilebotonpri">
                             <div className="tilebotonpri-tit">Perfil</div>
@@ -76,24 +92,24 @@ function Main() {
 
                         {/* Si el usuario está en la ubicación deseada, muestra el enlace de aplicar */}
                         {showAplicarLink ? (
-                            <div>
+                        
                             <Link to="/aplicar" className="tilebotonpri">
                                 <div className="tilebotonpri-tit">Aplicar</div>
                                 <div className="tilebotonpri-desc">Formulario para solicitar préstamos.</div>
                                 <div className="tilebotonpri-estado"></div>
                                 <div className="tilebotonpri-icon"><img alt="" src={tile_aplicar} /></div>
                             </Link>
-                            </div>
+                        
                         ) : (
                             // Si el usuario no está en la ubicación deseada, muestra el mensaje de error
-                            <div>
+                            
                             <Link className="tilebotonpri disabled">
                                 <div className="tilebotonpri-tit">Aplicar</div>
                                 <div className="tilebotonpri-desc">Lo sentimos esta opción no esta disponible en tu zona por el momento.</div>
                                 <div className="tilebotonpri-estado"></div>
                                 <div className="tilebotonpri-icon"><img alt="" src={tile_aplicar} /></div>
                             </Link>
-                            </div>
+                            
                         )}
 
                         <Link to="/plan" className="tilebotonpri">
@@ -130,6 +146,7 @@ function Main() {
                 </Paper>
                 <BarraFinal />
             </Box>
+              )}
         </Container>
     );
 }

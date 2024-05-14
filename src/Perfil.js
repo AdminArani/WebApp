@@ -49,14 +49,15 @@ function Perfil() {
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
             const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
-
+    
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
-
-                const departamento = data.address.state || data.address.county || '';
+                console.log(data);
+    
+                const ciudad = data.address.city || ''; // Cambio aquí
                 const pais = data.address.country || '';
-
+    
                 // Lista de ubicaciones permitidas
                 const ubicacionesPermitidas = [
                     "Tegucigalpa, Honduras",
@@ -66,11 +67,10 @@ function Perfil() {
                     "Villanueva, Honduras",
                     "Progreso, Honduras",
                     "San Pedro Sula, Honduras",
-                    
                 ];
-
+    
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
-                if (ubicacionesPermitidas.includes(`${departamento}, ${pais}`)) {
+                if (ubicacionesPermitidas.includes(`${ciudad}, ${pais}`)) { // Cambio aquí
                     setShowAplicarLink(true);
                 } else {
                     setErrorMessage('Lo sentimos, nuestro servicio no está disponible en tu ubicación por el momento.');
