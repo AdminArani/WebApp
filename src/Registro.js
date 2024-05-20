@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, Checkbox, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormHelperText, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, Step, StepContent, StepLabel, Stepper, TextField, Toolbar, Tooltip, Typography } from "@mui/material";
+import { AppBar, Box, Button, Checkbox, Container, Dialog, DialogActions, DialogContent,DialogContentText, DialogTitle, Divider, FormControl, FormHelperText, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, Step, StepContent, StepLabel, Stepper, TextField, Toolbar, Tooltip, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useContext, useEffect, useState } from "react";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -13,6 +13,7 @@ import procesar_login from "./funciones/procesar_login.js";
 // import logoArani from "./images/logoarani_blanco.png";
 import logoArani from "./images/logoarani.png";
 // import { Stack } from "@mui/system";
+
 
 
 // UsrMail = correo de usuario
@@ -483,6 +484,19 @@ function VerticalLinearStepper2(){
     //     }
     // }
 
+    // Creamos un estado para controlar si el diálogo está abierto o cerrado
+    const [open, setOpen] = useState(false);
+
+    // Función para abrir el diálogo
+    const handleClickOpen = () => {
+    setOpen(true);
+    };
+
+    // Función para cerrar el diálogo
+    const handleClose = () => {
+    setOpen(false);
+    };
+
     const enviarARegistroApi = ()=>{
         set_enviandoDataFinal(true);
         axios.request({
@@ -503,6 +517,9 @@ function VerticalLinearStepper2(){
               },
         })
         .then((res) => {
+             // Abrimos el diálogo
+            //  handleClickOpen();
+
             set_enviandoDataFinal(false);
             if(res.data.status === "ER"){
                 set_mensajeFinalError(res.data.payload.message);
@@ -511,6 +528,10 @@ function VerticalLinearStepper2(){
             if(res.data.status === "OK"){
                 set_mensajeFinalError("");
                 set_mensajeFinalOk("Cuenta creada correctamente.");
+
+                // Abrimos el diálogo
+                // handleClickOpen();
+
                 procesar_login(inputCorreo.valor, inputPass1.valor, function(data){
                     gContext.set_logeado({estado: true, token: data.payload.sid});
                     localStorage.setItem('arani_session_id', data.payload.sid);
@@ -520,6 +541,11 @@ function VerticalLinearStepper2(){
                 });
             }
             if(res.data.status === "ER-API"){
+                // Muestra la advertencia
+
+                // Abrimos el diálogo
+                //handleClickOpen();
+
                 let errmsj_person_code = "El ID ya esta en uso";
                 let errmsj_emain = "El correo ya esta en uso";
                 let errmsj_mob_phone = "El teléfono ya esta en uso";
@@ -931,6 +957,33 @@ function VerticalLinearStepper2(){
                     </StepContent>
                 </Step>
             </Stepper>
+
+            {/* Modal */}
+            <Dialog
+                className="miDialogo"
+                open={open}  // El diálogo se mostrará si 'open' es true
+                onClose={handleClose}  // Cuando se cierra el diálogo, llamamos a la función 'handleClose'
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+            >
+                <Box display="flex" justifyContent="center" alignItems="center">
+                    <img src={`${process.env.PUBLIC_URL}/logosi.jpg`} alt="Logo" />
+                </Box>
+                <DialogTitle id="alert-dialog-title" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold'}}>{"¡Tienes un préstamo pre aprobado!"}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText className="miDialogoTexto" id="alert-dialog-description" style={{color: 'white'}}>
+                     Para completarla, responde las siguientes preguntas.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions className="miDialogoAcciones" style={{display: 'flex', justifyContent: 'center'}}>
+                    <Button className="miDialogoBoton" onClick={handleClose} color="primary" autoFocus style={{background: 'white', alignContent: 'center', fontSize: '12px', borderRadius: '20px', width: '200px'}}>
+                    Ir a formulario
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+
             {activeStep === 3 && (
                 <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                     <Grid item xs={12} sm={12}>
@@ -959,7 +1012,14 @@ function VerticalLinearStepper2(){
                     }
                     {!mensajeFinalOk && 
                         <>
-                            <Grid item xs={12} sm={6}><Button fullWidth disabled={enviandoDataFinal} onClick={enviarARegistroApi} variant="contained" sx={{ mt: 1, mr: 1 }}>{(enviandoDataFinal)?"Enviando...":"Terminar registro"}</Button></Grid>
+
+                            {/* Boton de enviar registro */}
+                            <Grid item xs={12} sm={6}>
+                                <Button fullWidth disabled={enviandoDataFinal} onClick={enviarARegistroApi} variant="contained" sx={{ mt: 1, mr: 1 }}>
+                                    {(enviandoDataFinal)?"Enviando...":"Terminar registro"}
+                                </Button>
+                            </Grid>
+
                             <Grid item xs={12} sm={6}><Button fullWidth variant="text" onClick={handleReset} sx={{ mt: 1, mr: 1 }}>Reiniciar</Button></Grid>
                         </>
                     }

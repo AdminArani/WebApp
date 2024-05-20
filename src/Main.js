@@ -22,7 +22,7 @@ function Main() {
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false);
-        }, 1000);
+        }, 2000);
 
         return () => clearTimeout(timer);
     }, []);
@@ -75,7 +75,19 @@ function Main() {
     return (   
             <Container disableGutters sx={{ minHeight: '100vh', display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }} component="main" maxWidth="md">
             {loading ? (
-                 <img src={process.env.PUBLIC_URL + '/logo512.png'} className="spin" alt="loading" />
+                 <div style={{ 
+                    position: 'fixed', 
+                    top: 0, 
+                    left: 0, 
+                    width: '100%', 
+                    height: '100%', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    backgroundColor: '#5b75e7' 
+                  }}>
+                    <img src={process.env.PUBLIC_URL + '/araniloader1.gif'} alt="loading" style={{height: '250px', width:'250px'}}/>
+                  </div>
             ) : (
             <Box sx={{ p: '4px' }}>
                 <Paper elevation={6} sx={{ p: 6 }}>

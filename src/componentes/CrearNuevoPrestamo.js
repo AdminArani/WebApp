@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 // import logoArani from "./images/logoarani.png";
-import { Button, Checkbox, CircularProgress, Dialog, DialogActions, DialogContent, Divider, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery } from "@mui/material";
+import React from 'react';
+import { Button, Checkbox, CircularProgress, Dialog, DialogTitle, DialogContentText,  DialogActions, DialogContent, Divider, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 // import axios from "axios";
 import { AppContext } from "../App";
@@ -46,15 +47,16 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     function handleChange_inputCantidadDinero(event){
         let valor = numeral(event.target.value)._value;
         let validado = false;
-        let minimoPermitido = numeral(params.pricelistData.PriMntDes)._value;
+        let minimoPermitido = 1500;
         let maximoPermitido = numeral(params.pricelistData.PriMntHas)._value;
         let texto = "Minimo L"+numeral(params.pricelistData.PriMntDes).format('0,0')+", máximo de L"+numeral(params.pricelistData.PriMntHas).format('0,0')+" y multiplo de 10.";
         
         if(valor >= minimoPermitido && valor <= maximoPermitido && (valor%10 === 0)){
             validado = true;
         }
-        if(valor < params.pricelistData.PriMntDes){
+        if(valor < minimoPermitido){
             validado = false;
+            texto = 'El monto debe ser mayor o igual a 1500'; // Agrega este mensaje cuando el valor es menor al mínimo permitido
         }
         if(valor > params.pricelistData.PriMntHas){
             validado = false;
@@ -167,6 +169,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             }
             if(res.data.status === "OK"){
                 set_seRegistro(true);
+                handleClickOpen(); // Abre el moda
             }
         }).catch(err => {
             set_enviandoAlApi(false);
@@ -174,6 +177,18 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             console.log(err.message);
         });
     }
+
+    const [open, setOpen] = React.useState(false);
+
+    // 2. Define las funciones para abrir y cerrar el modal
+    const handleClickOpen = (e) => {
+        e.stopPropagation();
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+    setOpen(false);
+    };
 
     useEffect(()=>{
 
@@ -325,6 +340,36 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         });
     }
 
+    function enviarInformacionAlApi() {
+        set_enviandoAlApi(true);
+        axios.request({
+            url: "https://app.arani.hn/api/app/postOffer.php",
+            method: "post",
+            withCredentials: true,
+            data: {
+                sid: gContext.logeado.token,
+                period: inputPeriodo.valor,
+                amount: inputCantidadDinero.valor,
+                purpose: inputProposito.valor,
+                productId: params.productSelected.ProCod,
+            },
+        })
+        .then((res) => {
+            set_enviandoAlApi(false);
+            if(res.data.status === "ER"){
+                // set_seRegistro(true);
+            }
+            if(res.data.status === "OK"){
+                set_seRegistro(true);
+                handleClickOpen(); // Abre el modal
+            }
+        }).catch(err => {
+            set_enviandoAlApi(false);
+            set_seRegistro(true);
+            console.log(err.message);
+        });
+    }
+
 
     useEffect(()=>{
         getInformacionUsuario();
@@ -361,13 +406,18 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                 <Grid sx={{mt: 1, mb: 1}} container spacing={3}>
                     <Grid item xs={12} sm={6}>
                         <TextField 
-                            helperText={inputCantidadDinero.textoAyuda} 
+                            error={!inputCantidadDinero.validado}
+                            helperText={!inputCantidadDinero.validado ? inputCantidadDinero.textoAyuda : ''}
                             required value={inputCantidadDinero.valor} 
                             onChange={handleChange_inputCantidadDinero} 
-                            error={(!inputCantidadDinero.validado && yaIntentoEnviar)} 
                             autoComplete="off" 
                             fullWidth 
                             label="Cantidad de dinero" 
+                            InputProps={{
+                                style: {
+                                  color: (!inputCantidadDinero.validado && yaIntentoEnviar) ? 'red' : 'black'
+                                }
+                              }}
                             />
                     </Grid>
 
@@ -449,9 +499,42 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                     </Grid>
                    
                     <Grid onClick={()=>{set_yaIntentoEnviar(true)}} item xs={12} sm={12}>
-                        <Button onClick={crearPrestamoApi} disabled={!botonEnviarHabilitado} variant="contained" sx={{ mt: 1, mr: 1 }} >Enviar solicitud</Button>
+                        <Button onClick={(e) => handleClickOpen(e)} disabled={!botonEnviarHabilitado} variant="contained" sx={{ mt: 1, mr: 1 }} >Enviar solicitud</Button>
                         <Button onClick={()=>{cerrarVentana()}} variant="contained" sx={{ mt: 1, mr: 1 }} >Cancelar</Button>
                     </Grid>
+
+                    {/* Modal */}
+                    <Dialog
+                        className="miDialogo"
+                        open={open}  // El diálogo se mostrará si 'open' es true
+                        onClose={handleClose}  // Cuando se cierra el diálogo, llamamos a la función 'handleClose'
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                        style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                    >
+                           
+                            <br/>
+                            <br/>
+                        <Box display="flex" justifyContent="center" alignItems="center">
+                            <img src={`${process.env.PUBLIC_URL}/logowhite.png`} alt="Logo" height={'100px'} width={'100px'}/>
+                        </Box>
+                        <DialogTitle id="alert-dialog-title" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold'}}>{"¡Tu solicitud ha sido enviada!"}</DialogTitle>
+                        <br/>
+                       
+                        <DialogContent style={{textAlign: 'center'}}>
+                            <DialogContentText className="miDialogoTexto" id="alert-dialog-description" style={{color: 'white', textAlign: 'center'}}>
+                            En un máximo de 24 horas <br/> estarás recibiendo una respuesta.
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions className="miDialogoAcciones" style={{display: 'flex', justifyContent: 'center'}}>
+                        <Button className="miDialogoBoton" onClick={(e) => {
+    e.preventDefault();
+    enviarInformacionAlApi();
+}} color="primary" autoFocus style={{background: 'white', alignContent: 'center', fontSize: '12px', borderRadius: '20px', width: '200px'}}>
+Ver información de mi préstamo
+</Button>
+                        </DialogActions>
+                    </Dialog>
                 </Grid>
                 </>
                 }
@@ -527,7 +610,7 @@ function Calculadora({setOpen, inputCantidadDinero, inputPeriodo, interesPeriodo
         console.log('interesPeriodo', interesPeriodo);
     }, [inputCantidadDinero, inputPeriodo, interesPeriodo, diasPorPerSel, params]);
 
-
+    const [isGridOpen, setIsGridOpen] = useState(false);
 
     return (
     <>

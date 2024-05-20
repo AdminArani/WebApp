@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 // import logoArani from "./images/logoarani.png";
-import {Autocomplete, Button, Dialog, DialogContent, Divider, FormControl, Grid, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
+import {Autocomplete, Button, Dialog, DialogTitle,DialogContentText,DialogActions, DialogContent, Divider, FormControl, Grid, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
 // import { useContext } from "react";
 // import axios from "axios";
 import { AppContext } from "./App";
@@ -20,6 +20,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import CircularProgress from '@mui/material/CircularProgress';
 import Avatar from '@mui/material/Avatar';
 import ConfirmarCorreo from "./componentes/ConfirmarCorreo";
+import React from 'react';
+import Aplicar from './Aplicar.js';
 
 function Perfil() {
     const gContext = useContext(AppContext);
@@ -278,11 +280,22 @@ function Perfil() {
                 // console.log('constructorapi', res.data.payload.data);
                 // set_apiCamposConstructor(res.data.payload.data);
                 set_datosEnviadosArevision(true);
+                handleClickOpen(); //llama al modal 
             }
         }).catch(err => {
             console.log(err.message);
         });
     }
+
+    const [open, setOpen] = React.useState(false);
+
+    const handleClickOpen = () => {
+        setOpen(true);
+      };
+      
+      const handleClose = () => {
+        setOpen(false);
+      };
 
     const tieneTodosCamposObligatoriosHechos = ()=>{
         if(
@@ -694,6 +707,31 @@ function Perfil() {
                             <Button onClick={enviarARev} variant="contained" sx={{ mt: 5, mr: 1 }} >Mis datos son correctos</Button>
                         </Box>
                     </DialogContent>
+                </Dialog>
+
+                {/* Modal */}
+                <Dialog
+                    className="miDialogo"
+                    open={open}  // El diálogo se mostrará si 'open' es true
+                    onClose={handleClose}  // Cuando se cierra el diálogo, llamamos a la función 'handleClose'
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                    style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                >
+                    <Box display="flex" justifyContent="center" alignItems="center">
+                        <img src={`${process.env.PUBLIC_URL}/logosi.jpg`} alt="Logo" />
+                    </Box>
+                    <DialogTitle id="alert-dialog-title" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold'}}>{"¡Tienes un préstamo pre aprobado!"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText className="miDialogoTexto" id="alert-dialog-description" style={{color: 'white'}}>
+                        Para completarla, responde las siguientes preguntas.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions className="miDialogoAcciones" style={{display: 'flex', justifyContent: 'center'}}>
+                        <Button className="miDialogoBoton" onClick={handleClose} to="/aplicar" color="primary" autoFocus style={{background: 'white', alignContent: 'center', fontSize: '12px', borderRadius: '20px', width: '200px'}}>
+                        Ir a formulario
+                        </Button>
+                    </DialogActions>
                 </Dialog>
                 <BarraFinal />
             </Box>
