@@ -336,21 +336,49 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         // eslint-disable-next-line
     },[])
 
-    const [responseData, setResponseData] = useState(null);
+    // Define el estado al inicio de tu componente
+    const [cantidadSolicitada,setCantidadSolicitada] = useState(0);
+    const [intereses, setIntereses] = useState(0);
+    const [gastosAdministrativos, setGastosAdministrativos] = useState(0);
+    const [totalAPagar, setTotalAPagar] = useState(0);
+    const [pagosARealizar, setPagosARealizar] = useState(0);
+    const [pagos, setPagos] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/app/getContainerId.php?clientId=218');
-        const jsonData = await response.json();
-        setResponseData(jsonData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+   useEffect(() => {
+    function factura(){
+        axios.get(`http://localhost:8000/app/getContainerId.php?clientId=${gContext.logeado?.token}`)
+        .then(response => {
+             if (response.status !== 200) {
+                 throw new Error(`HTTP error! status: ${response.status}`);
+             }
+             return response.data;
+         })
+         .then(data => {
+             setCantidadSolicitada(data.cantidadSolicitada);
+             setIntereses(data.intereses);
+             setGastosAdministrativos(data.gastosAdministrativos);
+             setTotalAPagar(data.totalAPagar);
+             setPagosARealizar(data.pagosARealizar);
+             setPagos(data.pagos);
+             console.log(data);
+         })
+         .catch(error => console.error('Error:', error));
+    }
+    factura();
+}, [gContext.logeado?.token]);
 
-    fetchData();
-  }, []);
+    function numeroAOrdinal(numero) {
+        const ordinales = [
+            'Primer', 'Segundo', 'Tercer', 'Cuarto', 'Quinto', 
+            'Sexto', 'Séptimo', 'Octavo', 'Noveno', 'Décimo',
+            'Undécimo', 'Duodécimo', 'Decimotercero', 'Decimocuarto', 'Decimoquinto',
+            'Decimosexto', 'Decimoséptimo', 'Decimooctavo', 'Decimonoveno', 'Vigésimo',
+            'Vigésimo Primero', 'Vigésimo segundo', 'Vigésimo Tercero', 'Vigésimo Cuarto', 'Vigésimo Quinto',
+            'Vigésimo Sexto', 'Vigésimo Séptimo', 'Vigésimo Octavo', 'Vigésimo Noveno', 'Trigésimo',
+            'trigésimo Primero', 'Trigésimo Segundo', 'Trigésimo Tercero', 'Trigésimo Cuarto', 'Trigésimo Quinto', 'Trigésimo Sexto'
+        ];
+        return numero <= 36 ? ordinales[numero - 1] : numero + 'º';
+    }
 
 
     return (
@@ -362,7 +390,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                         <Typography variant="body1" sx={{pt: 1, pb: 3}} >Enviando....</Typography>
                     </div>
                 }
-                {(!enviandoAlApi && seRegistro) && 
+                {(!enviandoAlApi && seRegistro) &&
                 <div>
                     <Typography variant="h5" sx={{pt: 1, pb: 0}} style={{fontSize: '18px',textAlign: 'center', fontWeight: 'bold'}}>Resumen de tu préstamo</Typography>
                     <br/>
@@ -396,25 +424,27 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                     </Box>
 
                     <Box style={{padding: '0',boxSizing: 'border-box', margin: '35px'}}>
-                        <div>
-                            
-                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <div>
-                                    <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Pagos a realizar: </Typography>
-                                    <Typography variant="body2" style={{fontSize: '8px'}}>Solicitaste un plazo de 3 semanas</Typography>
-                                </div>
-                                <Typography variant="body2" style={{fontSize: '12px'}}>3</Typography>
+                    <div>
+                        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                            <div>
+                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Pagos a realizar: </Typography>
+                                <Typography variant="body2" style={{fontSize: '8px'}}>{`Solicitaste un plazo de ${pagosARealizar} semanas`}</Typography>
                             </div>
-                            <br/>
-                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <div>
-                                    <Typography variant="body2" style={{fontSize: '12px', color: '#647cf8', fontWeight: 'bold'}}>Primer Pago: </Typography>
-                                    <Typography variant="body2" style={{fontSize: '8px'}}>Jueves 16 de Mayo 2024 </Typography>
-                                </div>
-                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>L {numeral(inputCantidadDinero.valor).format('0,0.00')}</Typography>
-                            </div>
+                            <Typography variant="body2" style={{fontSize: '12px'}}>{(pagosARealizar)}</Typography>
                         </div>
-                    </Box>
+                        <br/>
+                        {pagos && pagos.map((pago, index) => (
+                            <div key={index} style={{display: 'flex', justifyContent: 'space-between'}}>
+                                <div>
+                                    <Typography variant="body2" style={{fontSize: '12px', color: '#647cf8', fontWeight: 'bold'}}>{numeroAOrdinal(index + 1)} pago: </Typography>
+                                    <Typography variant="body2" style={{fontSize: '8px'}}>{pago.fechaDePago}</Typography>
+                                    <br/>
+                                </div>
+                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>L {numeral(pago.cantidad).format('0,0.00')}</Typography>
+                            </div>
+                        ))}
+                    </div>
+                </Box>
                     
                     <div 
                     style={{
