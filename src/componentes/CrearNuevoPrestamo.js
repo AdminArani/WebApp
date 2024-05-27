@@ -41,6 +41,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     const [validadoParaContrato, set_validadoParaContrato] = useState(false);
     const [openVentanaCalculadora, set_openVentanaCalculadora] = useState(false);
     
+    
     // const [permisoP, set_permisoP] = useState(false);
     // const [cargandoPermisoP, set_cargandoPermisoP] = useState(false);
 
@@ -344,28 +345,37 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     const [pagosARealizar, setPagosARealizar] = useState(0);
     const [pagos, setPagos] = useState([]);
 
-   useEffect(() => {
-    function factura(){
-        axios.get(`http://localhost:8000/app/getContainerId.php?clientId=${gContext.logeado?.token}`)
-        .then(response => {
-             if (response.status !== 200) {
-                 throw new Error(`HTTP error! status: ${response.status}`);
-             }
-             return response.data;
-         })
-         .then(data => {
-             setCantidadSolicitada(data.cantidadSolicitada);
-             setIntereses(data.intereses);
-             setGastosAdministrativos(data.gastosAdministrativos);
-             setTotalAPagar(data.totalAPagar);
-             setPagosARealizar(data.pagosARealizar);
-             setPagos(data.pagos);
-             console.log(data);
-         })
-         .catch(error => console.error('Error:', error));
-    }
-    factura();
-}, [gContext.logeado?.token]);
+    useEffect(() => {
+        function factura(){
+            axios.request({
+                url: "https://app.arani.hn/api/app/getPrueba1.php",
+                method: "post",
+                data: {
+                    sid: gContext.logeado?.token,
+                  },
+            })
+            .then(response => {
+                 if (response.status !== 200) {
+                     throw new Error(`HTTP error! status: ${response.status}`);
+                 }
+                 return response.data;
+             })
+             .then(data => {
+                 setCantidadSolicitada(data.cantidadSolicitada);
+                 setIntereses(data.intereses);
+                 setGastosAdministrativos(data.gastosAdministrativos);
+                 setTotalAPagar(data.totalAPagar);
+                 setPagosARealizar(data.pagosARealizar);
+                 setPagos(data.pagos);
+                 console.log(data);
+             })
+             .catch(error => console.error('Error:', error));
+        }
+    
+        const intervalId = setInterval(factura, 1000); // Ejecuta factura cada 1000 ms (1 segundo)
+    
+        return () => clearInterval(intervalId); // Limpia el intervalo cuando el componente se desmonta
+    }, [gContext.logeado?.token]);
 
     function numeroAOrdinal(numero) {
         const ordinales = [
