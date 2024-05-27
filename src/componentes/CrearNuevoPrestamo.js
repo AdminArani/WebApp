@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 // import logoArani from "./images/logoarani.png";
 import React from 'react';
-import { Button, Checkbox, CircularProgress, Dialog, DialogTitle, DialogContentText,  DialogActions, DialogContent, Divider, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery } from "@mui/material";
+import { Button,InputAdornment, Checkbox, CircularProgress, Dialog, DialogTitle, DialogContentText,  DialogActions, DialogContent, Divider, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 // import axios from "axios";
 import { AppContext } from "../App";
@@ -43,11 +43,13 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     
     // const [permisoP, set_permisoP] = useState(false);
     // const [cargandoPermisoP, set_cargandoPermisoP] = useState(false);
+
+    
    
     function handleChange_inputCantidadDinero(event){
         let valor = numeral(event.target.value)._value;
         let validado = false;
-        let minimoPermitido = 1500;
+        let minimoPermitido = numeral(params.pricelistData.PriMntDes)._value;
         let maximoPermitido = numeral(params.pricelistData.PriMntHas)._value;
         let texto = "Minimo L"+numeral(params.pricelistData.PriMntDes).format('0,0')+", máximo de L"+numeral(params.pricelistData.PriMntHas).format('0,0')+" y multiplo de 10.";
         
@@ -56,7 +58,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         }
         if(valor < minimoPermitido){
             validado = false;
-            texto = 'El monto debe ser mayor o igual a 1500'; // Agrega este mensaje cuando el valor es menor al mínimo permitido
+            texto = 'El monto debe ser mayor o igual a L.' +numeral(params.pricelistData.PriMntDes).format('0,0'); // Agrega este mensaje cuando el valor es menor al mínimo permitido
         }
         if(valor > params.pricelistData.PriMntHas){
             validado = false;
@@ -135,48 +137,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     }
 
 
-    function crearPrestamoApi(){
-        set_yaIntentoEnviar(true);
-        // amount
-        // productId
-        // period
-        // sid
-        // purpose
-        // console.log({
-        //     sid: gContext.logeado.token,
-        //     period: inputPeriodo.valor,
-        //     amount: inputCantidadDinero.valor,
-        //     purpose: inputProposito.valor,
-        //     productId: params.productSelected.ProCod,
-        //   });
-        set_enviandoAlApi(true);
-        axios.request({
-            url: "https://app.arani.hn/api/app/postOffer.php",
-            method: "post",
-            withCredentials: true,
-            data: {
-                sid: gContext.logeado.token,
-                period: inputPeriodo.valor,
-                amount: inputCantidadDinero.valor,
-                purpose: inputProposito.valor,
-                productId: params.productSelected.ProCod,
-              },
-        })
-        .then((res) => {
-            set_enviandoAlApi(false);
-            if(res.data.status === "ER"){
-                // set_seRegistro(true);
-            }
-            if(res.data.status === "OK"){
-                set_seRegistro(true);
-                handleClickOpen(); // Abre el moda
-            }
-        }).catch(err => {
-            set_enviandoAlApi(false);
-            set_seRegistro(true);
-            console.log(err.message);
-        });
-    }
+    
 
     const [open, setOpen] = React.useState(false);
 
@@ -305,17 +266,16 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     },[usuarioDetalle, contratoRaw, inputAceptoContrato]);
 
 
-    const change_inputAceptoContrato = (e)=>{
+    const change_inputVerAceptoContrato = (e)=>{
         set_inputAceptoContrato(e.target.checked);
         if(e.target.checked){
             set_ventanaContrato(true);
         }
     }
 
-    const change_inputAceptoBanco = (e)=>{
-        set_inputAceptoBanco(e.target.checked);
+    const change_inputAceptoContrato = (e)=>{
+        set_inputAceptoContrato(e.target.checked);
     }
-
 
     const cargarContratoTemplate = ()=>{
         axios.request({
@@ -370,58 +330,166 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         });
     }
 
-
     useEffect(()=>{
         getInformacionUsuario();
         cargarContratoTemplate();
         // eslint-disable-next-line
     },[])
 
+    const [responseData, setResponseData] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/app/getContainerId.php?clientId=218');
+        const jsonData = await response.json();
+        setResponseData(jsonData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
     return (
-        <Box sx={{p: '4px'}}>
+        <Box style={{padding: 'none', margin: '0px', marginLeft: '-24px', marginRight: '-24px', width:'600px'}}>
             
             <Box>
                 {enviandoAlApi &&
-                <div>
-                    <Typography variant="body1" sx={{pt: 1, pb: 3}} >Enviando....</Typography>
-                </div>
+                    <div>
+                        <Typography variant="body1" sx={{pt: 1, pb: 3}} >Enviando....</Typography>
+                    </div>
                 }
                 {(!enviandoAlApi && seRegistro) && 
                 <div>
-                    <Typography variant="h5" sx={{pt: 1, pb: 0}} >Solicitud de préstamo</Typography>
-                    <Typography variant="body2" sx={{pt: 1, pb: 5}} >Su solicitud de préstamo ha sido enviada, ahora solo tiene que esperar a que nuestros agentes verifiquen su información para que el dinero sea desembolsado.</Typography>
-                    <Typography variant="body2" sx={{}} >Resumen</Typography>
-                    <Divider sx={{ mb: 1, mt: 1 }}></Divider>
-                    <Typography variant="body2" sx={{}} >Cantidad: L {numeral(inputCantidadDinero.valor).format('0,0.00')}</Typography>
-                    <Typography variant="body2" sx={{}} >Total de pagos: {inputPeriodo.valor/diasPorPerSel}</Typography>
-                    <Typography variant="body2" sx={{}} >Periodicidad: {params.productSelected.ProTip}</Typography>
-                    <Typography variant="body2" sx={{}} >Interes: {interesPeriodo}%</Typography>
-                    <Divider sx={{ mb: 6, mt: 1 }}></Divider>
-                   
-                    <Button onClick={todobiencallback} variant="contained" sx={{ mt: 1, mr: 1 }} >Aceptar y continuar</Button>
+                    <Typography variant="h5" sx={{pt: 1, pb: 0}} style={{fontSize: '18px',textAlign: 'center', fontWeight: 'bold'}}>Resumen de tu préstamo</Typography>
+                    <br/>
+                    <Box style={{backgroundColor: '#dcdcdc', boxSizing: 'border-box'}}>
+                        <div style={{padding: '10px', paddingTop: '2px', marginLeft: '30px', marginRight:'24px'}}>
+                            <br/>
+                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Cantidad solicitada: </Typography>
+                                <Typography variant="body2" style={{fontSize: '12px'}}>L {numeral(cantidadSolicitada).format('0,0.00')}</Typography>
+                            </div>
+                            <br/>
+                            {/* <Typography variant="body2" sx={{}} >Total de pagos: {inputPeriodo.valor/diasPorPerSel}</Typography>
+                            <Typography variant="body2" sx={{}} >Periodicidad: {params.productSelected.ProTip}</Typography> */}
+                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Interes:</Typography>
+                                <Typography variant="body2" style={{fontSize: '12px'}}>L {numeral(intereses).format('0,0.00')}</Typography>
+                            </div>
+                            <br/>
+                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Gastos administrativos: </Typography>
+                                <Typography variant="body2" style={{fontSize: '12px'}}>L {numeral(gastosAdministrativos).format('0,0.00')}</Typography>
+                            </div>
+                            <br/>
+                            <Divider sx={{ mb: 1, mt: 1 }}></Divider>
+                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Total a Pagar: </Typography>
+                                <Typography variant="body2" style={{fontSize: '12px'}}>L {numeral(totalAPagar).format('0,0.00')}</Typography>
+                            </div>
+                        </div>
+                        <br/>
+                    </Box>
+
+                    <Box style={{padding: '0',boxSizing: 'border-box', margin: '35px'}}>
+                        <div>
+                            
+                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                <div>
+                                    <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Pagos a realizar: </Typography>
+                                    <Typography variant="body2" style={{fontSize: '8px'}}>Solicitaste un plazo de 3 semanas</Typography>
+                                </div>
+                                <Typography variant="body2" style={{fontSize: '12px'}}>3</Typography>
+                            </div>
+                            <br/>
+                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                <div>
+                                    <Typography variant="body2" style={{fontSize: '12px', color: '#647cf8', fontWeight: 'bold'}}>Primer Pago: </Typography>
+                                    <Typography variant="body2" style={{fontSize: '8px'}}>Jueves 16 de Mayo 2024 </Typography>
+                                </div>
+                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>L {numeral(inputCantidadDinero.valor).format('0,0.00')}</Typography>
+                            </div>
+                        </div>
+                    </Box>
+                    
+                    <div 
+                    style={{
+                        display:'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        width: '100%',
+                       }}
+                    >
+                        <br/>
+                        <br/>
+                        <br/>
+                        <Button 
+                            onClick={todobiencallback} 
+                            variant="contained" 
+                            sx={{ mt: 1, mr: 1 }} 
+                            style={{
+                                    backgroundColor: '#647cf8',
+                                    textAlign: 'center',
+                                    alignItems: 'center',
+                                    color: 'white',
+                                    height: '30px',
+                                    width: '25%',
+                                    marginTop: '10px',
+                                    fontSize: '10px',
+                                    boxShadow: 'none',
+                                    border: '1px solid grey',
+                                    borderRadius: '20px',
+                                    textTransform: 'none',
+                                    marginLeft: '10px',
+                            }}
+                        >
+                            Ir a mi perfil
+                        </Button>
+                    </div>
+                    
                 </div>
                 }
-                {(!enviandoAlApi && !seRegistro) && <>
-                <Typography variant="body2" sx={{}} >Llena los campos siguientes para solicitar tu préstamo, una vez aprobado recibirás el dinero. </Typography>
-                <Grid sx={{mt: 1, mb: 1}} container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                        <TextField 
-                            error={!inputCantidadDinero.validado}
-                            helperText={!inputCantidadDinero.validado ? inputCantidadDinero.textoAyuda : ''}
-                            required value={inputCantidadDinero.valor} 
-                            onChange={handleChange_inputCantidadDinero} 
-                            autoComplete="off" 
-                            fullWidth 
-                            label="Cantidad de dinero" 
-                            InputProps={{
-                                style: {
-                                  color: (!inputCantidadDinero.validado && yaIntentoEnviar) ? 'red' : 'black'
-                                }
-                              }}
-                            />
+                {(!enviandoAlApi && !seRegistro) && 
+                <div>
+                <br/>
+                <Typography variant="body2" sx={{}} align="center" style={{fontWeight: 'bold', fontSize: '18px'}}>Llena los siguientes campos para solicitar tu préstamo:</Typography>
+            
+                <Grid sx={{mt: 1, mb: 1}} container spacing={3} style={{padding: '25px'}}>
+                    <Grid item xs={12} sm={6} style={{display: 'flex', alignItems: 'flex-start'}}>
+                    <Typography variant="h6" style={{fontWeight: 'bold', marginRight: '20px', marginTop: '10px'}}>1.</Typography>
+                    <TextField 
+                        error={inputCantidadDinero.valor && !inputCantidadDinero.validado}
+                        helperText={!inputCantidadDinero.valor ? inputCantidadDinero.textoAyuda : (!inputCantidadDinero.validado ? inputCantidadDinero.textoAyuda : '')}
+                        required value={inputCantidadDinero.valor} 
+                        onChange={handleChange_inputCantidadDinero} 
+                        autoComplete="off" 
+                        fullWidth 
+                        label="Cantidad de dinero" 
+                        variant="outlined"
+                        InputProps={{
+                            startAdornment: inputCantidadDinero.valor && <InputAdornment position="start"><Typography style={{fontSize: '13px', color: 'black', marginLeft: '0px'}}>Lps.</Typography></InputAdornment>,
+                            style: {
+                                color: (inputCantidadDinero.valor && !inputCantidadDinero.validado && yaIntentoEnviar) ? 'red' : 'black',
+                                marginTop: '10px',
+                                width: '90%',
+                                height: '30px',
+                                borderRadius: '20px',
+                                fontSize: '12px',
+                            }
+                        }}
+                        InputLabelProps={{
+                            style: {
+                                fontSize: '12px',
+                            },
+                        }}
+                    />
                     </Grid>
 
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} style={{borderRadius: '20px'}}> 
                         {/* <TextField 
                             helperText={inputPeriodo.textoAyuda} 
                             required value={inputPeriodo.valor} 
@@ -431,9 +499,16 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                             fullWidth 
                             label="Tiempo para pagar (días)" 
                             /> */}
-                        <FormControl fullWidth>
-                            <InputLabel required error={(!inputPeriodo.validado && yaIntentoEnviar)}>A pagar en:</InputLabel>
-                            <Select required value={inputPeriodo.valor} onChange={handleChange_inputPeriodo} label="Proposito del préstamo" error={(!inputPeriodo.validado && yaIntentoEnviar)}>
+                        <FormControl fullWidth >
+                            <InputLabel required error={(!inputPeriodo.validado && yaIntentoEnviar)} style={{fontSize: '12px'}} >A pagar en:</InputLabel>
+                            <Select 
+                                required 
+                                value={inputPeriodo.valor} 
+                                onChange={handleChange_inputPeriodo} 
+                                label="Proposito del préstamo" 
+                                style={{marginTop: '10px', width: '90%', height: '34px', borderRadius: '20px', fontSize: '12px'}}
+                                error={(!inputPeriodo.validado && yaIntentoEnviar)}
+                            >
                                {listadoPeriodos}
                             </Select>
                         </FormControl>
@@ -443,8 +518,26 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
                     <Grid item xs={12} sm={12}>
                         <FormControl fullWidth>
-                            <InputLabel error={(!inputProposito.validado && yaIntentoEnviar)}>Proposito del préstamo</InputLabel>
-                            <Select value={inputProposito.valor} onChange={handleChange_inputProposito} label="Proposito del préstamo" error={(!inputProposito.validado && yaIntentoEnviar)}>
+                            <InputLabel 
+                                error={(!inputProposito.validado && yaIntentoEnviar)}
+                                style={{marginLeft: '30px', fontSize: '12px'}}
+                            >
+                                Proposito del préstamo
+                            </InputLabel>
+                            <Select 
+                                value={inputProposito.valor} 
+                                onChange={handleChange_inputProposito} 
+                                style={{
+                                    marginTop: '10px',
+                                    marginLeft: '30px', 
+                                    width: '90%', 
+                                    height: '34px', 
+                                    borderRadius: '20px',
+                                    fontSize: '12px',
+                                    }} 
+                                label="Proposito del préstamo" 
+                                error={(!inputProposito.validado && yaIntentoEnviar)}
+                                >
                                 {Object.keys(params.purposeListaObj).map((key)=>{
                                     return (
                                         <MenuItem key={key} value={params.purposeListaObj[key].id}>{params.purposeListaObj[key].title}</MenuItem>
@@ -457,53 +550,302 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                     
 
                     <Grid item xs={12} sm={12}>
-                        <div></div>
-                        <FormControlLabel
-                            label={"Mi información bancaria es correcta"}
-                            control={<Checkbox checked={inputAceptoBanco} onChange={change_inputAceptoBanco} />}
-                        />
-                        <Dialog open={ventanaContrato} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
-                            {/* <DialogTitle id="alert-dialog-title">Contrato de préstamo Arani</DialogTitle> */}
+
+                        <Grid item xs={12} style={{display: 'flex', fontSize: '10px'}}>
+                            <Typography variant="h6" style={{fontWeight: 'bold', marginRight: '20px', marginTop: '10px'}}>2.</Typography>
+                            <Typography variant="body1" style={{marginTop: '10px', fontSize: '14px'}}>
+                                Confirma que la cuenta 73402385 de Banco Atlántida es la correcta para desembolsar tu dinero
+                            </Typography>
+                        </Grid>
+
+                        <br/>
+                        <Grid item xs={12} sm={12} style={{display: 'flex', justifyContent: 'space-between'}}>
+                        <Button 
+                            variant="contained" 
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.backgroundColor = 'black';
+                                e.currentTarget.style.color = 'white';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.backgroundColor = 'white';
+                                e.currentTarget.style.color = 'black';
+                            }}
+                            style={{
+                                marginLeft: '30px',
+                                backgroundColor: 'white',
+                                color: 'black',
+                                height: '30px',
+                                width: '40%',
+                                marginTop: '10px',
+                                fontSize: '10px',
+                                boxShadow: 'none',
+                                border: '1px solid grey',
+                                borderRadius: '20px',
+                                textTransform: 'none',
+                            }} 
+                            onClick={() => set_inputAceptoBanco(!inputAceptoBanco)}
+                        >
+                            {inputAceptoBanco ? 
+                                <span>
+                                    <span role="img" aria-label="check" style={{ paddingRight: '10px' }}>✔️</span>
+                                    La información bancaria es correcta
+                                </span> 
+                                : 
+                                'La información bancaria es correcta'
+                            }
+                        </Button>
+
+                            <Button 
+                                onClick={()=>{set_openEditarBanco(true)}} 
+                                variant="contained"
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'black';
+                                    e.currentTarget.style.color = 'white';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'white';
+                                    e.currentTarget.style.color = 'black';
+                                }}
+                                style={{
+                                    marginLeft: '30px',
+                                    marginRight: '30px',
+                                    backgroundColor: 'white',
+                                    color: 'black',
+                                    height: '30px',
+                                    width: '40%',
+                                    marginTop: '10px',
+                                    fontSize: '10px',
+                                    boxShadow: 'none',
+                                    border: '1px solid grey',
+                                    borderRadius: '20px',
+                                    textTransform: 'none',
+                                }} 
+                            >
+                                Actualizar cuenta de banco
+                            </Button>
+                        </Grid>
+
+                        {/* Modal del contrato */}
+                        <Dialog open={ventanaContrato} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" style={{ textAlign: 'center'}}>
                             <DialogContent>
                                 {parse(contratoFinal||"")}
                             </DialogContent>
                             <DialogActions>
-                            <Button onClick={()=>{ set_ventanaContrato(false); set_inputAceptoContrato(false); }}>No acepto</Button>
-                            <Button autoFocus onClick={()=>{ set_ventanaContrato(false); set_inputAceptoContrato(true); }}>Acepto</Button>
+                                <Button 
+                                    autoFocus 
+                                    onClick={()=>{ set_ventanaContrato(false); set_inputAceptoContrato(true); }}
+                                    style={{ display: 'none' }}
+                                >
+                                    Acepto
+                                </Button>
+                                <div style={{ width: '100%', textAlign: 'center' }}>
+                                    <Button onClick={()=>{ set_ventanaContrato(false); set_inputAceptoContrato(false); }}  style={{
+                                        marginLeft: '30px',
+                                        backgroundColor: '#647cf8',
+                                        color: 'white',
+                                        height: '40px',
+                                        width: '30%',
+                                        marginTop: '10px',
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        boxShadow: 'none',
+                                        border: '1px solid grey',
+                                        borderRadius: '20px',
+                                        textTransform: 'none',
+                                        }} >
+                                      Regresar
+                                    </Button>
+                                </div>
                             </DialogActions>
                         </Dialog>
-                    </Grid>
 
-                    <Grid item xs={12} sm={12}>
-                        <Button onClick={()=>{set_openEditarBanco(true)}} variant="contained">Revisar o actualizar cuenta de banco</Button>
                         <Dialog onClose={()=>{set_openEditarBanco(false)}} open={openEditarBanco}>
                             <DialogContent>
                                 <FormCambiarBanco setOpen={set_openEditarBanco} />
                             </DialogContent>
                         </Dialog>
-                    </Grid>
+                        </Grid>
 
                     <Grid item xs={12} sm={12}>
+                        <Grid item xs={12} style={{display: 'flex', fontSize: '10px'}}>
+                            <Typography variant="h6" style={{fontWeight: 'bold', marginRight: '20px', marginTop: '10px'}}>3.</Typography>
+                            <Typography variant="body1" style={{marginTop: '20px', fontSize: '14px'}}>
+                                Necesitamos tu aprobación para el contrato del préstamo
+                            </Typography>
+                        </Grid>
                         <FormControlLabel
                             disabled={!validadoParaContrato}
-                            label={"Acepto el contrato de préstamo"}
-                            control={<Checkbox checked={inputAceptoContrato} onChange={change_inputAceptoContrato} />}
+                            label={
+                                <Typography variant="body2" style={{ fontSize: '12px', marginLeft: '18px'}}> 
+                                    Ver contrato 
+                                </Typography>
+                                }
+                            control={
+                                <Checkbox 
+                                    checked={inputAceptoContrato} 
+                                    onChange={change_inputVerAceptoContrato} 
+                                    style={{
+                                        visibility: 'hidden',
+                                        color: 'green',
+                                        transform: 'scale(0.6)',
+                                        marginTop: '2px',
+                                        marginLeft: '10px',
+                                        marginRight: '5px',
+                                        boxShadow: 'none',
+                                        fontSize: '5px',
+                                        position: 'absolute',
+                                    }}
+                                />
+                            }
+                            style={{
+                                marginLeft: '30px',
+                                textAlign: 'center',
+                                fontSize: '5px',
+                                backgroundColor: 'white',
+                                height: '30px',
+                                width: '20%',
+                                marginTop: '10px',
+                                boxShadow: 'none',
+                                border: '1px solid grey',
+                                borderRadius: '20px',
+                                textTransform: 'none',
+                            }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.backgroundColor = 'black';
+                                e.currentTarget.style.color = 'white';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.backgroundColor = 'white';
+                                e.currentTarget.style.color = 'black';
+                            }}
+                            
+                        />
+
+                        <FormControlLabel
+                            disabled={!validadoParaContrato}
+                            label={
+                                <Typography variant="body2" style={{ fontSize: '12px' }}> 
+                                    Acepto el contrato
+                                </Typography>
+                            }
+                            control={
+                                <Checkbox 
+                                    checked={inputAceptoContrato} 
+                                    onChange={change_inputAceptoContrato} 
+                                    icon={<></>}
+                                    checkedIcon={<span style={{ fontSize: '18px' }}>✔️</span>} 
+                                    style={{
+                                        color: 'green',
+                                        transform: 'scale(0.6)',
+                                        marginTop: '2px',
+                                        marginLeft: '10px',
+                                        marginRight: '5px',
+                                        boxShadow: 'none',
+                                        fontSize: '5px',
+                                    }}
+                                />
+                            }
+                            style={{
+                                marginLeft: '30px',
+                                fontSize: '5px',
+                                backgroundColor: 'white',
+                                height: '30px',
+                                width: '30%',
+                                marginTop: '10px',
+                                boxShadow: 'none',
+                                border: '1px solid grey',
+                                borderRadius: '20px',
+                                textTransform: 'none',
+                            }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.backgroundColor = 'black';
+                                e.currentTarget.style.color = 'white';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.backgroundColor = 'white';
+                                e.currentTarget.style.color = 'black';
+                            }}
                         />
                     </Grid>
 
                    
 
-                    <Grid item xs={12} sm={6}>
-                        {/* <Typography variant="body2" sx={{pt: 1, pb: 1}} >La tasa {params.productSelected.ProTip} es de {interesPeriodo}%</Typography> */}
+                    {/* <Grid item xs={12} sm={6}>
                         <Button variant="contained" onClick={()=>{set_openVentanaCalculadora(true)}} disabled={!validadoParaContrato} size="small">Calculadora de cuotas</Button>
-                    </Grid>
+                    </Grid> */}
                    
-                    <Grid onClick={()=>{set_yaIntentoEnviar(true)}} item xs={12} sm={12}>
-                        <Button onClick={(e) => handleClickOpen(e)} disabled={!botonEnviarHabilitado} variant="contained" sx={{ mt: 1, mr: 1 }} >Enviar solicitud</Button>
-                        <Button onClick={()=>{cerrarVentana()}} variant="contained" sx={{ mt: 1, mr: 1 }} >Cancelar</Button>
+                   <Grid 
+                        container 
+                        direction="row" 
+                        justifyContent="flex-end" 
+                        onClick={()=>{set_yaIntentoEnviar(true)}} 
+                        item xs={12} sm={12}
+                    >
+                        <Button 
+                            onClick={(e) => handleClickOpen(e)} 
+                            disabled={!botonEnviarHabilitado} 
+                            variant="contained" 
+                            onMouseOver={(e) => {
+                                if(botonEnviarHabilitado) {
+                                    e.currentTarget.style.backgroundColor = '#495cbf';
+                                }
+                            }}
+                            onMouseOut={(e) => {
+                                if(botonEnviarHabilitado) {
+                                    e.currentTarget.style.backgroundColor = '#647cf8';
+                                }
+                            }}
+                            style={{
+                                backgroundColor: botonEnviarHabilitado ? '#647cf8' : 'white',
+                                color: botonEnviarHabilitado ? 'white' : 'black',
+                                borderColor: '#647cf8',
+                                height: '30px',
+                                width: '30%',
+                                marginTop: '10px',
+                                fontSize: '10px',
+                                boxShadow: 'none',
+                                border: '1px solid grey',
+                                borderRadius: '20px',
+                                textTransform: 'none',
+                                marginLeft: '10px',
+                                '&:hover': {
+                                    backgroundColor: '#e0e0e0',
+                                  },
+                            }}
+                        >
+                            Enviar solicitud
+                        </Button>
+                        <Button 
+                            onClick={()=>{cerrarVentana()}} 
+                            variant="contained" 
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.backgroundColor = '#647cf8';
+                                e.currentTarget.style.color = 'white';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.backgroundColor = 'white';
+                                e.currentTarget.style.color = 'black';
+                            }}
+                            style={{
+                                backgroundColor: 'white',
+                                color: 'black',
+                                borderColor: '#647cf8',
+                                height: '30px',
+                                width: '30%',
+                                marginTop: '10px',
+                                fontSize: '10px',
+                                boxShadow: 'none',
+                                border: '1px solid grey',
+                                borderRadius: '20px',
+                                textTransform: 'none',
+                                marginLeft: '10px',
+                            }}
+                        >
+                            Cancelar
+                        </Button>
                     </Grid>
 
-                    {/* Modal */}
+                    {/* Modal de prestamo solicitado con exito*/}
                     <Dialog
                         className="miDialogo"
                         open={open}  // El diálogo se mostrará si 'open' es true
@@ -528,15 +870,24 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                         </DialogContent>
                         <DialogActions className="miDialogoAcciones" style={{display: 'flex', justifyContent: 'center'}}>
                         <Button className="miDialogoBoton" onClick={(e) => {
-    e.preventDefault();
-    enviarInformacionAlApi();
-}} color="primary" autoFocus style={{background: 'white', alignContent: 'center', fontSize: '12px', borderRadius: '20px', width: '200px'}}>
-Ver información de mi préstamo
-</Button>
+                            e.preventDefault();
+                            enviarInformacionAlApi();
+                        }} 
+                        color="primary" 
+                        autoFocus 
+                        style={{
+                            background: 'white', 
+                            alignContent: 'center', 
+                            fontSize: '12px', 
+                            borderRadius: '20px', 
+                            width: '200px'
+                            }}>
+                            Ver información de mi préstamo
+                        </Button>
                         </DialogActions>
                     </Dialog>
                 </Grid>
-                </>
+                </div>
                 }
                 <Dialog
                     open={openVentanaCalculadora}
@@ -609,8 +960,6 @@ function Calculadora({setOpen, inputCantidadDinero, inputPeriodo, interesPeriodo
         // console.log('gastosAdministrativos', gastosAdministrativos);
         console.log('interesPeriodo', interesPeriodo);
     }, [inputCantidadDinero, inputPeriodo, interesPeriodo, diasPorPerSel, params]);
-
-    const [isGridOpen, setIsGridOpen] = useState(false);
 
     return (
     <>
@@ -872,37 +1221,106 @@ function FormCambiarBanco({setOpen}){
             
             {(usuarioDetalle && apiCamposConstructor && !terminoEditar) && 
             <Box>
-                <Typography variant="h5" sx={{}} >Actualizar banco</Typography>
-                <Typography variant="body" sx={{mb: '1rem'}} >A la siguiente cuenta de banco se enviara el dinero del préstamo, si su cuenta de banco es correcta no la actulice.</Typography>
+                <br/>
+                <Typography variant="h5" sx={{}} style={{textAlign: 'center', fontSize: '16px', fontWeight: 'bold'}}>Actualiza tu información bancaria</Typography>
+                <br/>   
+                <Typography variant="body1" sx={{mb: '1rem'}} style={{fontSize: '14px', textAlign: 'center'}}>
+                    Asegúrate de colocar la información del banco al que quieres que llegue el dinero. Si la información es correcta, no la actualices.
+                </Typography>
                 <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth>
-                        <InputLabel onBlur={()=>{set_inputBanco({...inputBanco, blur: true})}} required error={(!inputBanco.validado && inputBanco.blur)}>Banco</InputLabel>
-                        <Select onBlur={()=>{set_inputBanco({...inputBanco, blur: true})}} required value={inputBanco.valor} onChange={handleChange_inputBanco} label="Banco" error={(!inputBanco.validado && inputBanco.blur)}>
-                            {Object.keys(apiCamposConstructor?.bank?.values).map((key)=>{
-                                return ((key)?<MenuItem key={key} value={key}>{apiCamposConstructor?.bank?.values[key]}</MenuItem>:'');
-                            })}
-                        </Select>
-                    </FormControl>
-                </Grid>
+                <FormControl fullWidth>
+                    <InputLabel 
+                        onBlur={()=>{set_inputBanco({...inputBanco, blur: true})}} 
+                        required 
+                        error={(!inputBanco.validado && inputBanco.blur)}
+                        style={{fontSize: '12px'}}
+                    >
+                        Banco
+                    </InputLabel>
+                    <Select 
+                        onBlur={()=>{set_inputBanco({...inputBanco, blur: true})}} 
+                        required 
+                        value={inputBanco.valor} 
+                        onChange={handleChange_inputBanco} 
+                        label="Banco" 
+                        error={(!inputBanco.validado && inputBanco.blur)}
+                        style={{fontSize: '12px', borderRadius: '20px', height: '30px'}}
+                    >
+                        {Object.keys(apiCamposConstructor?.bank?.values).map((key)=>{
+                            return ((key)?<MenuItem key={key} value={key}>{apiCamposConstructor?.bank?.values[key]}</MenuItem>:'');
+                        })}
+                    </Select>
+                </FormControl>
+            </Grid>
                 <Grid item xs={12} sm={6}>
-                    <TextField 
-                        helperText={inputCuentaBanco.textoAyuda} 
-                        required value={inputCuentaBanco.valor} 
-                        onBlur={()=>{set_inputCuentaBanco({...inputCuentaBanco, blur: true})}}
-                        onChange={handleChange_inputCuentaBanco} 
-                        error={(!inputCuentaBanco.validado && inputCuentaBanco.blur)} 
-                        autoComplete="off" 
-                        fullWidth 
-                        label={"# de cuenta" }
-                        />
+                <TextField 
+                    helperText={inputCuentaBanco.textoAyuda} 
+                    required 
+                    value={inputCuentaBanco.valor} 
+                    onBlur={()=>{set_inputCuentaBanco({...inputCuentaBanco, blur: true})}}
+                    onChange={handleChange_inputCuentaBanco} 
+                    error={(!inputCuentaBanco.validado && inputCuentaBanco.blur)} 
+                    autoComplete="off" 
+                    fullWidth 
+                    label={"# de cuenta" }
+                    InputProps={{
+                        style: {
+                            fontSize: '12px',
+                            borderRadius: '20px',
+                            overflow: 'hidden',
+                            height: '30px',
+                        }
+                    }}
+                    inputProps={{
+                        style: {
+                            fontSize: '12px',
+                        }
+                    }}
+                    InputLabelProps={{
+                        style: {
+                            fontSize: '12px',
+                        }
+                    }}
+                />
                     </Grid>
                     <Grid item xs={12} sm={12}>
                         <Typography variant="body2" sx={{mb: '1rem', color: '#ff4d4d'}} >{errorAjax}</Typography>
                     </Grid>
-                    <Grid item xs={12} sm={12}>
-                        <Button disabled={(validado && !enviandoForm)?false:true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }} >{(enviandoForm)?"Enviando....":"Guardar"}</Button>
-                        <Button onClick={()=>{setOpen(false)}} sx={{ mt: 1, mr: 1 }} >Cerrar</Button>
+                    <Grid item xs={12} sm={12} style={{textAlign: 'center'}}>
+                        <Button 
+                            disabled={(validado && !enviandoForm)?false:true} 
+                            variant="contained" 
+                            onClick={guardarDatos} 
+                            sx={{ mt: 1, mr: 1 }} 
+                            style={{
+                                background: '#647cf8',
+                                color: 'white',
+                                borderRadius: '20px',
+                                height: '30px',
+                                width: '20%',
+                                fontSize: '12px',
+                                textTransform: 'none',
+                            }}
+                        >
+                            {(enviandoForm)?"Enviando....":"Guardar"}
+                        </Button>
+                        <Button 
+                            onClick={()=>{setOpen(false)}} 
+                            sx={{ mt: 1, mr: 1 }} 
+                            style={{
+                                borderRadius: '20px',
+                                color: '#647cf8',
+                                borderColor: '#647cf8',
+                                height: '30px',
+                                width: '20%',
+                                fontSize: '12px',
+                                border: '1px solid #647cf8',
+                                textTransform: 'none',
+                            }}
+                        >
+                            Cerrar
+                        </Button>
                     </Grid>
                 </Grid>
             </Box>

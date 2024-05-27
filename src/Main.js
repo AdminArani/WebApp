@@ -50,6 +50,7 @@ function Main() {
                     "Villanueva, Honduras",
                     "Progreso, Honduras",
                     "San Pedro Sula, Honduras",
+                    "Intibucá, Honduras",
                 ];
     
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
