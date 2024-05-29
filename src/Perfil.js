@@ -22,6 +22,7 @@ import Avatar from '@mui/material/Avatar';
 import ConfirmarCorreo from "./componentes/ConfirmarCorreo";
 import React from 'react';
 import Aplicar from './Aplicar.js';
+import Main from './Main.js';
 
 function Perfil() {
     const gContext = useContext(AppContext);
@@ -721,15 +722,15 @@ function Perfil() {
                     <Box display="flex" justifyContent="center" alignItems="center">
                         <img src={`${process.env.PUBLIC_URL}/logosi.jpg`} alt="Logo" />
                     </Box>
-                    <DialogTitle id="alert-dialog-title" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold'}}>{"¡Tienes un préstamo pre aprobado!"}</DialogTitle>
+                    <DialogTitle id="alert-dialog-title" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold'}}>{"¡Felicidades!"}</DialogTitle>
                     <DialogContent>
-                        <DialogContentText className="miDialogoTexto" id="alert-dialog-description" style={{color: 'white'}}>
-                        Para completarla, responde las siguientes preguntas.
+                        <DialogContentText className="miDialogoTexto" id="alert-dialog-description" style={{color: 'white', textAlign: 'center'}}>
+                            Has completado tu perfil con exito. <br/> Procederemos a revisarlo para que puedes aplicar a tu prestamo lo antes posible.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions className="miDialogoAcciones" style={{display: 'flex', justifyContent: 'center'}}>
-                        <Button className="miDialogoBoton" onClick={handleClose} to="/aplicar" color="primary" autoFocus style={{background: 'white', alignContent: 'center', fontSize: '12px', borderRadius: '20px', width: '200px'}}>
-                        Ir a formulario
+                        <Button className="miDialogoBoton" onClick={handleClose} to="./Main" color="primary" autoFocus style={{background: 'white', alignContent: 'center', fontSize: '12px', borderRadius: '20px', width: '200px'}}>
+                        Inicio
                         </Button>
                     </DialogActions>
                 </Dialog>

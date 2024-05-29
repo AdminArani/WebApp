@@ -367,7 +367,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                  setTotalAPagar(data.totalAPagar);
                  setPagosARealizar(data.pagosARealizar);
                  setPagos(data.pagos);
-                 console.log(data);
              })
              .catch(error => console.error('Error:', error));
         }
@@ -390,6 +389,157 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         return numero <= 36 ? ordinales[numero - 1] : numero + 'º';
     }
 
+    const [inputCuentaBanco, set_inputCuentaBanco] = useState({ valor: '', validado: false });
+    const [inputBanco, set_inputBanco] = useState({ valor: '', validado: false });
+    const [validado, set_validado] = useState(false);
+
+    const cargarCuentaBanco = () => {
+        axios.request({
+            url: "https://app.arani.hn/api/app/get_bankaccount.php",
+            method: "post",
+            data: {
+                sid: gContext.logeado.token,
+            },
+        })
+        .then((res) => {
+            if (res.data.status === "OK") {
+                console.log('get_bankaccount', res.data.payload?.data);
+
+                let cuentaActiva = false;
+                for (const key in res.data.payload?.data) {
+                    if (Object.hasOwnProperty.call(res.data.payload?.data, key)) {
+                        const element = res.data.payload?.data[key];
+                        if (element.current === '1') {
+                            cuentaActiva = element;
+                        }
+                    }
+                }
+
+                set_inputCuentaBanco({
+                    ...inputCuentaBanco,
+                    valor: cuentaActiva.account_number,
+                    validado: true
+                });
+                set_inputBanco({
+                    ...inputBanco,
+                    valor: cuentaActiva.bank,
+                    validado: true
+                });
+            }
+        }).catch(err => {
+            console.log(err.message);
+        });
+    }
+
+    
+    const [bank, setBank] = useState(null);
+
+    useEffect(() => {
+        fetchInformacionUsuario(); // Llama a la función para obtener la información del usuario
+    }, []);
+
+    // Función para obtener la información del usuario
+    const fetchInformacionUsuario = (callback) => {
+        axios.request({
+            url: "https://app.arani.hn/api/app/getProfile.php",
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+            },
+        })
+        .then((res) => {
+            if (res.data.status === "ER") {
+                console.log(res.data.payload.message);
+            } else if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            } else if (res.data.status === "OK") {
+                console.log('usuarioDetalle', res.data.payload.data);
+                set_usuarioDetalle(res.data.payload.data);
+
+                // Almacena el valor del banco en una variable
+                const bankValue = res.data.payload.data.bank;
+                setBank(bankValue); // Actualiza el estado con el valor del banco
+                console.log("Valor del banco:", bankValue);
+
+                // Obtener el nombre del banco utilizando el valor numérico
+                const nombreBanco = obtenerNombreBanco(bankValue);
+                set_inputBanco({
+                    ...inputBanco,
+                    valor: nombreBanco,
+                    validado: true
+                });
+
+                console.log("Nombre del banco:", nombreBanco);
+            }
+
+            if (typeof callback === 'function') callback();
+        })
+        .catch(err => {
+            console.log(err.message);
+        });
+    }; 
+    
+    const obtenerNombreBanco = (valorBanco) => {
+        console.log("Valor del banco al case:", valorBanco)
+        switch (parseInt(valorBanco)) {
+            case 1:
+                return 'Bac Credomatic';
+            case 2:
+                return 'Banco Atlantida';
+            case 3:
+                return 'Banco Azteca';
+            case 4:
+                return 'Banco Banrural';
+            case 5:
+                return 'Banco Banrural';
+            case 6:
+                return 'Banco Banrural';
+            case 7:
+                return 'Banco Banrural';
+            case 8:
+                return 'Banco Banrural';
+            case 9:
+                return 'Banco Banrural';
+            case 10:
+                return 'Banco Banrural';
+            case 11:
+                return 'Banco Banrural';
+            case 12:
+                return 'Banco Banrural';
+            case 13:
+                return 'Banco Banrural';
+            case 14:
+                return 'Banco Banrural';
+            case 15:
+                return 'Banco Banrural';
+            case 16:
+                return 'Banco Banrural';
+            default:
+                return 'Banco No Registrado';
+        }
+    };
+    
+    
+    
+      
+    
+    useEffect(() => {
+        cargarCuentaBanco();
+        getInformacionUsuario(() => {
+            cargarCuentaBanco();
+        });
+        // eslint-disable-next-line
+    }, []);
+    
+    useEffect(() => {
+        if (inputCuentaBanco?.validado && inputBanco.validado) {
+            set_validado(true);
+        } else {
+            set_validado(false);
+        }
+        // eslint-disable-next-line
+    }, [inputCuentaBanco, inputBanco]);
 
     return (
         <Box style={{padding: 'none', margin: '0px', marginLeft: '-24px', marginRight: '-24px', width:'600px'}}>
@@ -408,26 +558,26 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                         <div style={{padding: '10px', paddingTop: '2px', marginLeft: '30px', marginRight:'24px'}}>
                             <br/>
                             <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Cantidad solicitada: </Typography>
-                                <Typography variant="body2" style={{fontSize: '12px'}}>L {numeral(cantidadSolicitada).format('0,0.00')}</Typography>
+                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Cantidad solicitada: </Typography>
+                                <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(cantidadSolicitada).format('0,0.00')}</Typography>
                             </div>
                             <br/>
                             {/* <Typography variant="body2" sx={{}} >Total de pagos: {inputPeriodo.valor/diasPorPerSel}</Typography>
                             <Typography variant="body2" sx={{}} >Periodicidad: {params.productSelected.ProTip}</Typography> */}
                             <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Interes:</Typography>
-                                <Typography variant="body2" style={{fontSize: '12px'}}>L {numeral(intereses).format('0,0.00')}</Typography>
+                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Interes:</Typography>
+                                <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(intereses).format('0,0.00')}</Typography>
                             </div>
                             <br/>
                             <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Gastos administrativos: </Typography>
-                                <Typography variant="body2" style={{fontSize: '12px'}}>L {numeral(gastosAdministrativos).format('0,0.00')}</Typography>
+                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Gastos administrativos: </Typography>
+                                <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(gastosAdministrativos).format('0,0.00')}</Typography>
                             </div>
                             <br/>
                             <Divider sx={{ mb: 1, mt: 1 }}></Divider>
                             <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Total a Pagar: </Typography>
-                                <Typography variant="body2" style={{fontSize: '12px'}}>L {numeral(totalAPagar).format('0,0.00')}</Typography>
+                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Total a Pagar: </Typography>
+                                <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(totalAPagar).format('0,0.00')}</Typography>
                             </div>
                         </div>
                         <br/>
@@ -437,20 +587,20 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                     <div>
                         <div style={{display: 'flex', justifyContent: 'space-between'}}>
                             <div>
-                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>Pagos a realizar: </Typography>
-                                <Typography variant="body2" style={{fontSize: '8px'}}>{`Solicitaste un plazo de ${pagosARealizar} semanas`}</Typography>
+                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Pagos a realizar: </Typography>
+                                <Typography variant="body2" style={{fontSize: '12px'}}>{`Solicitaste un plazo de ${pagosARealizar} semanas`}</Typography>
                             </div>
-                            <Typography variant="body2" style={{fontSize: '12px'}}>{(pagosARealizar)}</Typography>
+                            <Typography variant="body2" style={{fontSize: '16px'}}>{(pagosARealizar)}</Typography>
                         </div>
                         <br/>
                         {pagos && pagos.map((pago, index) => (
                             <div key={index} style={{display: 'flex', justifyContent: 'space-between'}}>
                                 <div>
-                                    <Typography variant="body2" style={{fontSize: '12px', color: '#647cf8', fontWeight: 'bold'}}>{numeroAOrdinal(index + 1)} pago: </Typography>
-                                    <Typography variant="body2" style={{fontSize: '8px'}}>{pago.fechaDePago}</Typography>
+                                    <Typography variant="body2" style={{fontSize: '16px', color: '#647cf8', fontWeight: 'bold'}}>{numeroAOrdinal(index + 1)} pago: </Typography>
+                                    <Typography variant="body2" style={{fontSize: '12px'}}>{pago.fechaDePago}</Typography>
                                     <br/>
                                 </div>
-                                <Typography variant="body2" style={{fontSize: '12px', fontWeight: 'bold'}}>L {numeral(pago.cantidad).format('0,0.00')}</Typography>
+                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>L {numeral(pago.cantidad).format('0,0.00')}</Typography>
                             </div>
                         ))}
                     </div>
@@ -593,10 +743,14 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
                         <Grid item xs={12} style={{display: 'flex', fontSize: '10px'}}>
                             <Typography variant="h6" style={{fontWeight: 'bold', marginRight: '20px', marginTop: '10px'}}>2.</Typography>
-                            <Typography variant="body1" style={{marginTop: '10px', fontSize: '14px'}}>
-                                Confirma que la cuenta 73402385 de Banco Atlántida es la correcta para desembolsar tu dinero
+                            <Typography variant="h6" style={{fontSize: '13px', marginRight: '25px', marginTop: '10px'}}>
+                                {'Confirma que la cuenta '}
+                                <span style={{fontWeight: 'bold'}}>{inputCuentaBanco.valor}</span>
+                                {' de '}
+                                <span style={{fontWeight: 'bold'}}>{obtenerNombreBanco(bank)}</span>
+                                {' es la correcta para desembolsar tu dinero'}
                             </Typography>
-                        </Grid>
+                            </Grid>
 
                         <br/>
                         <Grid item xs={12} sm={12} style={{display: 'flex', justifyContent: 'space-between'}}>
@@ -683,15 +837,16 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                         marginLeft: '30px',
                                         backgroundColor: '#647cf8',
                                         color: 'white',
-                                        height: '40px',
-                                        width: '30%',
+                                        height: '30px',
+                                        width: '20%',
                                         marginTop: '10px',
-                                        fontSize: '16px',
+                                        fontSize: '12px',
                                         fontWeight: 'bold',
                                         boxShadow: 'none',
                                         border: '1px solid grey',
                                         borderRadius: '20px',
                                         textTransform: 'none',
+                                        paddingBottom: '10px',
                                         }} >
                                       Regresar
                                     </Button>
@@ -920,7 +1075,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                             alignContent: 'center', 
                             fontSize: '12px', 
                             borderRadius: '20px', 
-                            width: '200px'
+                            width: '200px', 
+                            textTransform: 'none',
                             }}>
                             Ver información de mi préstamo
                         </Button>
@@ -1201,10 +1357,6 @@ function FormCambiarBanco({setOpen}){
 
     }
 
-  
-
-    
- 
     useEffect(()=>{
         cargarDatosSeleccionables();
         getInformacionUsuario();
