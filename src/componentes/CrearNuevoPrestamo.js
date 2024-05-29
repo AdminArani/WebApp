@@ -521,9 +521,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     };
     
     
-    
+    const esPantallaPequeña = useMediaQuery('(max-width:600px)');
       
-    
     useEffect(() => {
         cargarCuentaBanco();
         getInformacionUsuario(() => {
@@ -542,7 +541,16 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     }, [inputCuentaBanco, inputBanco]);
 
     return (
-        <Box style={{padding: 'none', margin: '0px', marginLeft: '-24px', marginRight: '-24px', width:'600px'}}>
+        <Box style={{
+            padding: 'none', 
+            margin: '0px', 
+            width: '100%', 
+            '@media (min-width:600px)': { 
+                width: '600px', 
+                marginLeft: '-24px', 
+                marginRight: '-24px'
+            }
+        }}>
             
             <Box>
                 {enviandoAlApi &&
@@ -551,10 +559,10 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                     </div>
                 }
                 {(!enviandoAlApi && seRegistro) &&
-                <div>
+                <div style={{width: esPantallaPequeña ? '100%' : '400px', margin: '0%'}}>
                     <Typography variant="h5" sx={{pt: 1, pb: 0}} style={{fontSize: '18px',textAlign: 'center', fontWeight: 'bold'}}>Resumen de tu préstamo</Typography>
                     <br/>
-                    <Box style={{backgroundColor: '#dcdcdc', boxSizing: 'border-box'}}>
+                    <Box style={{backgroundColor: '#dcdcdc', boxSizing: 'border-box', marginLeft: '-24px', marginRight: '-24px'}}>
                         <div style={{padding: '10px', paddingTop: '2px', marginLeft: '30px', marginRight:'24px'}}>
                             <br/>
                             <div style={{display: 'flex', justifyContent: 'space-between'}}>
@@ -679,29 +687,27 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                     />
                     </Grid>
 
-                    <Grid item xs={12} sm={6} style={{borderRadius: '20px'}}> 
-                        {/* <TextField 
-                            helperText={inputPeriodo.textoAyuda} 
-                            required value={inputPeriodo.valor} 
-                            onChange={handleChange_inputPeriodo} 
-                            error={(!inputPeriodo.validado && yaIntentoEnviar)} 
-                            autoComplete="off" 
-                            fullWidth 
-                            label="Tiempo para pagar (días)" 
-                            /> */}
-                        <FormControl fullWidth >
-                            <InputLabel required error={(!inputPeriodo.validado && yaIntentoEnviar)} style={{fontSize: '12px'}} >A pagar en:</InputLabel>
-                            <Select 
-                                required 
-                                value={inputPeriodo.valor} 
-                                onChange={handleChange_inputPeriodo} 
-                                label="Proposito del préstamo" 
-                                style={{marginTop: '10px', width: '90%', height: '34px', borderRadius: '20px', fontSize: '12px'}}
-                                error={(!inputPeriodo.validado && yaIntentoEnviar)}
-                            >
-                               {listadoPeriodos}
-                            </Select>
-                        </FormControl>
+                    <Grid item xs={12} sm={6} style={{borderRadius: '20px', '@media (max-width:600px)': { justifyContent: 'center' }}}> 
+                            <FormControl fullWidth >
+                                <InputLabel required error={(!inputPeriodo.validado && yaIntentoEnviar)} style={{marginLeft: '30px', fontSize: '12px'}}>A pagar en:</InputLabel>
+                                <Select 
+                                    required 
+                                    value={inputPeriodo.valor} 
+                                    onChange={handleChange_inputPeriodo} 
+                                    label="Proposito del préstamo" 
+                                    style={{
+                                        marginTop: '10px',
+                                        marginLeft: '30px', 
+                                        width: '80%', 
+                                        height: '34px', 
+                                        borderRadius: '20px',
+                                        fontSize: '12px',
+                                        }} 
+                                    error={(!inputPeriodo.validado && yaIntentoEnviar)}
+                                >
+                                {listadoPeriodos}
+                                </Select>
+                            </FormControl>
                     </Grid>
 
                     
@@ -720,7 +726,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 style={{
                                     marginTop: '10px',
                                     marginLeft: '30px', 
-                                    width: '90%', 
+                                    width: '80%', 
                                     height: '34px', 
                                     borderRadius: '20px',
                                     fontSize: '12px',
@@ -754,41 +760,44 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
                         <br/>
                         <Grid item xs={12} sm={12} style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <Button 
-                            variant="contained" 
-                            onMouseOver={(e) => {
-                                e.currentTarget.style.backgroundColor = 'black';
-                                e.currentTarget.style.color = 'white';
-                            }}
-                            onMouseOut={(e) => {
-                                e.currentTarget.style.backgroundColor = 'white';
-                                e.currentTarget.style.color = 'black';
-                            }}
-                            style={{
-                                marginLeft: '30px',
-                                backgroundColor: 'white',
-                                color: 'black',
-                                height: '30px',
-                                width: '40%',
-                                marginTop: '10px',
-                                fontSize: '10px',
-                                boxShadow: 'none',
-                                border: '1px solid grey',
-                                borderRadius: '20px',
-                                textTransform: 'none',
-                            }} 
-                            onClick={() => set_inputAceptoBanco(!inputAceptoBanco)}
-                        >
-                            {inputAceptoBanco ? 
-                                <span>
-                                    <span role="img" aria-label="check" style={{ paddingRight: '10px' }}>✔️</span>
-                                    La información bancaria es correcta
-                                </span> 
-                                : 
-                                'La información bancaria es correcta'
-                            }
-                        </Button>
+                        <div style={{'@media (max-width:600px)': { height: '50px' }}}>
+                            <Button 
+                                variant="contained" 
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'black';
+                                    e.currentTarget.style.color = 'white';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'white';
+                                    e.currentTarget.style.color = 'black';
+                                }}
+                                style={{
+                                    marginLeft: '30px',
+                                    backgroundColor: 'white',
+                                    color: 'black',
+                                    height: '65%',
+                                    width: '80%',
+                                    marginTop: '10px',
+                                    fontSize: '10px',
+                                    boxShadow: 'none',
+                                    border: '1px solid grey',
+                                    borderRadius: '20px',
+                                    textTransform: 'none',
+                                }} 
+                                onClick={() => set_inputAceptoBanco(!inputAceptoBanco)}
+                            >
+                                {inputAceptoBanco ? 
+                                    <span>
+                                        <span role="img" aria-label="check" style={{ paddingRight: '10px' }}>✔️</span>
+                                        La información bancaria es correcta
+                                    </span> 
+                                    : 
+                                    'La información bancaria es correcta'
+                                }
+                            </Button>
+                        </div>
 
+                        <div style={{'@media (max-width:600px)': { height: '50px' }}}>
                             <Button 
                                 onClick={()=>{set_openEditarBanco(true)}} 
                                 variant="contained"
@@ -805,8 +814,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                     marginRight: '30px',
                                     backgroundColor: 'white',
                                     color: 'black',
-                                    height: '30px',
-                                    width: '40%',
+                                    height: '65%',
+                                    width: '80%',
                                     marginTop: '10px',
                                     fontSize: '10px',
                                     boxShadow: 'none',
@@ -817,7 +826,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                             >
                                 Actualizar cuenta de banco
                             </Button>
-                        </Grid>
+                        </div>
+                    </Grid>
 
                         {/* Modal del contrato */}
                         <Dialog open={ventanaContrato} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" style={{ textAlign: 'center'}}>
@@ -861,7 +871,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                         </Dialog>
                         </Grid>
 
-                    <Grid item xs={12} sm={12}>
+                    <Grid item xs={12} sm={12} style={{marginBottom: '50px'}}>
                         <Grid item xs={12} style={{display: 'flex', fontSize: '10px'}}>
                             <Typography variant="h6" style={{fontWeight: 'bold', marginRight: '20px', marginTop: '10px'}}>3.</Typography>
                             <Typography variant="body1" style={{marginTop: '20px', fontSize: '14px'}}>
@@ -871,7 +881,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                         <FormControlLabel
                             disabled={!validadoParaContrato}
                             label={
-                                <Typography variant="body2" style={{ fontSize: '12px', marginLeft: '18px'}}> 
+                                <Typography variant="body2" align="center" style={{ fontSize: '12px', marginLeft: esPantallaPequeña ? '90px' : '60px'}}> 
                                     Ver contrato 
                                 </Typography>
                                 }
@@ -889,6 +899,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                         boxShadow: 'none',
                                         fontSize: '5px',
                                         position: 'absolute',
+                                        textAlign: 'center',
                                     }}
                                 />
                             }
@@ -897,8 +908,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 textAlign: 'center',
                                 fontSize: '5px',
                                 backgroundColor: 'white',
-                                height: '30px',
-                                width: '20%',
+                                height: esPantallaPequeña ? '30%' : '35%',
+                                width: esPantallaPequeña ? '80%' : '40%',
                                 marginTop: '10px',
                                 boxShadow: 'none',
                                 border: '1px solid grey',
@@ -919,7 +930,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                         <FormControlLabel
                             disabled={!validadoParaContrato}
                             label={
-                                <Typography variant="body2" style={{ fontSize: '12px' }}> 
+                                <Typography variant="body2" style={{ fontSize: '12px', marginLeft: esPantallaPequeña ? '60px' : '10px'}}> 
                                     Acepto el contrato
                                 </Typography>
                             }
@@ -944,8 +955,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 marginLeft: '30px',
                                 fontSize: '5px',
                                 backgroundColor: 'white',
-                                height: '30px',
-                                width: '30%',
+                                height: esPantallaPequeña ? '30%' : '35%',
+                                width: esPantallaPequeña ? '80%' : '40%',
                                 marginTop: '10px',
                                 boxShadow: 'none',
                                 border: '1px solid grey',
@@ -962,6 +973,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                             }}
                         />
                     </Grid>
+
+                    <br/>
 
                    
 
@@ -994,8 +1007,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 backgroundColor: botonEnviarHabilitado ? '#647cf8' : 'white',
                                 color: botonEnviarHabilitado ? 'white' : 'black',
                                 borderColor: '#647cf8',
-                                height: '30px',
-                                width: '30%',
+                                height: esPantallaPequeña ? '50px' : '30px',
+                                width: esPantallaPequeña ? '30%' : '30%',
                                 marginTop: '10px',
                                 fontSize: '10px',
                                 boxShadow: 'none',
@@ -1025,8 +1038,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 backgroundColor: 'white',
                                 color: 'black',
                                 borderColor: '#647cf8',
-                                height: '30px',
-                                width: '30%',
+                                height: esPantallaPequeña ? '50px' : '30px',
+                                width: esPantallaPequeña ? '30%' : '30%',
                                 marginTop: '10px',
                                 fontSize: '10px',
                                 boxShadow: 'none',
