@@ -26,6 +26,7 @@ import Main from './Main.js';
 
 function Perfil() {
     const gContext = useContext(AppContext);
+    console.log(gContext)
     const [usuarioDetalle, set_usuarioDetalle] = useState({});
     const [usuarioDetalleFullR, set_usuarioDetalleFullR] = useState(false);
     const [faltaTerminarRegistro, set_faltaTerminarRegistro] = useState(false);
@@ -84,6 +85,8 @@ function Perfil() {
             }
         });
     }, []);
+
+    
 
     function validarPerfilEnCore(callback){ // Para saber si ya esta registrado en el CORE o no
         axios.request({
@@ -514,6 +517,7 @@ function Perfil() {
                                     </ListItemButton>
                                 </List>
                             </Grid>
+                            
                             <Grid item xs={12} sm={6}>
                                 <List>
                                     <ListItemButton onClick={()=>{set_moduloEditarActivo('banco'); set_openEditarCampos(true);}}>
@@ -524,6 +528,7 @@ function Perfil() {
                                     </ListItemButton>
                                 </List>
                             </Grid>
+
                             <Grid item xs={12} sm={6}>
                                 <List>
                                     <ListItemButton onClick={()=>{set_moduloEditarActivo('estadocivil'); set_openEditarCampos(true);}}>
@@ -534,6 +539,7 @@ function Perfil() {
                                     </ListItemButton>
                                 </List>
                             </Grid>
+
                             <Grid item xs={12} sm={6}>
                                 <List>
                                     <ListItemButton onClick={()=>{set_moduloEditarActivo('income'); set_openEditarCampos(true);}}>
@@ -554,16 +560,6 @@ function Perfil() {
                                     </ListItemButton>
                                 </List>
                             </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('lugartrabajo'); set_openEditarCampos(true);}}>
-                                        <ListItemIcon>
-                                            <span className="material-symbols-outlined">apartment</span>
-                                        </ListItemIcon>
-                                        <ListItemText primary={usuarioDetalle.workplace||"----"} secondary="* Lugar de trabajo" />
-                                    </ListItemButton>
-                                </List>
-                            </Grid>
                             
                             <Grid item xs={12} sm={6}>
                                 <List>
@@ -581,6 +577,8 @@ function Perfil() {
                                     </ListItemButton>
                                 </List>
                             </Grid>
+
+                            
                             <Grid item xs={12} sm={6}>
                                 <List>
                                     <ListItemButton onClick={()=>{set_moduloEditarActivo('numerodependientes'); set_openEditarCampos(true);}}>
@@ -591,6 +589,18 @@ function Perfil() {
                                     </ListItemButton>
                                 </List>
                             </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <List>
+                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('dependendeti'); set_openEditarCampos(true);}}>
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">person</span>
+                                    </ListItemIcon>
+                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={usuarioDetalle.dependents_who||"-----"} secondary="* Tipo de dependientes" />
+                                    </ListItemButton>
+                                </List>
+                            </Grid>
+                            
                             <Grid item xs={12} sm={6}>
                                 <List>
                                     <ListItemButton onClick={()=>{set_moduloEditarActivo('gradoeducativo'); set_openEditarCampos(true);}}>
@@ -598,6 +608,47 @@ function Perfil() {
                                         <span className="material-symbols-outlined">school</span>
                                     </ListItemIcon>
                                     <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={(usuarioDetalle.education)?apiCamposConstructor.education?.values[usuarioDetalle.education]:"-----"} secondary="* Grado educativo" />
+                                    </ListItemButton>
+                                </List>
+                            </Grid>
+
+                            <Grid item xs={12} sm={6}>
+                                <List>
+                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('lugartrabajo'); set_openEditarCampos(true);}}>
+                                        <ListItemIcon>
+                                            <span className="material-symbols-outlined">apartment</span>
+                                        </ListItemIcon>
+                                        <ListItemText primary={usuarioDetalle.workplace||"----"} secondary="* Lugar de trabajo" />
+                                    </ListItemButton>
+                                </List>
+                            </Grid>
+                            {/* Ejemplo de camposs trabajo */}
+                            {/* posicion de trabajo  */}
+                            <Grid item xs={12} sm={6}>
+                                <List>
+                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('posiciontrabajo'); set_openEditarCampos(true);}}>
+                                        <ListItemIcon>
+                                            <span className="material-symbols-outlined">apartment</span>
+                                        </ListItemIcon>
+                                        <ListItemText primary={usuarioDetalle.workplace_position||"----"} secondary="* Posición de trabajo" />
+                                    </ListItemButton>
+                                </List>
+                            </Grid>
+
+                            {/* Departamento donde se ubica el trabajo */}
+                            <Grid item xs={12} sm={6}>
+                                <List>
+                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('ubicaciontrabajo'); set_openEditarCampos(true);}}>
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">location_on</span>
+                                    </ListItemIcon>
+                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={
+                                        
+                                        (usuarioDetalle.work_region || '----')+", "+
+                                        (usuarioDetalle.work_county || '----')+", "+
+                                        (usuarioDetalle.workplace_address || '----')
+                                        } 
+                                        secondary="* Ubicación empleo" />
                                     </ListItemButton>
                                 </List>
                             </Grid>
@@ -612,6 +663,9 @@ function Perfil() {
                                     </ListItemButton>
                                 </List>
                             </Grid>
+
+
+                            
                             <Grid item xs={12} sm={12}>
                                 <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}></Divider>
                             </Grid>
@@ -681,24 +735,27 @@ function Perfil() {
                 <Dialog onClose={()=>{set_openEditarCampos(false)}} open={openEditarCampos}>
                     <DialogContent>
                         {(moduloEditarActivo === 'nombres') && <FormEditNombres cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} />}
-                        {(moduloEditarActivo === 'income') && <FormEditIncome cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} />}
+                        {(moduloEditarActivo === 'income') && <FormEditIncome cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'telefono') && <FormEditTelefono cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} />}
-                        {(moduloEditarActivo === 'tipoingreso') && <FormEditTipoIngreso cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} />}
-                        {(moduloEditarActivo === 'estadocivil') && <FormEditEstadoCivil cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} />}
-                        {(moduloEditarActivo === 'ubicacion') && <FormEditUbicacion cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalleFullR={usuarioDetalleFullR} />}
-                        {(moduloEditarActivo === 'vivienda') && <FormEditVivienda cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} />}
-                        {(moduloEditarActivo === 'lugartrabajo') && <FormEditLugarTrabajo cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} />}
-                        {(moduloEditarActivo === 'numerodependientes') && <FormEditNumeroDependientes cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} />}
-                        {(moduloEditarActivo === 'gradoeducativo') && <FormEditGradoEducativo cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} />}
-                        {(moduloEditarActivo === 'antiguedadlaboral') && <FormEditAntiguedadLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} />}
+                        {(moduloEditarActivo === 'tipoingreso') && <FormEditTipoIngreso cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'estadocivil') && <FormEditEstadoCivil cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'ubicacion') && <FormEditUbicacion cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalleFullR={usuarioDetalleFullR}/>}
+                        {(moduloEditarActivo === 'vivienda') && <FormEditVivienda cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'lugartrabajo') && <FormEditLugarTrabajo cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'numerodependientes') && <FormEditNumeroDependientes cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'dependendeti') && <FormEditDependeti cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'gradoeducativo') && <FormEditGradoEducativo cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'antiguedadlaboral') && <FormEditAntiguedadLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {/* {(moduloEditarActivo === 'documentos') && <FormEditDocumentos cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />} */}
                         {(moduloEditarActivo === 'cambiarpass') && <FormCambiarClave cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
-                        {(moduloEditarActivo === 'banco') && <FormCambiarBanco cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} />}
+                        {(moduloEditarActivo === 'banco') && <FormCambiarBanco cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'file1') && <FormEditFile1 cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
                         {(moduloEditarActivo === 'file2') && <FormEditFile2 cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
                         {(moduloEditarActivo === 'file3') && <FormEditFile3 cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
                         {(moduloEditarActivo === 'file4') && <FormEditFile4 cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
-                    </DialogContent>
+                        {(moduloEditarActivo === 'posiciontrabajo') && <FormEditWorkplacePosition cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'ubicaciontrabajo') && <FormEditUbicacionTrabajo cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalleFullR={usuarioDetalleFullR}/>}
+                        </DialogContent>
                 </Dialog>
                 <Dialog onClose={()=>{set_openEditarCampos(false)}} open={(!usuarioAprobadoManual && tieneTodosCamposObligatoriosHechos() && !datosEnviadosArevision)}>
                     <DialogContent>
@@ -896,12 +953,84 @@ function FormEditNombres({cerrar, reiniciarpantalla}){
     )
 }
 
-function FormEditIncome({cerrar, reiniciarpantalla}){
+// Inicio campo Editar posicion de trabajo 
+function FormEditWorkplacePosition({ cerrar, reiniciarpantalla, usuarioDetalle }) {
+    const gContext = useContext(AppContext);
+
+    const [inputWorkplacePosition, set_inputWorkplacePosition] = useState({ valor: usuarioDetalle ? usuarioDetalle.workplace_position : '', validado: false, textoAyuda: "", blur: false });
+    const [enviandoForm, set_enviandoForm] = useState(false);
+
+    function handleChange_inputWorkplacePosition(event) {
+        let valor = event.target.value;
+        let validado = false;
+        let textoAyuda = "Campo obligatorio";
+        if (valor.length >= 1) {
+            validado = true;
+            textoAyuda = "";
+        }
+        set_inputWorkplacePosition({
+            valor: valor,
+            validado: validado,
+            textoAyuda: textoAyuda,
+            blur: inputWorkplacePosition.blur,
+        });
+    }
+
+    function guardarDatos() {
+        set_enviandoForm(true);
+        axios.request({
+            url: "https://app.arani.hn/api/app/putProfile.php",
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    workplace_position: inputWorkplacePosition.valor
+                },
+            },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            if (res.data.status === "OK") {
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            console.log(err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5" sx={{}}>Editar</Typography>
+            <Typography variant="body" sx={{ mb: '1rem' }}>Edita el siguiente campo para cambiar tu posición en el lugar de trabajo</Typography>
+            <Grid sx={{ mt: 1, mb: 1 }} container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        required
+                        autoComplete="off"
+                        fullWidth
+                        label="Posición en el lugar de trabajo"
+                        onBlur={() => { set_inputWorkplacePosition({ ...inputWorkplacePosition, blur: true }) }}
+                        value={inputWorkplacePosition.valor}
+                        onChange={handleChange_inputWorkplacePosition}
+                        error={(!inputWorkplacePosition.validado && inputWorkplacePosition.blur)}
+                        helperText={inputWorkplacePosition.textoAyuda}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={(!inputWorkplacePosition.validado || enviandoForm) ? true : false} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>{(enviandoForm) ? "Enviando...." : "Guardar cambios"}</Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+}
+
+function FormEditIncome({cerrar, reiniciarpantalla, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
 
     const [validado, set_validado] = useState(false);
-    const [inputIngresoMensual, set_inputIngresoMensual] = useState({valor: '', validado: false, textoAyuda: "", blur: false});
+    const [inputIngresoMensual, set_inputIngresoMensual] = useState({ valor: usuarioDetalle ? usuarioDetalle.income : '', validado: false, textoAyuda: "", blur: false });
 
     const [enviandoForm, set_enviandoForm] = useState(false);
 
@@ -1184,12 +1313,12 @@ function FormEditTelefono({cerrar, reiniciarpantalla}){
     )
 }
 
-function FormEditTipoIngreso({cerrar, reiniciarpantalla, apiCamposConstructor}){
+function FormEditTipoIngreso({cerrar, reiniciarpantalla, apiCamposConstructor, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
 
     const [validado, set_validado] = useState(false);
-    const [inputTipoIngresos, set_inputTipoIngresos] = useState({valor: '', validado: false, textoAyuda: "", blur: false});
+    const [inputTipoIngresos, set_inputTipoIngresos] = useState({ valor: usuarioDetalle ? usuarioDetalle.income_status : '', validado: false, textoAyuda: "", blur: false });
 
     const [enviandoForm, set_enviandoForm] = useState(false);
     
@@ -1312,12 +1441,12 @@ function FormEditTipoIngreso({cerrar, reiniciarpantalla, apiCamposConstructor}){
     )
 }
 
-function FormEditEstadoCivil({cerrar, reiniciarpantalla, apiCamposConstructor}){
+function FormEditEstadoCivil({cerrar, reiniciarpantalla, apiCamposConstructor, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
 
     const [validado, set_validado] = useState(false);
-    const [inputEstadoCivil, set_inputEstadoCivil] = useState({valor: '', validado: false, textoAyuda: ""});
+    const [inputEstadoCivil, set_inputEstadoCivil] = useState({ valor: usuarioDetalle ? usuarioDetalle.marital_status : '', validado: false, textoAyuda: "", blur: false });
 
     const [enviandoForm, set_enviandoForm] = useState(false);
     
@@ -1629,12 +1758,129 @@ function FormEditUbicacion({cerrar, reiniciarpantalla, usuarioDetalleFullR}){
     )
 }
 
-function FormEditVivienda({cerrar, reiniciarpantalla, apiCamposConstructor}){
+// Ubicacion Trabajo inicio
+function FormEditUbicacionTrabajo({cerrar, reiniciarpantalla, usuarioDetalleFullR, usuarioDetalle}){
+
+    const gContext = useContext(AppContext);
+    const [validado, set_validado] = useState(false);
+    const [enviandoForm, set_enviandoForm] = useState(false);
+    
+    const [inputDepartamento, set_inputDepartamento] = useState({valor: '', validado: false, textoAyuda: ""});
+    function handleChange_inputDepartamento(event){
+        let valor = event.target.value;
+        let validado = false;
+        let texto = "Seleccione una opción.";
+        if(valor.length >= 0){
+            validado = true;
+            texto = "";
+        }
+        set_inputDepartamento({
+            validado: validado,
+            valor: valor,
+            textoAyuda: texto,
+            blur: inputDepartamento.blur,
+        });
+    }
+
+    const [inputMunicipio, set_inputMunicipio] = useState({valor: '', validado: false, textoAyuda: ""});
+    function handleChange_inputMunicipio(e, newValue){
+        if(!newValue) return false;
+        let valor = newValue;
+        let validado = false;
+        let texto = "Seleccione una opción.";
+        if(valor.length >= 0){
+            validado = true;
+            texto = "";
+        }
+        set_inputMunicipio({
+            validado: validado,
+            valor: valor,
+            textoAyuda: texto,
+            blur: inputMunicipio.blur,
+        });
+    }
+
+    function guardarDatos(){
+        set_enviandoForm(true);
+        axios.request({
+            url: "https://app.arani.hn/api/app/putProfile.php",
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    work_region: usuarioDetalleFullR?.deps.find(element => element.DepCod === inputDepartamento.valor).DepDsc,
+                    work_county: usuarioDetalleFullR.muns.filter(element => element.DepCod === inputDepartamento.valor).find(element => element.MunCod === inputMunicipio.valor).MunDsc,
+                },
+              },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            if(res.data.status === "ER"){
+            }
+            if(res.data.status === "ERS"){
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({estado: false, token: ''});
+            }
+            if(res.data.status === "OK"){
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            console.log(err.message);
+        });
+    }
+
+    useEffect(()=>{
+        if(inputDepartamento?.validado && inputMunicipio.validado){
+            set_validado(true);
+        }else{
+            set_validado(false);
+        }
+    },[inputDepartamento, inputMunicipio]);
+
+    return (
+        <Box>
+            <Typography variant="h5" sx={{}} >Editar</Typography>
+            <Typography variant="body" sx={{mb: '1rem'}} >Seleccione las opciones correspondientes a su lugar de trabajo.</Typography>
+            <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                        <InputLabel onBlur={()=>{set_inputDepartamento({...inputDepartamento, blur: true})}} required error={(!inputDepartamento.validado && inputDepartamento.blur)}>Departamento</InputLabel>
+                        <Select onBlur={()=>{set_inputDepartamento({...inputDepartamento, blur: true})}} required value={inputDepartamento.valor} onChange={handleChange_inputDepartamento} label="Departamento" error={(!inputDepartamento.validado && inputDepartamento.blur)}>
+                            {usuarioDetalleFullR?.deps.map((element)=>{
+                                return ((element.DepCod)?<MenuItem key={element.DepCod} value={element.DepCod}><span className="capitalize">{element.DepDsc}</span></MenuItem>:'');
+                            })}
+                        </Select>
+                    </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                        <Autocomplete
+                            disablePortal={false}
+                            id="combo-box-demo"
+                            onChange={(e, newdata)=>handleChange_inputMunicipio(e, newdata.MunCod)}
+                            options={usuarioDetalleFullR.muns.filter(element => element.DepCod === inputDepartamento.valor)}
+                            getOptionLabel={(option) => option.MunDsc}
+                            renderInput={(params) => <TextField inputProps={params.inputProps} onBlur={()=>{set_inputMunicipio({...inputMunicipio, blur: true})}} sx={{zIndex: 1000}} {...params} label="Municipio" error={(!inputMunicipio.validado && inputMunicipio.blur)} />}
+                        />
+                    </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={(validado && !enviandoForm)?false:true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }} >{(enviandoForm)?"Enviando....":"Guardar cambios"}</Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }} >Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    )
+}
+
+// Ubicaciion trabajo final 
+
+function FormEditVivienda({cerrar, reiniciarpantalla, apiCamposConstructor, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
 
     const [validado, set_validado] = useState(false);
-    const [inputVivienda, set_inputVivienda] = useState({valor: '', validado: false, textoAyuda: ""});
+    const [inputVivienda, set_inputVivienda] = useState({ valor: usuarioDetalle ? usuarioDetalle.home_status : '', validado: false, textoAyuda: "", blur: false });
 
     const [enviandoForm, set_enviandoForm] = useState(false);
     
@@ -1725,12 +1971,12 @@ function FormEditVivienda({cerrar, reiniciarpantalla, apiCamposConstructor}){
     )
 }
 
-function FormEditLugarTrabajo({cerrar, reiniciarpantalla}){
+function FormEditLugarTrabajo({cerrar, reiniciarpantalla, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
 
     const [validado, set_validado] = useState(false);
-    const [inputLugarTrabajo, set_inputLugarTrabajo] = useState({valor: '', validado: false, textoAyuda: "", blur: false});
+    const [inputLugarTrabajo, set_inputLugarTrabajo] = useState({ valor: usuarioDetalle ? usuarioDetalle.workplace : '', validado: false, textoAyuda: "", blur: false });
 
     const [enviandoForm, set_enviandoForm] = useState(false);
 
@@ -1814,12 +2060,12 @@ function FormEditLugarTrabajo({cerrar, reiniciarpantalla}){
     )
 }
 
-function FormEditNumeroDependientes({cerrar, reiniciarpantalla}){
+function FormEditNumeroDependientes({cerrar, reiniciarpantalla, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
 
     const [validado, set_validado] = useState(false);
-    const [inputNumeroDependientes, set_inputNumeroDependientes] = useState({valor: '', validado: false, textoAyuda: "", blur: false});
+    const [inputNumeroDependientes, set_inputNumeroDependientes] = useState({ valor: usuarioDetalle ? usuarioDetalle.dependents : '', validado: false, textoAyuda: "", blur: false });
 
     const [enviandoForm, set_enviandoForm] = useState(false);
 
@@ -1908,12 +2154,105 @@ function FormEditNumeroDependientes({cerrar, reiniciarpantalla}){
     )
 }
 
-function FormEditGradoEducativo({cerrar, reiniciarpantalla, apiCamposConstructor}){
+
+// TIPO DE DEPENDIENTES
+function FormEditDependeti({cerrar, reiniciarpantalla, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
 
     const [validado, set_validado] = useState(false);
-    const [inputGradoEducativo, set_inputGradoEducativo] = useState({valor: '', validado: false, textoAyuda: ""});
+    const [inputTipoDependientes, set_inputTipoDependientes] = useState({ valor: usuarioDetalle ? usuarioDetalle.dependents_who : '', validado: false, textoAyuda: "", blur: false });
+
+    const [enviandoForm, set_enviandoForm] = useState(false);
+
+    function handleChange_inputTipoDependientes(event){
+        let valor = event.target.value;
+        let validado = false;
+        let textoAyuda = "Seleccione una opción.";
+        if(valor !== ''){
+            validado = true;
+            textoAyuda = "";
+        }
+        set_inputTipoDependientes({
+            valor: valor, 
+            validado: validado,
+            textoAyuda: textoAyuda,
+            blur: inputTipoDependientes.blur,
+        });
+    }
+
+    useEffect(()=>{
+        if(inputTipoDependientes?.validado){
+            set_validado(true);
+        }else{
+            set_validado(false);
+        }
+        // eslint-disable-next-line
+    },[inputTipoDependientes]);
+
+    function guardarDatos(){
+        set_enviandoForm(true);
+        axios.request({
+            url: "https://app.arani.hn/api/app/putProfile.php",
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    dependents_who: inputTipoDependientes.valor,
+                },
+              },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            if(res.data.status === "ER"){
+            }
+            if(res.data.status === "ERS"){
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({estado: false, token: ''});
+            }
+            if(res.data.status === "OK"){
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            console.log(err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5" sx={{}} >Editar</Typography>
+            <Typography variant="body" sx={{mb: '1rem'}} >Ingrese el tipo de dependientes.</Typography>
+            <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                        <InputLabel onBlur={()=>{set_inputTipoDependientes({...inputTipoDependientes, blur: true})}} required error={(!inputTipoDependientes.validado && inputTipoDependientes.blur)}>Tipo de dependientes</InputLabel>
+                        <Select onBlur={()=>{set_inputTipoDependientes({...inputTipoDependientes, blur: true})}} required value={inputTipoDependientes.valor} onChange={handleChange_inputTipoDependientes} label="Tipo de dependientes" error={(!inputTipoDependientes.validado && inputTipoDependientes.blur)}>
+                            <MenuItem value={"Tus hijos"}>Tus hijos</MenuItem>
+                            <MenuItem value={"Tu pareja"}>Tu pareja</MenuItem>
+                            <MenuItem value={"Tus padres"}>Tus padres</MenuItem>
+                            <MenuItem value={"Tus hermanos"}>Tus hermanos</MenuItem>
+                            <MenuItem value={"No tengo dependientes"}>No tengo dependientes</MenuItem>
+                        </Select>
+                    </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={(validado && !enviandoForm)?false:true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }} >{(enviandoForm)?"Enviando....":"Guardar cambios"}</Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }} >Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    )
+}
+
+
+// FIN TIPO DE DEPENDIENTES 
+
+function FormEditGradoEducativo({cerrar, reiniciarpantalla, apiCamposConstructor, usuarioDetalle}){
+
+    const gContext = useContext(AppContext);
+
+    const [validado, set_validado] = useState(false);
+    const [inputGradoEducativo, set_inputGradoEducativo] = useState({ valor: usuarioDetalle ? usuarioDetalle.education : '', validado: false, textoAyuda: "", blur: false });
 
     const [enviandoForm, set_enviandoForm] = useState(false);
     
@@ -2005,12 +2344,12 @@ function FormEditGradoEducativo({cerrar, reiniciarpantalla, apiCamposConstructor
     )
 }
 
-function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla}){
+function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
 
     const [validado, set_validado] = useState(false);
-    const [inputFechaIngresoTrabajo, set_inputFechaIngresoTrabajo] = useState({valor: '', validado: false, textoAyuda: ""});
+    const [inputFechaIngresoTrabajo, set_inputFechaIngresoTrabajo] = useState({ valor: usuarioDetalle ? usuarioDetalle.work_experience : '', validado: false, textoAyuda: "", blur: false });
 
     const [enviandoForm, set_enviandoForm] = useState(false);
     
@@ -2507,65 +2846,61 @@ function FormCambiarClave({cerrar, reiniciarpantalla}){
     )
 }
 
-function FormCambiarBanco({cerrar, reiniciarpantalla, apiCamposConstructor}){
+
+
+function FormCambiarBanco({cerrar, reiniciarpantalla, apiCamposConstructor, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
 
     const [validado, set_validado] = useState(false);
 
-    const [inputCuentaBanco, set_inputCuentaBanco] = useState({valor: '', validado: false, textoAyuda: "", blur: false});
-    const [inputBanco, set_inputBanco] = useState({valor: '', validado: false, textoAyuda: "", blur: false});
+    const [inputCuentaBanco, set_inputCuentaBanco] = useState({valor: usuarioDetalle ? usuarioDetalle.account_number : '0', validado: false, textoAyuda: "", blur: false}) 
+    const [inputBanco, set_inputBanco] = useState({ valor: usuarioDetalle && usuarioDetalle.bank ? usuarioDetalle.bank : '0', validado: false, textoAyuda: "", blur: false });
 
     const [errorAjax, set_errorAjax] = useState(false);
     
-    // const [inputPass2, set_inputPass2] = useState({valor: '', validado: false, textoAyuda: "", blur: false});
-
     const [enviandoForm, set_enviandoForm] = useState(false);
 
-    function handleChange_inputBanco(event){
-        let valor = event.target.value;
-        let validado = false;
-        let texto = "Seleccione una opción.";
-        if(valor.length >= 1){
-            validado = true;
-            texto = "";
-        }
+    const handleChange_inputBanco = (event) => {
         set_inputBanco({
-            validado: validado,
-            valor: valor,
-            textoAyuda: texto,
-            blur: inputBanco.blur,
+            ...inputBanco,
+            valor: event.target.value,
+            validado: true
         });
     }
 
-    function handleChange_inputCuentaBanco(event){
-        let valor = event.target.value;
-        let validado = false;
-        let texto = "Solo números.";
-        if(valor.match(/^[0-9]+$/)){
-            validado = true;
-            texto = "";
-        }
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (usuarioDetalle && usuarioDetalle.bank) {
+                set_inputBanco(inputBanco => ({
+                    ...inputBanco,
+                    valor: usuarioDetalle.bank,
+                    validado: true
+                }));
+            }
+        }, 500); // 5000 milisegundos = 5 segundos
+    
+        // Limpia el timeout cuando el componente se desmonta
+        return () => clearTimeout(timeout);
+    }, [usuarioDetalle]);
+
+    const handleChange_inputCuentaBanco = (event) => {
         set_inputCuentaBanco({
-            validado: validado,
-            valor: valor,
-            textoAyuda: texto,
-            blur: inputCuentaBanco.blur,
+            ...inputCuentaBanco,
+            valor: event.target.value,
+            validado: true
         });
     }
 
- 
-
-    useEffect(()=>{
-        if(inputCuentaBanco?.validado && inputBanco.validado){
+    useEffect(() => {
+        if (inputBanco.validado && inputCuentaBanco.validado) {
             set_validado(true);
-        }else{
+        } else {
             set_validado(false);
         }
-        // eslint-disable-next-line
-    },[inputCuentaBanco, inputBanco]);
+    }, [inputBanco, inputCuentaBanco]);
 
-    function guardarDatos(){
+    const guardarDatos = () => {
         set_enviandoForm(true);
         axios.request({
             url: "https://app.arani.hn/api/app/putProfile.php",
@@ -2597,6 +2932,49 @@ function FormCambiarBanco({cerrar, reiniciarpantalla, apiCamposConstructor}){
         });
     }
 
+    const cargarCuentaBanco = () => {
+        axios.request({
+            url: "https://app.arani.hn/api/app/get_bankaccount.php",
+            method: "post",
+            data: {
+                sid: gContext.logeado.token,
+            },
+        })
+        .then((res) => {
+            if (res.data.status === "OK") {
+                console.log('get_bankaccount', res.data.payload?.data);
+
+                let cuentaActiva = false;
+                for (const key in res.data.payload?.data) {
+                    if (Object.hasOwnProperty.call(res.data.payload?.data, key)) {
+                        const element = res.data.payload?.data[key];
+                        if (element.current === '1') {
+                            cuentaActiva = element;
+                        }
+                    }
+                }
+
+                set_inputCuentaBanco({
+                    ...inputCuentaBanco,
+                    valor: cuentaActiva && cuentaActiva.account_number ? cuentaActiva.account_number : '',
+                    validado: true
+                });
+                set_inputBanco({
+                    ...inputBanco,
+                    valor: cuentaActiva && cuentaActiva.bank ? cuentaActiva.bank : '',
+                    validado: true
+                });
+            }
+        }).catch(err => {
+            console.log(err.message);
+        });
+    }
+
+    useEffect(() => {
+        cargarCuentaBanco();
+    }, []);
+    
+
     return (
         <Box>
             <Typography variant="h5" sx={{}} >Cambiar cuenta de banco</Typography>
@@ -2613,16 +2991,20 @@ function FormCambiarBanco({cerrar, reiniciarpantalla, apiCamposConstructor}){
                 </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-                <TextField 
-                    helperText={inputCuentaBanco.textoAyuda} 
-                    required value={inputCuentaBanco.valor} 
-                    onBlur={()=>{set_inputCuentaBanco({...inputCuentaBanco, blur: true})}}
-                    onChange={handleChange_inputCuentaBanco} 
-                    error={(!inputCuentaBanco.validado && inputCuentaBanco.blur)} 
-                    autoComplete="off" 
-                    fullWidth 
-                    label={"# de cuenta" }
-                    />
+            <TextField 
+                helperText={inputCuentaBanco.textoAyuda} 
+                required 
+                value={inputCuentaBanco.valor} 
+                onBlur={()=>{set_inputCuentaBanco({...inputCuentaBanco, blur: true})}}
+                onChange={handleChange_inputCuentaBanco} 
+                error={(!inputCuentaBanco.validado && inputCuentaBanco.blur)} 
+                autoComplete="off" 
+                fullWidth 
+                label={"# de cuenta  "}
+                InputLabelProps={{
+                    shrink: true,
+                }}
+            />
                 </Grid>
                 <Grid item xs={12} sm={12}>
                     <Typography variant="body2" sx={{mb: '1rem', color: '#ff4d4d'}} >{errorAjax}</Typography>

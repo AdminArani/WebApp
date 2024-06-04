@@ -119,6 +119,64 @@ function RegistradoCore({todosaliobienfn, usuarioAprobadoManual, datosEnviadosAr
     
     const navigate = useNavigate();
 
+    // INICIO CODIGO ANTIGUO
+
+    // function getApplicationProfile(){
+    //     set_cargandoPage(true);
+    //     axios.request({
+    //         url: "https://app.arani.hn/api/app/getApplicationProfilev2.php",
+    //         method: "post",
+    //         data: {
+    //             sid: gContext.logeado?.token,
+    //           },
+    //     })
+    //     .then((res) => {
+    //         set_cargandoPage(false);
+    //         if(res.data.status === "ER"){
+    //             console.log(res.data.payload.message);
+    //         }
+    //         if(res.data.status === "ERS"){
+    //             localStorage.removeItem('arani_session_id');
+    //             localStorage.removeItem('arani_session_data');
+    //             gContext.set_logeado({estado: false, token: '', data: {}});
+    //         }
+    //         if(res.data.status === "OK"){
+    //             console.log(res.data.payload);
+    //             let productosProcesados = [];
+    //             for (const key in res.data?.payload?.Products) {
+    //                 if (Object.hasOwnProperty.call(res.data?.payload?.Products, key)) {
+    //                     const element = res.data?.payload?.Products[key];
+    //                     if(res.data?.payload?.Products_r?.indexOf(element.ProCod) > -1){
+    //                         productosProcesados.push({...element, puedeAcceder: true});
+    //                         // console.log('Producto habilitado');
+    //                     }else{
+    //                         productosProcesados.push({...element, puedeAcceder: false});
+    //                         // console.log('Producto deshabilitado');
+    //                     }
+    //                 }
+    //             }
+    //             // productosProcesados.sort((a,b)=>a.ProFch=b.ProFch);
+
+
+    //             set_productsArr(productosProcesados);
+    //             set_pricelistData(res.data?.payload?.PriceList);
+
+    //             // console.log('procesado ',productosProcesados);
+    //             // for (const key in res.data?.payload?.PriceList?.data?.pricelistData) {
+    //             //     if (Object.hasOwnProperty.call(res.data?.payload?.PriceList?.data?.pricelistData, key)) {
+    //             //         const element = res.data?.payload?.PriceList?.data?.pricelistData[key];
+    //             //     }
+    //             // }
+    //         }
+            
+    //     }).catch(err => {
+    //         console.log(err.message);
+    //         navigate("/login");
+    //     });
+    // }
+
+    // FIN CODIGO ANTIGUO
+
     function getApplicationProfile(){
         set_cargandoPage(true);
         axios.request({
@@ -126,7 +184,7 @@ function RegistradoCore({todosaliobienfn, usuarioAprobadoManual, datosEnviadosAr
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
-              },
+            },
         })
         .then((res) => {
             set_cargandoPage(false);
@@ -146,25 +204,22 @@ function RegistradoCore({todosaliobienfn, usuarioAprobadoManual, datosEnviadosAr
                         const element = res.data?.payload?.Products[key];
                         if(res.data?.payload?.Products_r?.indexOf(element.ProCod) > -1){
                             productosProcesados.push({...element, puedeAcceder: true});
-                            // console.log('Producto habilitado');
                         }else{
                             productosProcesados.push({...element, puedeAcceder: false});
-                            // console.log('Producto deshabilitado');
                         }
                     }
                 }
-                // productosProcesados.sort((a,b)=>a.ProFch=b.ProFch);
-
-
+    
+                if(productosProcesados.length >= 3) {
+                    const ultimo = productosProcesados.pop();
+                    const penultimo = productosProcesados.pop();
+    
+                    productosProcesados.push(ultimo);
+                    productosProcesados.push(penultimo);
+                }
+    
                 set_productsArr(productosProcesados);
                 set_pricelistData(res.data?.payload?.PriceList);
-
-                // console.log('procesado ',productosProcesados);
-                // for (const key in res.data?.payload?.PriceList?.data?.pricelistData) {
-                //     if (Object.hasOwnProperty.call(res.data?.payload?.PriceList?.data?.pricelistData, key)) {
-                //         const element = res.data?.payload?.PriceList?.data?.pricelistData[key];
-                //     }
-                // }
             }
             
         }).catch(err => {
