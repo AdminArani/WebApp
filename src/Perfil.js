@@ -308,10 +308,14 @@ function Perfil() {
             usuarioDetalle.marital_status &&
             parseInt(usuarioDetalle.income) >= 1 &&
             usuarioDetalle.home_status &&
-            usuarioDetalle.workplace &&
             usuarioDetalle.region &&
             usuarioDetalle.dependents && 
+            usuarioDetalle.dependents_who &&
             usuarioDetalle.education &&
+            usuarioDetalle.workplace &&
+            usuarioDetalle.workplace_position &&
+            usuarioDetalle.work_region &&
+            usuarioDetalle.work_county &&
             usuarioDetalle.work_experience &&
             usuarioDetalle.file1 &&
             usuarioDetalle.file2 &&
@@ -573,7 +577,7 @@ function Perfil() {
                                         (usuarioDetalle.county || '----')+", "+
                                         (usuarioDetalle.city || '----')
                                         } 
-                                        secondary="* Ubicación" />
+                                        secondary="* Ubicación domicilio" />
                                     </ListItemButton>
                                 </List>
                             </Grid>
@@ -786,7 +790,7 @@ function Perfil() {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions className="miDialogoAcciones" style={{display: 'flex', justifyContent: 'center'}}>
-                        <Button className="miDialogoBoton" onClick={handleClose} to="./Main" color="primary" autoFocus style={{background: 'white', alignContent: 'center', fontSize: '12px', borderRadius: '20px', width: '200px'}}>
+                        <Button className="miDialogoBoton" onClick={handleClose} to="/main" color="primary" autoFocus style={{background: 'white', alignContent: 'center', fontSize: '12px', borderRadius: '20px', width: '200px'}}>
                         Inicio
                         </Button>
                     </DialogActions>
@@ -1741,7 +1745,7 @@ function FormEditUbicacion({cerrar, reiniciarpantalla, usuarioDetalleFullR}){
                         required
                         autoComplete="off"
                         fullWidth
-                        label="Referencia"
+                        label="Colonia o barrio"
                         onBlur={()=>{set_referenciaCasa({...referenciaCasa, blur: true})}}
                         value={referenciaCasa.valor}
                         onChange={handleChange_referenciaCasa}
