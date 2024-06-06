@@ -1714,16 +1714,14 @@ function FormEditUbicacion({cerrar, reiniciarpantalla, usuarioDetalleFullR}){
                     </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={12}>
-                    <FormControl>
+                    <FormControl fullWidth>
                         <Autocomplete
                             disablePortal={false}
-                            fullWidth
                             id="combo-box-demo"
                             onChange={(e, newdata)=>handleChange_inputLocalidad(e, newdata.LocCod)}
                             options={usuarioDetalleFullR.ubs.filter(element => element.MunCod === inputMunicipio.valor && element.DepCod === inputDepartamento.valor)}
                             getOptionLabel={(option) => option.LocDsc}
-                            renderInput={(params) => <TextField onBlur={()=>{set_inputLocalidad({...inputLocalidad, blur: true})}} sx={{zIndex: 1000}} {...params} label="Localidad" error={(!inputLocalidad.validado && inputLocalidad.blur)} />}
-                            sx={{ width: 400 }}
+                            renderInput={(params) => <TextField onBlur={()=>{set_inputLocalidad({...inputLocalidad, blur: true})}} sx={{zIndex: 1000}} {...params} label="Colonia o Barrio" error={(!inputLocalidad.validado && inputLocalidad.blur)} />}
                         />
                     </FormControl>
                 </Grid>
@@ -1745,7 +1743,7 @@ function FormEditUbicacion({cerrar, reiniciarpantalla, usuarioDetalleFullR}){
                         required
                         autoComplete="off"
                         fullWidth
-                        label="Colonia o barrio"
+                        label="Edificio o Casa"
                         onBlur={()=>{set_referenciaCasa({...referenciaCasa, blur: true})}}
                         value={referenciaCasa.valor}
                         onChange={handleChange_referenciaCasa}
@@ -1804,6 +1802,43 @@ function FormEditUbicacionTrabajo({cerrar, reiniciarpantalla, usuarioDetalleFull
         });
     }
 
+    const [inputLocalidad, set_inputLocalidad] = useState({valor: '', validado: false, textoAyuda: ""});
+    function handleChange_inputLocalidad(e, newValue){
+        if(!newValue) return false;
+        // console.log(e);
+        // console.log('inputLocalidad', newValue);
+        let valor = newValue;
+        let validado = false;
+        let texto = "Seleccione una opción.";
+        if(valor.length >= 1){
+            validado = true;
+            texto = "";
+        }
+        set_inputLocalidad({
+            validado: validado,
+            valor: valor,
+            textoAyuda: texto,
+            blur: inputLocalidad.blur,
+        });
+    }
+
+    const [referenciaCasa, set_referenciaCasa] = useState({valor: '', validado: false, textoAyuda: ""});
+    function handleChange_referenciaCasa(event){
+        let valor = event.target.value;
+        let validado = false;
+        let texto = "Escriba algo";
+        if(valor.length >= 1){
+            validado = true;
+            texto = "";
+        }
+        set_referenciaCasa({
+            validado: validado,
+            valor: valor,
+            textoAyuda: texto,
+            blur: referenciaCasa.blur,
+        });
+    }
+
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
@@ -1814,6 +1849,8 @@ function FormEditUbicacionTrabajo({cerrar, reiniciarpantalla, usuarioDetalleFull
                 array: {
                     work_region: usuarioDetalleFullR?.deps.find(element => element.DepCod === inputDepartamento.valor).DepDsc,
                     work_county: usuarioDetalleFullR.muns.filter(element => element.DepCod === inputDepartamento.valor).find(element => element.MunCod === inputMunicipio.valor).MunDsc,
+                    work_city: usuarioDetalleFullR.ubs.filter(element => element.MunCod === inputMunicipio.valor && element.DepCod === inputDepartamento.valor).find(element => element.LocCod === inputLocalidad.valor).LocDsc,
+                    workplace_address: referenciaCasa.valor,
                 },
               },
         })
@@ -1867,6 +1904,31 @@ function FormEditUbicacionTrabajo({cerrar, reiniciarpantalla, usuarioDetalleFull
                             renderInput={(params) => <TextField inputProps={params.inputProps} onBlur={()=>{set_inputMunicipio({...inputMunicipio, blur: true})}} sx={{zIndex: 1000}} {...params} label="Municipio" error={(!inputMunicipio.validado && inputMunicipio.blur)} />}
                         />
                     </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                        <Autocomplete
+                            disablePortal={false}
+                            id="combo-box-demo"
+                            onChange={(e, newdata)=>handleChange_inputLocalidad(e, newdata.LocCod)}
+                            options={usuarioDetalleFullR.ubs.filter(element => element.MunCod === inputMunicipio.valor && element.DepCod === inputDepartamento.valor)}
+                            getOptionLabel={(option) => option.LocDsc}
+                            renderInput={(params) => <TextField onBlur={()=>{set_inputLocalidad({...inputLocalidad, blur: true})}} sx={{zIndex: 1000}} {...params} label="Colonia o Barrio" error={(!inputLocalidad.validado && inputLocalidad.blur)} />}
+                        />
+                    </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        required
+                        autoComplete="off"
+                        fullWidth
+                        label="Edificio o Casa"
+                        onBlur={()=>{set_referenciaCasa({...referenciaCasa, blur: true})}}
+                        value={referenciaCasa.valor}
+                        onChange={handleChange_referenciaCasa}
+                        error={(!referenciaCasa.validado && referenciaCasa.blur)} 
+                        helperText={referenciaCasa.textoAyuda} 
+                        />
                 </Grid>
                 <Grid item xs={12} sm={12}>
                     <Button disabled={(validado && !enviandoForm)?false:true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }} >{(enviandoForm)?"Enviando....":"Guardar cambios"}</Button>

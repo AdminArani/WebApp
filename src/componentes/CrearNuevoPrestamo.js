@@ -348,7 +348,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     useEffect(() => {
         function factura(){
             axios.request({
-                url: "https://app.arani.hn/api/app/getPrueba1.php",
+                url: "https://app.arani.hn/api/app/getFactura.php",
                 method: "post",
                 data: {
                     sid: gContext.logeado?.token,
@@ -492,29 +492,29 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             case 4:
                 return 'Banco Banrural';
             case 5:
-                return 'Banco Banrural';
+                return 'Banco Davivienda';
             case 6:
-                return 'Banco Banrural';
+                return 'Banco de Honduras';
             case 7:
-                return 'Banco Banrural';
+                return 'Banco de los Trabajadores';
             case 8:
-                return 'Banco Banrural';
+                return 'Banco de Occidente';
             case 9:
-                return 'Banco Banrural';
+                return 'Banco del Pais';
             case 10:
-                return 'Banco Banrural';
+                return 'Banco Ficensa';
             case 11:
-                return 'Banco Banrural';
+                return 'Banco Hondureño del Café';
             case 12:
-                return 'Banco Banrural';
+                return 'Banco Lafise';
             case 13:
-                return 'Banco Banrural';
+                return 'Banco Popular';
             case 14:
-                return 'Banco Banrural';
+                return 'Banco Promerica';
             case 15:
-                return 'Banco Banrural';
+                return 'Banco Ficohsa';
             case 16:
-                return 'Banco Banrural';
+                return 'Tigo Money';
             default:
                 return 'Banco No Registrado';
         }
@@ -634,15 +634,22 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                     textAlign: 'center',
                                     alignItems: 'center',
                                     color: 'white',
-                                    height: '30px',
-                                    width: '25%',
+                                    height: '40px',
+                                    width: '35%',
                                     marginTop: '10px',
-                                    fontSize: '10px',
+                                    fontSize: '12px',
                                     boxShadow: 'none',
                                     border: '1px solid grey',
                                     borderRadius: '20px',
                                     textTransform: 'none',
                                     marginLeft: '10px',
+                                    padding: '4px',
+                                    fontWeight: 'bold',
+                                    '@media (max-width:600px)': { 
+                                        width: '50%',
+                                        fontSize: '16px',
+                                        height: '40px', 
+                                    }
                             }}
                         >
                             Ir a mi perfil
@@ -658,33 +665,33 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             
                 <Grid sx={{mt: 1, mb: 1}} container spacing={3} style={{padding: '25px'}}>
                     <Grid item xs={12} sm={6} style={{display: 'flex', alignItems: 'flex-start'}}>
-                    <Typography variant="h6" style={{fontWeight: 'bold', marginRight: '20px', marginTop: '10px'}}>1.</Typography>
-                    <TextField 
-                        error={inputCantidadDinero.valor && !inputCantidadDinero.validado}
-                        helperText={!inputCantidadDinero.valor ? inputCantidadDinero.textoAyuda : (!inputCantidadDinero.validado ? inputCantidadDinero.textoAyuda : '')}
-                        required value={inputCantidadDinero.valor} 
-                        onChange={handleChange_inputCantidadDinero} 
-                        autoComplete="off" 
-                        fullWidth 
-                        label="Cantidad de dinero" 
-                        variant="outlined"
-                        InputProps={{
-                            startAdornment: inputCantidadDinero.valor && <InputAdornment position="start"><Typography style={{fontSize: '13px', color: 'black', marginLeft: '0px'}}>Lps.</Typography></InputAdornment>,
-                            style: {
-                                color: (inputCantidadDinero.valor && !inputCantidadDinero.validado && yaIntentoEnviar) ? 'red' : 'black',
-                                marginTop: '10px',
-                                width: '90%',
-                                height: '30px',
-                                borderRadius: '20px',
-                                fontSize: '12px',
-                            }
-                        }}
-                        InputLabelProps={{
-                            style: {
-                                fontSize: '12px',
-                            },
-                        }}
-                    />
+                        <Typography variant="h6" style={{fontWeight: 'bold', marginRight: '20px', marginTop: '10px'}}>1.</Typography>
+                        <TextField 
+                            error={inputCantidadDinero.valor && !inputCantidadDinero.validado}
+                            helperText={!inputCantidadDinero.valor ? inputCantidadDinero.textoAyuda : (!inputCantidadDinero.validado ? inputCantidadDinero.textoAyuda : '')}
+                            required value={inputCantidadDinero.valor} 
+                            onChange={handleChange_inputCantidadDinero} 
+                            autoComplete="off" 
+                            fullWidth 
+                            label="Cantidad de dinero" 
+                            variant="outlined"
+                            InputProps={{
+                                startAdornment: inputCantidadDinero.valor && <InputAdornment position="start"><Typography style={{fontSize: '13px', color: 'black', marginLeft: '0px'}}>Lps.</Typography></InputAdornment>,
+                                style: {
+                                    color: (inputCantidadDinero.valor && !inputCantidadDinero.validado && yaIntentoEnviar) ? 'red' : 'black',
+                                    marginTop: '10px',
+                                    width: '90%',
+                                    height: '30px',
+                                    borderRadius: '20px',
+                                    fontSize: '16px',
+                                }
+                            }}
+                            InputLabelProps={{
+                                style: {
+                                    fontSize: '16px',
+                                },
+                            }}
+                        />
                     </Grid>
 
                     <Grid item xs={12} sm={6} style={{borderRadius: '20px', '@media (max-width:600px)': { justifyContent: 'center' }}}> 
@@ -1068,7 +1075,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                         <Box display="flex" justifyContent="center" alignItems="center">
                             <img src={`${process.env.PUBLIC_URL}/logowhite.png`} alt="Logo" height={'100px'} width={'100px'}/>
                         </Box>
-                        <DialogTitle id="alert-dialog-title" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold'}}>{"¡Tu solicitud ha sido enviada!"}</DialogTitle>
+                        <DialogTitle id="alert-dialog-title" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', textAlign: 'center'}}>{"¡Tu solicitud ha sido enviada!"}</DialogTitle>
                         <br/>
                        
                         <DialogContent style={{textAlign: 'center'}}>
