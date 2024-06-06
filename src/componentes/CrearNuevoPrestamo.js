@@ -652,7 +652,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                     }
                             }}
                         >
-                            Ir a mi perfil
+                            Finalizar
                         </Button>
                     </div>
                     
