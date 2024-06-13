@@ -30,14 +30,18 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     const [interesPeriodo, set_interesPeriodo] = useState(false);
     
     const [ventanaContrato, set_ventanaContrato] = useState(false);
+    const [ventanaPagare, set_ventanaPagare] = useState(false);
     const [inputAceptoContrato, set_inputAceptoContrato] = useState(false);
+    const [inputAceptoPagare, set_inputAceptoPagare] = useState(false);
     const [openEditarBanco, set_openEditarBanco] = useState(false);
     const [diasPorPerSel, set_diasPorPerSel] = useState(false);
     const [inputAceptoBanco, set_inputAceptoBanco] = useState(false);
 
     const [usuarioDetalle, set_usuarioDetalle] = useState(false);
     const [contratoRaw, set_contratoRaw] = useState(false);
+    const [pagareRaw, set_pagareRaw] = useState(false);
     const [contratoFinal, set_contratoFinal] = useState(false);
+    const [pagareFinal, set_pagareFinal] = useState(false);
     const [validadoParaContrato, set_validadoParaContrato] = useState(false);
     const [openVentanaCalculadora, set_openVentanaCalculadora] = useState(false);
     
@@ -301,6 +305,76 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         });
     }
 
+    // Pagare logica
+
+    useEffect(() => {
+        var pagareEditado = pagareRaw || '';
+    
+        pagareEditado = pagareEditado.replaceAll('%{realname}%', usuarioDetalle.realname?.toUpperCase());
+        pagareEditado = pagareEditado.replaceAll('%{midname}%', usuarioDetalle.midname?.toUpperCase());
+        pagareEditado = pagareEditado.replaceAll('%{surname}%', usuarioDetalle.surname?.toUpperCase());
+        pagareEditado = pagareEditado.replaceAll('%{midname2}%', usuarioDetalle.midname2?.toUpperCase());
+    
+        pagareEditado = pagareEditado.replaceAll('%{ESTADO CIVIL}%', usuarioDetalle.marital_status?.toUpperCase());
+        pagareEditado = pagareEditado.replaceAll('%{city}%', usuarioDetalle.county?.toUpperCase());
+        pagareEditado = pagareEditado.replaceAll('%{CIUDAD}%', usuarioDetalle.county?.toUpperCase());
+        pagareEditado = pagareEditado.replaceAll('%{region}%', usuarioDetalle.region?.toUpperCase());
+    
+        pagareEditado = pagareEditado.replaceAll('%{person_code}%', usuarioDetalle.person_code?.toUpperCase());
+    
+        pagareEditado = pagareEditado.replaceAll('%{amount}%', numeral(inputCantidadDinero.valor).format('0,0'));
+        pagareEditado = pagareEditado.replaceAll('%{period}%', inputPeriodo.valor);
+        pagareEditado = pagareEditado.replaceAll('%{s_number}%', inputPeriodo.valor / diasPorPerSel);
+    
+        pagareEditado = pagareEditado.replaceAll('%{interest}%%', interesPeriodo + '%');
+        pagareEditado = pagareEditado.replaceAll('%{created_day}%', moment().format('DD'));
+        pagareEditado = pagareEditado.replaceAll('%{NOMBRE MES}%', moment().format('MMMM')?.toUpperCase());
+        pagareEditado = pagareEditado.replaceAll('%{AÑO}%', moment().format('YYYY'));
+    
+        set_pagareFinal(pagareEditado);
+      }, [usuarioDetalle, pagareRaw, inputAceptoPagare, inputCantidadDinero, inputPeriodo, diasPorPerSel, interesPeriodo]);
+    
+      const change_inputVerAceptoPagare = (e) => {
+        set_inputAceptoPagare(e.target.checked);
+        if (e.target.checked) {
+          set_ventanaPagare(true);
+        }
+      };
+    
+      const change_inputAceptoPagare = (e) => {
+        set_inputAceptoPagare(e.target.checked);
+      };
+    
+      const cargarPagareTemplate = () => {
+        axios
+          .request({
+            url: 'https://app.arani.hn/api/app/get_pagarePre.php',
+            method: 'post',
+            data: {
+              sid: gContext.logeado?.token,
+            },
+          })
+          .then((res) => {
+            if (res.data.status === 'OK') {
+              for (const key in res.data.payload.data) {
+                if (Object.hasOwnProperty.call(res.data.payload.data, key)) {
+                  const element = res.data.payload.data[key];
+                  set_pagareRaw(element.document_template);
+                }
+              }
+            }
+          })
+          .catch((err) => {
+            console.log(err.message);
+          });
+      };
+    
+      useEffect(() => {
+        cargarPagareTemplate();
+      }, []);
+
+
+
     function enviarInformacionAlApi() {
         set_enviandoAlApi(true);
         axios.request({
@@ -334,6 +408,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     useEffect(()=>{
         getInformacionUsuario();
         cargarContratoTemplate();
+        cargarPagareTemplate();
         // eslint-disable-next-line
     },[])
 
@@ -842,16 +917,29 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 {parse(contratoFinal||"")}
                             </DialogContent>
                             <DialogActions>
-                                <Button 
-                                    autoFocus 
-                                    onClick={()=>{ set_ventanaContrato(false); set_inputAceptoContrato(true); }}
-                                    style={{ display: 'none' }}
-                                >
-                                    Acepto
-                                </Button>
                                 <div style={{ width: '100%', textAlign: 'center' }}>
                                     <Button onClick={()=>{ set_ventanaContrato(false); set_inputAceptoContrato(false); }}  style={{
                                         marginLeft: '30px',
+                                        backgroundColor: 'white',
+                                        color: '#647cf8',
+                                        height: '30px',
+                                        width: '20%',
+                                        marginTop: '10px',
+                                        fontSize: '12px',
+                                        fontWeight: 'bold',
+                                        boxShadow: 'none',
+                                        border: '1px solid #647cf8',
+                                        borderRadius: '20px',
+                                        textTransform: 'none',
+                                        paddingBottom: '10px',
+                                        }} >
+                                      Regresar
+                                    </Button>
+
+                                    <Button 
+                                    autoFocus 
+                                    onClick={()=>{ set_ventanaContrato(false); set_inputAceptoContrato(true); set_ventanaPagare(true);}}
+                                    style={{marginLeft: '20px',
                                         backgroundColor: '#647cf8',
                                         color: 'white',
                                         height: '30px',
@@ -863,10 +951,58 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                         border: '1px solid grey',
                                         borderRadius: '20px',
                                         textTransform: 'none',
+                                        paddingBottom: '10px',}}
+                                >
+                                    Acepto
+                                </Button>
+                                </div>
+                            </DialogActions>
+                        </Dialog>
+
+                        {/* Modal del pagare */}
+                        <Dialog open={ventanaPagare} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" style={{ textAlign: 'center'}}>
+                            <DialogContent>
+                                {parse(pagareFinal||"")}
+                            </DialogContent>
+                            <DialogActions>
+                                <div style={{ width: '100%', textAlign: 'center' }}>
+                                    <Button onClick={()=>{ set_ventanaPagare(false); set_inputAceptoPagare(false); }}  style={{
+                                        marginLeft: '30px',
+                                        backgroundColor: 'white',
+                                        color: '#647cf8',
+                                        height: '30px',
+                                        width: '20%',
+                                        marginTop: '10px',
+                                        fontSize: '12px',
+                                        fontWeight: 'bold',
+                                        boxShadow: 'none',
+                                        border: '1px solid #647cf8',
+                                        borderRadius: '20px',
+                                        textTransform: 'none',
                                         paddingBottom: '10px',
                                         }} >
-                                      Regresar
+                                    Regresar
                                     </Button>
+
+                                    <Button 
+                                    autoFocus 
+                                    onClick={()=>{ set_ventanaPagare(false); set_inputAceptoPagare(true); }}
+                                    style={{ marginLeft: '20px',
+                                        backgroundColor: '#647cf8',
+                                        color: 'white',
+                                        height: '30px',
+                                        width: '20%',
+                                        marginTop: '10px',
+                                        fontSize: '12px',
+                                        fontWeight: 'bold',
+                                        boxShadow: 'none',
+                                        border: '1px solid grey',
+                                        borderRadius: '20px',
+                                        textTransform: 'none',
+                                        paddingBottom: '10px',}}
+                                >
+                                    Acepto
+                                </Button>
                                 </div>
                             </DialogActions>
                         </Dialog>
@@ -945,6 +1081,53 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 <Checkbox 
                                     checked={inputAceptoContrato} 
                                     onChange={change_inputAceptoContrato} 
+                                    icon={<></>}
+                                    checkedIcon={<span style={{ fontSize: '18px' }}>✔️</span>} 
+                                    style={{
+                                        color: 'green',
+                                        transform: 'scale(0.6)',
+                                        marginTop: '2px',
+                                        marginLeft: '10px',
+                                        marginRight: '5px',
+                                        boxShadow: 'none',
+                                        fontSize: '5px',
+                                    }}
+                                />
+                            }
+                            style={{
+                                marginLeft: '30px',
+                                fontSize: '5px',
+                                backgroundColor: 'white',
+                                height: esPantallaPequeña ? '30%' : '35%',
+                                width: esPantallaPequeña ? '80%' : '40%',
+                                marginTop: '10px',
+                                boxShadow: 'none',
+                                border: '1px solid grey',
+                                borderRadius: '20px',
+                                textTransform: 'none',
+                            }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.backgroundColor = 'black';
+                                e.currentTarget.style.color = 'white';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.backgroundColor = 'white';
+                                e.currentTarget.style.color = 'black';
+                            }}
+                        />
+
+                        {/* label pagare */}
+                        <FormControlLabel
+                            disabled={!validadoParaContrato}
+                            label={
+                                <Typography variant="body2" style={{ fontSize: '12px', marginLeft: esPantallaPequeña ? '60px' : '10px'}}> 
+                                    Acepto el pagare
+                                </Typography>
+                            }
+                            control={
+                                <Checkbox 
+                                    checked={inputAceptoPagare} 
+                                    onChange={change_inputAceptoPagare} 
                                     icon={<></>}
                                     checkedIcon={<span style={{ fontSize: '18px' }}>✔️</span>} 
                                     style={{
