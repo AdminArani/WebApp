@@ -162,7 +162,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         console.log('inputPeriodo.validado', inputPeriodo.validado);
         console.log('inputCantidadDinero.validado', inputCantidadDinero.validado);
         console.log('inputAceptoContrato', inputAceptoContrato);
-        if( inputPeriodo.validado && inputCantidadDinero.validado && inputAceptoContrato && inputAceptoBanco){
+        console.log('inputAceptoPagare', inputAceptoPagare);
+        if( inputPeriodo.validado && inputCantidadDinero.validado && inputAceptoContrato && inputAceptoBanco  && inputAceptoPagare){
             set_botonEnviarHabilitado(true);
         }
 
@@ -171,7 +172,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             set_validadoParaContrato(true);
         }
 
-    }, [inputPeriodo, inputCantidadDinero, inputAceptoContrato, inputAceptoBanco]);
+    }, [inputPeriodo, inputCantidadDinero, inputAceptoContrato, inputAceptoBanco, inputAceptoPagare]);
     
     useEffect(()=>{
 
@@ -252,13 +253,15 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         contratoEditado = contratoEditado.replaceAll('%{period}%', inputPeriodo.valor);
         contratoEditado = contratoEditado.replaceAll('%{s_number}%', inputPeriodo.valor/diasPorPerSel);
 
-        contratoEditado = contratoEditado.replaceAll('%{interest}%%', interesPeriodo+"%");
+        contratoEditado = contratoEditado.replaceAll('%{interest}%%', parseFloat(interesPeriodo).toFixed(2)+"%");
         contratoEditado = contratoEditado.replaceAll('%{created_day}%', moment().format('DD'));
         contratoEditado = contratoEditado.replaceAll('%{NOMBRE MES}%', moment().format('MMMM')?.toUpperCase());
         contratoEditado = contratoEditado.replaceAll('%{AÑO}%', moment().format('YYYY'));
 
-        
+        var fechaFinal = moment().add(inputPeriodo.valor, 'days').format('YYYY-MM-DD');
 
+        contratoEditado = contratoEditado.replaceAll('%{fecha_final}%', fechaFinal);
+        
         // contratoEditado = contratoEditado.replace('%{s_number}%', 'FUNCIONA2');
         // contratoEditado = contratoEditado.replace('%{s_amount}%', 'FUNCIONA2');
         // contratoEditado = contratoEditado.replace('%{s_amount}%', 'FUNCIONA2');
@@ -326,7 +329,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         pagareEditado = pagareEditado.replaceAll('%{period}%', inputPeriodo.valor);
         pagareEditado = pagareEditado.replaceAll('%{s_number}%', inputPeriodo.valor / diasPorPerSel);
     
-        pagareEditado = pagareEditado.replaceAll('%{interest}%%', interesPeriodo + '%');
+        pagareEditado = pagareEditado.replaceAll('%{interest}%%', parseFloat(interesPeriodo).toFixed(2)+"%");
         pagareEditado = pagareEditado.replaceAll('%{created_day}%', moment().format('DD'));
         pagareEditado = pagareEditado.replaceAll('%{NOMBRE MES}%', moment().format('MMMM')?.toUpperCase());
         pagareEditado = pagareEditado.replaceAll('%{AÑO}%', moment().format('YYYY'));
@@ -614,6 +617,20 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         }
         // eslint-disable-next-line
     }, [inputCuentaBanco, inputBanco]);
+
+    const botones = [
+    {
+        label: "Acepto el contrato",
+        checked: inputAceptoContrato,
+        onChange: change_inputAceptoContrato
+    },
+    {
+        label: "Acepto el pagare",
+        checked: inputAceptoPagare,
+        onChange: change_inputAceptoPagare
+    }
+    
+];
 
     return (
         <Box style={{
@@ -1018,14 +1035,14 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                         <Grid item xs={12} style={{display: 'flex', fontSize: '10px'}}>
                             <Typography variant="h6" style={{fontWeight: 'bold', marginRight: '20px', marginTop: '10px'}}>3.</Typography>
                             <Typography variant="body1" style={{marginTop: '20px', fontSize: '14px'}}>
-                                Necesitamos tu aprobación para el contrato del préstamo
+                                Necesitamos tu aprobación para el contrato y pagare del préstamo
                             </Typography>
                         </Grid>
                         <FormControlLabel
                             disabled={!validadoParaContrato}
                             label={
-                                <Typography variant="body2" align="center" style={{ fontSize: '12px', marginLeft: esPantallaPequeña ? '90px' : '60px'}}> 
-                                    Ver contrato 
+                                <Typography variant="body2" align="center" style={{ fontSize: '12px', marginLeft: esPantallaPequeña ? '70px' : '60px'}}> 
+                                    Ver contrato y pagare
                                 </Typography>
                                 }
                             control={
@@ -1069,99 +1086,117 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                             }}
                             
                         />
+                        
+
+                        {/* Acepto pagare y contrato inicio */}
+                        <>
+                        <FormControlLabel
+                            style={{ display: 'none' }} 
+                            disabled={!validadoParaContrato}
+                            label={
+                            <Typography variant="body2" style={{ fontSize: '12px', marginLeft: esPantallaPequeña ? '60px' : '10px' }}>
+                                Acepto el contrato
+                            </Typography>
+                            }
+                            control={
+                            <Checkbox 
+                                checked={inputAceptoContrato} 
+                                onChange={(event) => change_inputAceptoContrato(event)} 
+                                icon={<></>}
+                                checkedIcon={<span style={{ fontSize: '18px' }}>✔️</span>} 
+                                style={{
+                                color: 'green',
+                                transform: 'scale(0.6)',
+                                marginTop: '2px',
+                                marginLeft: '10px',
+                                marginRight: '5px',
+                                boxShadow: 'none',
+                                fontSize: '5px',
+                                }}
+                            />
+                            }
+                        />
+
+                        <FormControlLabel
+                            style={{ display: 'none' }} 
+                            disabled={!validadoParaContrato}
+                            label={
+                            <Typography variant="body2" style={{ fontSize: '12px', marginLeft: esPantallaPequeña ? '60px' : '10px' }}>
+                                Acepto el pagare
+                            </Typography>
+                            }
+                            control={
+                            <Checkbox 
+                                checked={inputAceptoPagare} 
+                                onChange={(event) => change_inputAceptoPagare(event)} 
+                                icon={<></>}
+                                checkedIcon={<span style={{ fontSize: '18px' }}>✔️</span>} 
+                                style={{
+                                color: 'green',
+                                transform: 'scale(0.6)',
+                                marginTop: '2px',
+                                marginLeft: '10px',
+                                marginRight: '5px',
+                                boxShadow: 'none',
+                                fontSize: '5px',
+                                }}
+                            />
+                            }
+                        />
 
                         <FormControlLabel
                             disabled={!validadoParaContrato}
                             label={
-                                <Typography variant="body2" style={{ fontSize: '12px', marginLeft: esPantallaPequeña ? '60px' : '10px'}}> 
-                                    Acepto el contrato
-                                </Typography>
+                            <Typography variant="body2" style={{ fontSize: '12px', padding: '2px', marginLeft: esPantallaPequeña ? '60px' : '10px' }}>
+                                Acepto contrato y pagare
+                            </Typography>
                             }
                             control={
-                                <Checkbox 
-                                    checked={inputAceptoContrato} 
-                                    onChange={change_inputAceptoContrato} 
-                                    icon={<></>}
-                                    checkedIcon={<span style={{ fontSize: '18px' }}>✔️</span>} 
-                                    style={{
-                                        color: 'green',
-                                        transform: 'scale(0.6)',
-                                        marginTop: '2px',
-                                        marginLeft: '10px',
-                                        marginRight: '5px',
-                                        boxShadow: 'none',
-                                        fontSize: '5px',
-                                    }}
-                                />
+                            <Checkbox 
+                                checked={inputAceptoContrato && inputAceptoPagare} 
+                                onChange={(event) => {
+                                const isChecked = event.target.checked;
+                                change_inputAceptoContrato({ target: { checked: isChecked } });
+                                change_inputAceptoPagare({ target: { checked: isChecked } });
+                                }} 
+                                icon={<></>}
+                                checkedIcon={<span style={{ fontSize: '18px' }}>✔️</span>} 
+                                style={{
+                                color: 'green',
+                                transform: 'scale(0.6)',
+                                marginTop: '2px',
+                                marginLeft: '10px',
+                                marginRight: '5px',
+                                boxShadow: 'none',
+                                fontSize: '5px',
+                                }}
+                            />
                             }
                             style={{
-                                marginLeft: '30px',
-                                fontSize: '5px',
-                                backgroundColor: 'white',
-                                height: esPantallaPequeña ? '30%' : '35%',
-                                width: esPantallaPequeña ? '80%' : '40%',
-                                marginTop: '10px',
-                                boxShadow: 'none',
-                                border: '1px solid grey',
-                                borderRadius: '20px',
-                                textTransform: 'none',
+                            marginLeft: '30px',
+                            fontSize: '5px',
+                            backgroundColor: 'white',
+                            height: esPantallaPequeña ? '30%' : '35%',
+                            width: esPantallaPequeña ? '80%' : '40%',
+                            marginTop: '10px',
+                            boxShadow: 'none',
+                            border: '1px solid grey',
+                            borderRadius: '20px',
+                            textTransform: 'none',
                             }}
                             onMouseOver={(e) => {
-                                e.currentTarget.style.backgroundColor = 'black';
-                                e.currentTarget.style.color = 'white';
+                            e.currentTarget.style.backgroundColor = 'black';
+                            e.currentTarget.style.color = 'white';
                             }}
                             onMouseOut={(e) => {
-                                e.currentTarget.style.backgroundColor = 'white';
-                                e.currentTarget.style.color = 'black';
+                            e.currentTarget.style.backgroundColor = 'white';
+                            e.currentTarget.style.color = 'black';
                             }}
                         />
+                        </>
+                        {/* Acepto pagare y contrato fin */}
 
-                        {/* label pagare */}
-                        <FormControlLabel
-                            disabled={!validadoParaContrato}
-                            label={
-                                <Typography variant="body2" style={{ fontSize: '12px', marginLeft: esPantallaPequeña ? '60px' : '10px'}}> 
-                                    Acepto el pagare
-                                </Typography>
-                            }
-                            control={
-                                <Checkbox 
-                                    checked={inputAceptoPagare} 
-                                    onChange={change_inputAceptoPagare} 
-                                    icon={<></>}
-                                    checkedIcon={<span style={{ fontSize: '18px' }}>✔️</span>} 
-                                    style={{
-                                        color: 'green',
-                                        transform: 'scale(0.6)',
-                                        marginTop: '2px',
-                                        marginLeft: '10px',
-                                        marginRight: '5px',
-                                        boxShadow: 'none',
-                                        fontSize: '5px',
-                                    }}
-                                />
-                            }
-                            style={{
-                                marginLeft: '30px',
-                                fontSize: '5px',
-                                backgroundColor: 'white',
-                                height: esPantallaPequeña ? '30%' : '35%',
-                                width: esPantallaPequeña ? '80%' : '40%',
-                                marginTop: '10px',
-                                boxShadow: 'none',
-                                border: '1px solid grey',
-                                borderRadius: '20px',
-                                textTransform: 'none',
-                            }}
-                            onMouseOver={(e) => {
-                                e.currentTarget.style.backgroundColor = 'black';
-                                e.currentTarget.style.color = 'white';
-                            }}
-                            onMouseOut={(e) => {
-                                e.currentTarget.style.backgroundColor = 'white';
-                                e.currentTarget.style.color = 'black';
-                            }}
-                        />
+
                     </Grid>
 
                     <br/>
