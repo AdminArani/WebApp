@@ -37,7 +37,7 @@ function Contrato(){
 
     function getContrato(){
         axios.request({
-            url: "https://app.arani.hn/api/app/get_contract.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/get_contract.php`,
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -63,7 +63,7 @@ function Contrato(){
     const firmarContrato = ()=>{
         set_cargandoC(true);
         axios.request({
-            url: "https://app.arani.hn/api/app/post_contract_sign.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/post_contract_sign.php`,
             method: "post",
             data: {
                 sid: gContext.logeado.token,

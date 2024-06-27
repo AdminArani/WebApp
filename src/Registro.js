@@ -329,7 +329,7 @@ function VerticalLinearStepper2(){
     const validarTel = () =>{
         set_enviandoSMSTel(true);
         axios.request({
-            url: "https://app.arani.hn/api/app/otp_cre.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/otp_cre.php`,
             method: "post",
             withCredentials: true,
             data: {
@@ -392,7 +392,7 @@ function VerticalLinearStepper2(){
 
     const fnValidarCodigoSMS = ()=>{
         axios.request({
-            url: "https://app.arani.hn/api/app/otp_cmp.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/otp_cmp.php`,
             method: "post",
             withCredentials: true,
             data: {
@@ -429,7 +429,7 @@ function VerticalLinearStepper2(){
 
     const getDatosExternos = (ID)=>{
         axios.request({
-            url: "https://app.arani.hn/api/app/getDNI.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/getDNI.php`,
             method: "post",
             data: {
                 ID: ID,
@@ -500,7 +500,7 @@ function VerticalLinearStepper2(){
     const enviarARegistroApi = ()=>{
         set_enviandoDataFinal(true);
         axios.request({
-            url: "https://app.arani.hn/api/app/register.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/register.php`,
             method: "post",
             withCredentials: true,
             data: {

@@ -25,7 +25,7 @@ function RecuperarPass(){
         set_cargando(true);
         axios
         .request({
-            url: "https://app.arani.hn/api/app/recovery.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/recovery.php`,
             method: "post",
             withCredentials: true,
             data: {

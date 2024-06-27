@@ -23,7 +23,7 @@ function Pagare(){
 
     function getPagare(){
         axios.request({
-            url: "https://app.arani.hn/api/app/get_pagare.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/get_pagare.php`,
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -47,7 +47,7 @@ function Pagare(){
     const firmarPagare = ()=>{
         set_cargandoP(true);
         axios.request({
-            url: "https://app.arani.hn/api/app/post_contract_sign.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/post_contract_sign.php`,
             method: "post",
             data: {
                 sid: gContext.logeado.token,

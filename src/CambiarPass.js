@@ -85,7 +85,7 @@ function CambiarPass(){
         set_cargando(true);
         axios
         .request({
-            url: "https://app.arani.hn/api/app/recoverypwd.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/recoverypwd.php`,
             method: "post",
             withCredentials: true,
             data: {

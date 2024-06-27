@@ -182,7 +182,7 @@ function TerminarRegistroForm({todobiencallback, cerrar}) {
         // set_yaIntentoEnviar(true);
         set_cargandoRegister2(true);
         axios.request({
-            url: "https://app.arani.hn/api/app/register2.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/register2.php`,
             method: "post",
             withCredentials: true,
             data: {
@@ -247,7 +247,7 @@ function TerminarRegistroForm({todobiencallback, cerrar}) {
     function cargarDatosSeleccionables(){
 
         axios.request({
-            url: "https://app.arani.hn/api/app/getFieldConstructor.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/getFieldConstructor.php`,
             method: "post",
             data: {
                 sid: gContext.logeado.token,

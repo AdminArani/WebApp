@@ -83,7 +83,7 @@ function Login(){
 
     const enviarSMSLogin = (sid)=>{
         axios.request({
-            url: "https://app.arani.hn/api/app/otp_login.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/otp_login.php`,
             method: "post",
             data: {
                 sid: sid,
@@ -123,7 +123,7 @@ function Login(){
 
     const confirmarSMSLogin = (smsCode)=>{
         axios.request({
-            url: "https://app.arani.hn/api/app/otp_cmp_login.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/otp_cmp_login.php`,
             method: "post",
             data: {
                 OtpLNum: smsCode,
@@ -182,7 +182,7 @@ function Login(){
             set_showContador(false);
         }, 60000);
         axios.request({
-            url: "https://app.arani.hn/api/app/otp_mail.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/otp_mail.php`,
             method: "post",
             data: {
                 sid: sidTemp,

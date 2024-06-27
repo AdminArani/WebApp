@@ -24,7 +24,7 @@ function BarraApp(){
         // console.log('ini');
         const intervalNotis = setInterval(() => {
             axios.request({
-                url: "https://app.arani.hn/api/app/getNotificationNum.php",
+                url: `${process.env.REACT_APP_API_URL}/api/app/getNotificationNum.php`,
                 method: "post",
                 data: {
                     sid: gContext.logeado?.token,
@@ -96,7 +96,7 @@ function Notificaciones({chstdopen}){
     function cargarnotificaciones(){
         set_cargando(true);
         axios.request({
-            url: "https://app.arani.hn/api/app/getNotification.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/getNotification.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -124,7 +124,7 @@ function Notificaciones({chstdopen}){
 
     function eliminarNotificacion(id){
         axios.request({
-            url: "https://app.arani.hn/api/app/delNotification.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/delNotification.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,

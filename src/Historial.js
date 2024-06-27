@@ -25,7 +25,7 @@ function Historial() {
         
         set_cargando(true);
         axios.request({
-            url: "https://app.arani.hn/api/app/getCustomerOfferList.php",
+            url: `${process.env.REACT_APP_API_URL}/api/app/getCustomerOfferList.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
