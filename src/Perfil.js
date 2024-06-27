@@ -2413,17 +2413,19 @@ function FormEditGradoEducativo({cerrar, reiniciarpantalla, apiCamposConstructor
 function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
 
     const gContext = useContext(AppContext);
-
     const [validado, set_validado] = useState(false);
-    const [inputFechaIngresoTrabajo, set_inputFechaIngresoTrabajo] = useState({ valor: usuarioDetalle ? usuarioDetalle.work_experience : '', validado: false, textoAyuda: "", blur: false });
-
+    const [inputFechaIngresoTrabajo, set_inputFechaIngresoTrabajo] = useState({
+        valor: gContext.usuarioDetalle ? gContext.usuarioDetalle.work_experience : '',
+        validado: false,
+        textoAyuda: "",
+        blur: false
+    });
     const [enviandoForm, set_enviandoForm] = useState(false);
-    
 
-    function handleChange_inputFechaIngresoTrabajo(nuevoValor){
+    function handleChange_inputFechaIngresoTrabajo(nuevoValor) {
         let valor = nuevoValor;
         let validado = false;
-        if(nuevoValor?.$d){
+        if (nuevoValor?.$d) {
             validado = true;
         }
         set_inputFechaIngresoTrabajo({
@@ -2433,40 +2435,66 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
         });
     }
 
-    useEffect(()=>{
-        if(inputFechaIngresoTrabajo?.validado){
+    useEffect(() => {
+        if (inputFechaIngresoTrabajo?.validado) {
             set_validado(true);
-        }else{
+        } else {
             set_validado(false);
         }
-        // eslint-disable-next-line
-    },[inputFechaIngresoTrabajo]);
+    }, [inputFechaIngresoTrabajo]);
 
-    function guardarDatos(){
+    function formatFecha(fecha) {
+        if (fecha?.$d) {
+            const date = new Date(fecha.$d);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        return fecha; // Return the raw value if it's already formatted
+    }
+
+    function guardarDatos() {
+        if (!validado) {
+            console.log('Datos no válidos, no se puede enviar el formulario');
+            return;
+        }
+
         set_enviandoForm(true);
+        const fechaFormateada = formatFecha(inputFechaIngresoTrabajo.valor);
+        console.log('Enviando datos:', {
+            sid: gContext.logeado?.token,
+            array: {
+                work_experience: fechaFormateada
+            }
+        });
+
         axios.request({
             url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
                 array: {
-                    work_experience: inputFechaIngresoTrabajo.valor
+                    work_experience: fechaFormateada
                 },
-              },
+            },
         })
         .then((res) => {
             set_enviandoForm(false);
-            if(res.data.status === "ER"){
+            console.log('Respuesta de la API:', res.data);
+            if (res.data.status === "ER") {
+                console.log('Error en la API:', res.data);
             }
-            if(res.data.status === "ERS"){
+            if (res.data.status === "ERS") {
                 localStorage.removeItem('arani_session_id');
                 gContext.set_logeado({estado: false, token: ''});
             }
-            if(res.data.status === "OK"){
+            if (res.data.status === "OK") {
                 reiniciarpantalla();
             }
         }).catch(err => {
-            console.log(err.message);
+            set_enviandoForm(false);
+            console.log('Error en la petición:', err.message);
         });
     }
     

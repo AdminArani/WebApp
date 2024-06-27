@@ -15,6 +15,7 @@ import { useTheme } from "@emotion/react";
 import numeral from "numeral";
 import parse from "html-react-parser";
 import moment from "moment";
+import { NumerosALetras } from 'numero-a-letras';
 
 function Formulario({cerrarVentana, params, todobiencallback}) {
     const gContext = useContext(AppContext);
@@ -216,6 +217,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
             // Sacamos el interes por periodo
             var interesPeriodo = params.pricelistData.PriInt;
+            console.log('interesPeriodo', interesPeriodo);
             if(tipo === 'semanal') set_interesPeriodo((interesPeriodo/52).toFixed(10));
             if(tipo === 'quincenal') set_interesPeriodo((interesPeriodo/26).toFixed(10));
             if(tipo === 'mensual') set_interesPeriodo((interesPeriodo/12).toFixed(10));
@@ -224,6 +226,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     // eslint-disable-next-line
     },[params]);
 
+    
 
     useEffect(()=>{
         
@@ -249,9 +252,26 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         
         contratoEditado = contratoEditado.replaceAll('%{person_code}%', usuarioDetalle.person_code?.toUpperCase());
 
-        contratoEditado = contratoEditado.replaceAll('%{amount}%', numeral(inputCantidadDinero.valor).format('0,0'));
+        let cantidadEnLetras = NumerosALetras(inputCantidadDinero.valor, 'lempiras');
+        cantidadEnLetras = cantidadEnLetras.replace(/\(/g, '').replace(/\)/g, '').replace('Pesos', '').replace('M.N.', 'Lempiras');
+        contratoEditado = contratoEditado.replaceAll('%{amount}%', `${cantidadEnLetras} (${numeral(inputCantidadDinero.valor).format('0,0')} Lempiras)`);
+
         contratoEditado = contratoEditado.replaceAll('%{period}%', inputPeriodo.valor);
         contratoEditado = contratoEditado.replaceAll('%{s_number}%', inputPeriodo.valor/diasPorPerSel);
+
+        let tipoDePago;
+
+        if (diasPorPerSel === 7) {
+            tipoDePago = 'semanal';
+        } else if (diasPorPerSel === 15) {
+            tipoDePago = 'quincenal';
+        } else if (diasPorPerSel === 30) {
+            tipoDePago = 'mensual';
+        } else {
+            tipoDePago = 'desconocido';
+        }
+
+        contratoEditado = contratoEditado.replaceAll('%{payment_type}%', tipoDePago.toUpperCase());
 
         contratoEditado = contratoEditado.replaceAll('%{interest}%%', parseFloat(interesPeriodo).toFixed(2)+"%");
         contratoEditado = contratoEditado.replaceAll('%{created_day}%', moment().format('DD'));
@@ -261,6 +281,25 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         var fechaFinal = moment().add(inputPeriodo.valor, 'days').format('YYYY-MM-DD');
 
         contratoEditado = contratoEditado.replaceAll('%{fecha_final}%', fechaFinal);
+
+        let s_number = inputPeriodo.valor/diasPorPerSel;
+
+        let cargosAdministrativos = 13.8166667 * (s_number - 1); 
+        console.log('cargosAdministrativos', cargosAdministrativos.toFixed(2));
+        
+        let monto = inputCantidadDinero.valor;
+        console.log('monto', monto);
+        
+        let interesTotal = monto  / (interesPeriodo * 100) ;
+        console.log('interesTotal', interesTotal);
+        
+        let cantidadTotal = monto + interesTotal + cargosAdministrativos;
+        console.log('cantidadTotal', cantidadTotal);
+        
+        let cuota = (cantidadTotal / s_number).toFixed(2);
+        console.log('cuota', cuota);
+        
+        contratoEditado = contratoEditado.replaceAll('%{cuota}%', `${numeral(cuota).format('0,0.00')} Lempiras`);
         
         // contratoEditado = contratoEditado.replace('%{s_number}%', 'FUNCIONA2');
         // contratoEditado = contratoEditado.replace('%{s_amount}%', 'FUNCIONA2');
