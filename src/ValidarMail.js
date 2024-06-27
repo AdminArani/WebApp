@@ -22,7 +22,7 @@ function ValidarMail(){
     const peticionValidar = async () => {
         set_cargando(true);
         try {
-            const respuesta = await axios.get(`${process.env.REACT_APP_API_URL}/api/app/validatemail.php?code=${params.token}`);
+            const respuesta = await axios.get(`https://app.arani.hn/api/app/validatemail.php?code=${params.token}`);
             console.log(respuesta.data);
             if(respuesta.data.status === "ER"){
                 if(respuesta.data.payload.status === "CMP"){

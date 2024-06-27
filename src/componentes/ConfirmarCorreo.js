@@ -28,7 +28,7 @@ function ConfirmarCorreo({estadoMail, nombreMail}){
     const reenviarCorreo = () => {
         setEnviadno(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/resendMail.php`,
+            url: "https://app.arani.hn/api/app/resendMail.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,

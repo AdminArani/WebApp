@@ -27,7 +27,7 @@ function Aplicar() {
 
     function validarPerfilEnCore(){ // Para saber si ya esta registrado en el CORE o no
         axios.request({
-            url:  `${process.env.REACT_APP_API_URL}/api/app/getProfile.php`,
+            url: "https://app.arani.hn/api/app/getProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -124,7 +124,7 @@ function RegistradoCore({todosaliobienfn, usuarioAprobadoManual, datosEnviadosAr
     // function getApplicationProfile(){
     //     set_cargandoPage(true);
     //     axios.request({
-
+    //         url: "https://app.arani.hn/api/app/getApplicationProfilev2.php",
     //         method: "post",
     //         data: {
     //             sid: gContext.logeado?.token,
@@ -180,7 +180,7 @@ function RegistradoCore({todosaliobienfn, usuarioAprobadoManual, datosEnviadosAr
     function getApplicationProfile(){
         set_cargandoPage(true);
         axios.request({
-            url:  `${process.env.REACT_APP_API_URL}/api/app/getApplicationProfilev2.php`,
+            url: "https://app.arani.hn/api/app/getApplicationProfilev2.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -230,7 +230,7 @@ function RegistradoCore({todosaliobienfn, usuarioAprobadoManual, datosEnviadosAr
 
     function getPurposeList(){
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getPurposeList.php`,
+            url: "https://app.arani.hn/api/app/getPurposeList.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -261,7 +261,7 @@ function RegistradoCore({todosaliobienfn, usuarioAprobadoManual, datosEnviadosAr
     function validarSiTienePrestamos(){
         set_estacargandoValidacionPrestamo(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getCustomerOfferList.php`,
+            url: "https://app.arani.hn/api/app/getCustomerOfferList.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,

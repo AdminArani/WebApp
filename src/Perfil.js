@@ -90,7 +90,7 @@ function Perfil() {
 
     function validarPerfilEnCore(callback){ // Para saber si ya esta registrado en el CORE o no
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getProfile.php`,
+            url: "https://app.arani.hn/api/app/getProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -121,7 +121,7 @@ function Perfil() {
 
                 // Imagen perfil
                 let t18 = res.data.files.find(e=>e.type === "18");
-                if(t18?.dir) set_urlImagenPerfilTerminada(`${process.env.REACT_APP_API_URL}${t18?.dir}`);
+                if(t18?.dir) set_urlImagenPerfilTerminada('https://app.arani.hn'+t18?.dir);
                 
                 console.log('usuarioDetalleFullR.datasend', usuarioDetalleFullR.datasend);
                 console.log('usuarioDetalleFullR', usuarioDetalleFullR);
@@ -139,7 +139,7 @@ function Perfil() {
 
     function calificacion(){ // Para saber si ya esta registrado en el CORE o no
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getCSAS.php`,
+            url: "https://app.arani.hn/api/app/getCSAS.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -173,7 +173,7 @@ function Perfil() {
     // function cargarDatosSeleccionables(){
 
     //     axios.request({
-  
+    //         url: "https://app.arani.hn/api/app/getFieldConstructor.php",
     //         method: "post",
     //         data: {
     //             sid: gContext.logeado.token,
@@ -219,7 +219,7 @@ function Perfil() {
 
     function cargarWallet(){
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getWalletInfo.php`,
+            url: "https://app.arani.hn/api/app/getWalletInfo.php",
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -239,7 +239,7 @@ function Perfil() {
     function cargarDatosSeleccionables(){
 
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getFieldConstructor.php`,
+            url: "https://app.arani.hn/api/app/getFieldConstructor.php",
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -271,7 +271,7 @@ function Perfil() {
 
     const enviarARev = ()=>{
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/send_confirmdata.php`,
+            url: "https://app.arani.hn/api/app/send_confirmdata.php",
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -868,7 +868,7 @@ function FormEditNombres({cerrar, reiniciarpantalla}){
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -983,7 +983,7 @@ function FormEditWorkplacePosition({ cerrar, reiniciarpantalla, usuarioDetalle }
     function guardarDatos() {
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -1066,7 +1066,7 @@ function FormEditIncome({cerrar, reiniciarpantalla, usuarioDetalle}){
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -1160,7 +1160,7 @@ function FormEditTelefono({cerrar, reiniciarpantalla}){
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -1219,7 +1219,7 @@ function FormEditTelefono({cerrar, reiniciarpantalla}){
     const validarTel = () =>{
         set_enviandoSMSTel(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/otp_upd.php`,
+            url: "https://app.arani.hn/api/app/otp_upd.php",
             method: "post",
             withCredentials: true,
             data: {
@@ -1356,7 +1356,7 @@ function FormEditTipoIngreso({cerrar, reiniciarpantalla, apiCamposConstructor, u
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -1483,7 +1483,7 @@ function FormEditEstadoCivil({cerrar, reiniciarpantalla, apiCamposConstructor, u
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -1647,7 +1647,7 @@ function FormEditUbicacion({cerrar, reiniciarpantalla, usuarioDetalleFullR}){
         set_enviandoForm(true);
         // console.log(usuarioDetalleFullR.ubs.filter(element => element.MunCod === inputMunicipio.valor && element.DepCod === inputDepartamento.valor).find(element => element.LocCod === inputLocalidad.valor).LocDsc);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -1842,7 +1842,7 @@ function FormEditUbicacionTrabajo({cerrar, reiniciarpantalla, usuarioDetalleFull
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -1978,7 +1978,7 @@ function FormEditVivienda({cerrar, reiniciarpantalla, apiCamposConstructor, usua
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -2074,7 +2074,7 @@ function FormEditLugarTrabajo({cerrar, reiniciarpantalla, usuarioDetalle}){
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -2163,7 +2163,7 @@ function FormEditNumeroDependientes({cerrar, reiniciarpantalla, usuarioDetalle})
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -2259,7 +2259,7 @@ function FormEditDependeti({cerrar, reiniciarpantalla, usuarioDetalle}){
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -2351,7 +2351,7 @@ function FormEditGradoEducativo({cerrar, reiniciarpantalla, apiCamposConstructor
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -2470,7 +2470,7 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
         });
 
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -2551,7 +2551,10 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
 
 //         console.log('map', t18);
         
-
+//         if(t19?.dir) set_imageFiles1('https://app.arani.hn'+t19?.dir);
+//         if(t20?.dir) set_imageFiles2('https://app.arani.hn'+t20?.dir);
+//         if(t21?.dir) set_imageFiles3('https://app.arani.hn'+t21?.dir);
+//         if(t18?.dir) set_imageFiles4('https://app.arani.hn'+t18?.dir);
 
 //         // eslint-disable-next-line
 //     }, []);
@@ -2569,7 +2572,7 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
 //         formData.append('sid', gContext.logeado?.token);
 
 //         set_cargandoArchivo1(true);
-
+//         axios.post("https://app.arani.hn/api/app/putProfileFile.php", formData, {
 //             headers: {
 //                 'Content-Type': 'multipart/form-data'
 //             },
@@ -2604,7 +2607,7 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
 //         formData.append('sid', gContext.logeado?.token);
 
 //         set_cargandoArchivo2(true);
-
+//         axios.post("https://app.arani.hn/api/app/putProfileFile.php", formData, {
 //             headers: {
 //                 'Content-Type': 'multipart/form-data'
 //             },
@@ -2638,7 +2641,7 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
 //         formData.append('sid', gContext.logeado?.token);
 
 //         set_cargandoArchivo3(true);
-
+//         axios.post("https://app.arani.hn/api/app/putProfileFile.php", formData, {
 //             headers: {
 //                 'Content-Type': 'multipart/form-data'
 //             },
@@ -2673,7 +2676,7 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
 //         formData.append('sid', gContext.logeado?.token);
 
 //         set_cargandoArchivo4(true);
-
+//         axios.post("https://app.arani.hn/api/app/putProfileFile.php", formData, {
 //             headers: {
 //                 'Content-Type': 'multipart/form-data'
 //             },
@@ -2838,7 +2841,7 @@ function FormCambiarClave({cerrar, reiniciarpantalla}){
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/PostResetPassword.php`,
+            url: "https://app.arani.hn/api/app/PostResetPassword.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -2994,7 +2997,7 @@ function FormCambiarBanco({cerrar, reiniciarpantalla, apiCamposConstructor, usua
     const guardarDatos = () => {
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: "https://app.arani.hn/api/app/putProfile.php",
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -3025,7 +3028,7 @@ function FormCambiarBanco({cerrar, reiniciarpantalla, apiCamposConstructor, usua
 
     const cargarCuentaBanco = () => {
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/get_bankaccount.php`,
+            url: "https://app.arani.hn/api/app/get_bankaccount.php",
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -3119,7 +3122,7 @@ function FormEditFile1({reiniciarpantalla, usuarioFiles}){
         
         let t19 = usuarioFiles.find(e=>e.type === "19");
         if(!/\.eu$/.test(t19?.dir)){
-            if(t19?.dir) set_imageFiles1(`${process.env.REACT_APP_API_URL}${t19?.dir}`);
+            if(t19?.dir) set_imageFiles1('https://app.arani.hn'+t19?.dir);
         }
 
         // eslint-disable-next-line
@@ -3138,7 +3141,7 @@ function FormEditFile1({reiniciarpantalla, usuarioFiles}){
         formData.append('sid', gContext.logeado?.token);
 
         set_cargandoArchivo1(true);
-        axios.post(`${process.env.REACT_APP_API_URL}/api/app/putProfileFile.php`, formData, {
+        axios.post("https://app.arani.hn/api/app/putProfileFile.php", formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
@@ -3191,7 +3194,7 @@ function FormEditFile2({reiniciarpantalla, usuarioFiles}){
         console.log('usuarioFiles', usuarioFiles);
         
         let t20 = usuarioFiles.find(e=>e.type === "20");
-        if(t20?.dir) set_imageFiles2(`${process.env.REACT_APP_API_URL}${t20?.dir}`);
+        if(t20?.dir) set_imageFiles2('https://app.arani.hn'+t20?.dir);
 
         // eslint-disable-next-line
     }, []);
@@ -3211,7 +3214,7 @@ function FormEditFile2({reiniciarpantalla, usuarioFiles}){
         formData.append('sid', gContext.logeado?.token);
 
         set_cargandoArchivo2(true);
-        axios.post(`${process.env.REACT_APP_API_URL}/api/app/putProfileFile.php`, formData, {
+        axios.post("https://app.arani.hn/api/app/putProfileFile.php", formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
@@ -3264,7 +3267,7 @@ function FormEditFile3({reiniciarpantalla, usuarioFiles}){
         console.log('usuarioFiles', usuarioFiles);
         
         let t21 = usuarioFiles.find(e=>e.type === "21");
-        if(t21?.dir) set_imageFiles3(`${process.env.REACT_APP_API_URL}${t21?.dir}`);
+        if(t21?.dir) set_imageFiles3('https://app.arani.hn'+t21?.dir);
 
         // eslint-disable-next-line
     }, []);
@@ -3284,7 +3287,7 @@ function FormEditFile3({reiniciarpantalla, usuarioFiles}){
         formData.append('sid', gContext.logeado?.token);
 
         set_cargandoArchivo3(true);
-        axios.post(`${process.env.REACT_APP_API_URL}/api/app/putProfileFile.php`, formData, {
+        axios.post("https://app.arani.hn/api/app/putProfileFile.php", formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
@@ -3337,7 +3340,7 @@ function FormEditFile4({reiniciarpantalla, usuarioFiles}){
         console.log('usuarioFiles', usuarioFiles);
         
         let t18 = usuarioFiles.find(e=>e.type === "18");
-        if(t18?.dir) set_imageFiles4(`${process.env.REACT_APP_API_URL}${t18?.dir}`);
+        if(t18?.dir) set_imageFiles4('https://app.arani.hn'+t18?.dir);
 
         // eslint-disable-next-line
     }, []);
@@ -3358,7 +3361,7 @@ function FormEditFile4({reiniciarpantalla, usuarioFiles}){
         formData.append('sid', gContext.logeado?.token);
 
         set_cargandoArchivo4(true);
-        axios.post(`${process.env.REACT_APP_API_URL}/api/app/putProfileFile.php`, formData, {
+        axios.post("https://app.arani.hn/api/app/putProfileFile.php", formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
