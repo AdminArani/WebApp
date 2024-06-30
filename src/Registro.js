@@ -1,3 +1,4 @@
+import config from './config';
 import { AppBar, Box, Button, Checkbox, Container, Dialog, DialogActions, DialogContent,DialogContentText, DialogTitle, Divider, FormControl, FormHelperText, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, Step, StepContent, StepLabel, Stepper, TextField, Toolbar, Tooltip, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useContext, useEffect, useState } from "react";
@@ -329,7 +330,7 @@ function VerticalLinearStepper2(){
     const validarTel = () =>{
         set_enviandoSMSTel(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/otp_cre.php`,
+            url: `${config.apiUrl}/api/app/otp_cre.php`,
             method: "post",
             withCredentials: true,
             data: {
@@ -392,7 +393,7 @@ function VerticalLinearStepper2(){
 
     const fnValidarCodigoSMS = ()=>{
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/otp_cmp.php`,
+            url: `${config.apiUrl}/api/app/otp_cmp.php`,
             method: "post",
             withCredentials: true,
             data: {
@@ -429,7 +430,7 @@ function VerticalLinearStepper2(){
 
     const getDatosExternos = (ID)=>{
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getDNI.php`,
+            url: `${config.apiUrl}/api/app/getDNI.php`,
             method: "post",
             data: {
                 ID: ID,
@@ -500,7 +501,7 @@ function VerticalLinearStepper2(){
     const enviarARegistroApi = ()=>{
         set_enviandoDataFinal(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/register.php`,
+            url: `${config.apiUrl}/api/app/register.php`,
             method: "post",
             withCredentials: true,
             data: {

@@ -1,3 +1,4 @@
+import config from '../config';
 import Box from "@mui/material/Box";
 // import logoArani from "./images/logoarani.png";
 import React from 'react';
@@ -117,7 +118,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
     function getInformacionUsuario(callback){
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getProfile.php`,
+            url: `${config.apiUrl}/api/app/getProfile.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -326,7 +327,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
     const cargarContratoTemplate = ()=>{
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/get_contractPre.php`,
+            url: `${config.apiUrl}/api/app/get_contractPre.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -390,7 +391,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
       const cargarPagareTemplate = () => {
         axios
           .request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/get_pagarePre.php`,
+            url: `${config.apiUrl}/api/app/get_pagarePre.php`,
             method: 'post',
             data: {
               sid: gContext.logeado?.token,
@@ -420,7 +421,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     function enviarInformacionAlApi() {
         set_enviandoAlApi(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/postOffer.php`,
+            url: `${config.apiUrl}/api/app/postOffer.php`,
             method: "post",
             withCredentials: true,
             data: {
@@ -465,7 +466,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     useEffect(() => {
         function factura(){
             axios.request({
-                url: `${process.env.REACT_APP_API_URL}/api/app/getFactura.php`,
+                url: `${config.apiUrl}/api/app/getFactura.php`,
                 method: "post",
                 data: {
                     sid: gContext.logeado?.token,
@@ -512,7 +513,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
     const cargarCuentaBanco = () => {
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/get_bankaccount.php`,
+            url: `${config.apiUrl}/api/app/get_bankaccount.php`,
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -558,7 +559,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     // Función para obtener la información del usuario
     const fetchInformacionUsuario = (callback) => {
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getProfile.php`,
+            url: `${config.apiUrl}/api/app/getProfile.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -1545,7 +1546,7 @@ function FormCambiarBanco({setOpen}){
 
     function getInformacionUsuario(callback){
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getProfile.php`,
+            url: `${config.apiUrl}/api/app/getProfile.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -1578,7 +1579,7 @@ function FormCambiarBanco({setOpen}){
     const cargarDatosSeleccionables = ()=>{
 
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getFieldConstructor.php`,
+            url: `${config.apiUrl}/api/app/getFieldConstructor.php`,
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -1600,7 +1601,7 @@ function FormCambiarBanco({setOpen}){
     const cargarCuentaBanco = ()=>{
 
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/get_bankaccount.php`,
+            url: `${config.apiUrl}/api/app/get_bankaccount.php`,
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -1656,7 +1657,7 @@ function FormCambiarBanco({setOpen}){
     function guardarDatos(){
         set_enviandoForm(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/putProfile.php`,
+            url: `${config.apiUrl}/api/app/putProfile.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,

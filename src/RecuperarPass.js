@@ -1,3 +1,4 @@
+import config from './config';
 import { Button, Paper, TextField } from "@mui/material";
 import Box from "@mui/material/Box";
 import { Container } from "@mui/system";
@@ -25,7 +26,7 @@ function RecuperarPass(){
         set_cargando(true);
         axios
         .request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/recovery.php`,
+            url: `${config.apiUrl}/api/app/recovery.php`,
             method: "post",
             withCredentials: true,
             data: {

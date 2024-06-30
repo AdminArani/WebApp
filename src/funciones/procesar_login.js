@@ -1,8 +1,9 @@
+import config from '../config';
 import axios from "axios";
 
 export default function procesar_login(usr, pass, okcallback, errorcallback){
     axios.request({
-        url: `${process.env.REACT_APP_API_URL}/api/app/login.php`,
+        url: `${config.apiUrl}/api/app/login.php`,
         method: "post",
         data: {
             UsrUsr: usr || "",

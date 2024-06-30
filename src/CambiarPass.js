@@ -1,3 +1,4 @@
+import config from './config';
 import { Button, FormControl, FormHelperText, Grid, InputAdornment, InputLabel, OutlinedInput, Paper } from "@mui/material";
 import Box from "@mui/material/Box";
 import { Container } from "@mui/system";
@@ -85,7 +86,7 @@ function CambiarPass(){
         set_cargando(true);
         axios
         .request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/recoverypwd.php`,
+            url: `${config.apiUrl}/api/app/recoverypwd.php`,
             method: "post",
             withCredentials: true,
             data: {

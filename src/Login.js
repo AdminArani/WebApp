@@ -1,3 +1,4 @@
+import config from './config';
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "./App.js";
 import Button from "@mui/material/Button";
@@ -83,7 +84,7 @@ function Login(){
 
     const enviarSMSLogin = (sid)=>{
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/otp_login.php`,
+            url: `${config.apiUrl}/api/app/otp_login.php`,
             method: "post",
             data: {
                 sid: sid,
@@ -123,7 +124,7 @@ function Login(){
 
     const confirmarSMSLogin = (smsCode)=>{
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/otp_cmp_login.php`,
+            url: `${config.apiUrl}/api/app/otp_cmp_login.php`,
             method: "post",
             data: {
                 OtpLNum: smsCode,
@@ -182,7 +183,7 @@ function Login(){
             set_showContador(false);
         }, 60000);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/otp_mail.php`,
+            url: `${config.apiUrl}/api/app/otp_mail.php`,
             method: "post",
             data: {
                 sid: sidTemp,

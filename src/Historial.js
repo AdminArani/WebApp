@@ -1,3 +1,4 @@
+import config from './config';
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 // import logoArani from "./images/logoarani.png";
@@ -25,7 +26,7 @@ function Historial() {
         
         set_cargando(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getCustomerOfferList.php`,
+            url: `${config.apiUrl}/api/app/getCustomerOfferList.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,

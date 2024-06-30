@@ -1,3 +1,4 @@
+import config from '../config';
 import { Badge, IconButton, Divider, Menu, Typography, List, ListItem, ListItemText } from "@mui/material";
 import { Box } from "@mui/system";
 import axios from "axios";
@@ -24,7 +25,7 @@ function BarraApp(){
         // console.log('ini');
         const intervalNotis = setInterval(() => {
             axios.request({
-                url: `${process.env.REACT_APP_API_URL}/api/app/getNotificationNum.php`,
+                url: `${config.apiUrl}/api/app/getNotificationNum.php`,
                 method: "post",
                 data: {
                     sid: gContext.logeado?.token,
@@ -96,7 +97,7 @@ function Notificaciones({chstdopen}){
     function cargarnotificaciones(){
         set_cargando(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getNotification.php`,
+            url: `${config.apiUrl}/api/app/getNotification.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -124,7 +125,7 @@ function Notificaciones({chstdopen}){
 
     function eliminarNotificacion(id){
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/delNotification.php`,
+            url: `${config.apiUrl}/api/app/delNotification.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,

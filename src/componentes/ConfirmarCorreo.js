@@ -1,3 +1,4 @@
+import config from '../config';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
@@ -28,7 +29,7 @@ function ConfirmarCorreo({estadoMail, nombreMail}){
     const reenviarCorreo = () => {
         setEnviadno(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/resendMail.php`,
+            url: `${config.apiUrl}/api/app/resendMail.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,

@@ -1,3 +1,4 @@
+import config from './config';
 import { Button, CircularProgress, Paper } from "@mui/material";
 import Box from "@mui/material/Box";
 import { Container } from "@mui/system";
@@ -22,7 +23,7 @@ function ValidarMail(){
     const peticionValidar = async () => {
         set_cargando(true);
         try {
-            const respuesta = await axios.get(`${process.env.REACT_APP_API_URL}/api/app/validatemail.php?code=${params.token}`);
+            const respuesta = await axios.get(`${config.apiUrl}/api/app/validatemail.php?code=${params.token}`);
             console.log(respuesta.data);
             if(respuesta.data.status === "ER"){
                 if(respuesta.data.payload.status === "CMP"){

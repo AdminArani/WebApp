@@ -1,3 +1,4 @@
+import config from './config';
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 // import logoArani from "./images/logoarani.png";
@@ -77,7 +78,7 @@ function Plan() {
 
     function getApplicationProfile(){
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getApplicationProfile.php`,
+            url: `${config.apiUrl}/api/app/getApplicationProfile.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -131,7 +132,7 @@ function Plan() {
         if(cargando) return false;
         set_cargando(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getCustomerOfferList.php`,
+            url: `${config.apiUrl}/api/app/getCustomerOfferList.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -183,7 +184,7 @@ function Plan() {
     function cargarCalendarioPagos(idPrestamo){
         set_cargando(true);
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getBorrowerRepaymentSchedule.php`,
+            url: `${config.apiUrl}/api/app/getBorrowerRepaymentSchedule.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
@@ -253,7 +254,7 @@ function Plan() {
 
     function cargarWallet(){
         axios.request({
-            url: `${process.env.REACT_APP_API_URL}/api/app/getWalletInfo.php`,
+            url: `${config.apiUrl}/api/app/getWalletInfo.php`,
             method: "post",
             data: {
                 sid: gContext.logeado.token,
@@ -291,7 +292,7 @@ function Plan() {
 
         // console.log(pagoseleccionado);
         set_cargandoEnviandoComprobante(true);
-        axios.post(`${process.env.REACT_APP_API_URL}/api/app/send_recipemail.php`, formData, {
+        axios.post(`${config.apiUrl}/api/app/send_recipemail.php`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
