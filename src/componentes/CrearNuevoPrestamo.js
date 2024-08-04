@@ -361,7 +361,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
         if (priCuoTip === 'Cantidad fija') {
             // Si es 'Cantidad fija', usa calculoCuota
-            const calculoCuota = calculoCuota;
             cuota = parseFloat(calculoCuota.toFixed(2));
         } else if (priCuoTip === 'Porcentaje del importe mensual') {
             cuota = CuotaMensualNumerico + cargosAdmExistenteNumerico;
