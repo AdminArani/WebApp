@@ -283,8 +283,9 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             setPriCuo(parseFloat(priCuoRaw) || 0);
         } else if (priCuoTip === 'Porcentaje del importe mensual') {
             // Si es un porcentaje, calcula el monto sobre cantidadDinero
-            const porcentaje = parseFloat(priCuoRaw) || 0;
-            setPriCuo((cantidadDinero * porcentaje) / 100);
+            const porcentajeDecimal = priCuoRaw / 100;
+            setPriCuo(porcentajeDecimal);
+            
         } else {
             // Si el tipo no es válido, establece priCuo en 0 o maneja el error
             setPriCuo(0); // O puedes mostrar un mensaje de error si lo prefieres
@@ -293,7 +294,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         // Calcular cargos administrativos usando PriCuo
         const s_number = inputPeriodo.valor / diasPorPerSel;
         const cargosAdministrativos = priCuo;
-        console.log('cargosAdministrativos', cargosAdministrativos.toFixed(2));
     
         // Calcular interés total
         const monto = parseFloat(inputCantidadDinero.valor);
@@ -317,17 +317,64 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     
         // Calcular cuota
         const calculoCuota = CuotaMensual + CargoAdministrativoxCuota;
-        const cuota =  calculoCuota.toFixed(2);
+        
+
+        // Calcula el valor de calculo administrativo
+        if (priCuoTip === 'Cantidad fija') {
+            // Si es una cantidad fija, usa el valor de priCuoRaw directamente
+            setPriCuo(parseFloat(priCuoRaw) || 0);
+        } else if (priCuoTip === 'Porcentaje del importe mensual') {
+            // Si es un porcentaje, calcula el monto sobre cantidadDinero
+            const porcentajeDecimal = priCuoRaw / 100;
+            setPriCuo(porcentajeDecimal);
+            
+        } else {
+            // Si el tipo no es válido, establece priCuo en 0 o maneja el error
+            setPriCuo(0); // O puedes mostrar un mensaje de error si lo prefieres
+        }
 
         //Variables de la formula 
-        console.log('Monto', monto);
-        console.log('Tasa final', tasaInteresDecimal);
-        console.log('Plazo', inputPeriodo.valor);
-        console.log('Cargo administrativo', cargosAdministrativos);
-        console.log('Numerador', numeradorRedondeado);
-        console.log('Denomidador', denomidadorRedondeado);
-        console.log('Cuota mensual', CuotaMensual);
-        console.log('Cuota', cuota);
+        // console.log('PriCuoTip', priCuoTip);
+        // console.log('PriCuo', priCuo);
+        // console.log('Monto', monto);
+        // console.log('Tasa final', tasaInteresDecimal);
+        // console.log('Plazo', inputPeriodo.valor);
+        // console.log('Cargo administrativo cli nuevo:', cargosAdministrativos);
+        // console.log('Numerador', numeradorRedondeado);
+        // console.log('Denomidador', denomidadorRedondeado);
+        // console.log('Cuota mensual', CuotaMensual.toFixed(2));
+  
+
+        const cargosadminprueba = monto * priCuo/30 * inputPeriodo.valor/s_number.toFixed(2);
+        const cargosAdmExistente = cargosadminprueba.toFixed(1);
+
+
+        const CuotaMensualNumerico = parseFloat(CuotaMensual.toFixed(2));
+        const cargosAdmExistenteNumerico = parseFloat(cargosAdmExistente);
+
+        //const cuotaNuevo =  calculoCuota.toFixed(2);
+
+        //const cuotaExistente = CuotaMensualNumerico + cargosAdmExistenteNumerico;
+        // Calcular la cuota final según el tipo de PriCuoTip
+
+        let cuota;
+
+        if (priCuoTip === 'Cantidad fija') {
+            // Si es 'Cantidad fija', usa calculoCuota
+            const calculoCuota = calculoCuota;
+            cuota = parseFloat(calculoCuota.toFixed(2));
+        } else if (priCuoTip === 'Porcentaje del importe mensual') {
+            cuota = CuotaMensualNumerico + cargosAdmExistenteNumerico;
+        } else {
+            console.log("No hay cuota administrativa");
+            cuota = 0; // Valor por defecto si el tipo de cuota no es reconocido
+        }
+
+        // Actualiza el estado con el valor calculado
+        setCuota(cuota);
+
+        // Imprime en la consola para verificar el resultado
+        // console.log('Cuota:', cuota.toFixed(2));
     
         contratoEditado = contratoEditado.replaceAll('%{cuota}%', `${numeral(cuota).format('0,0.00')} Lempiras`);
     
