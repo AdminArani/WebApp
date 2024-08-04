@@ -290,11 +290,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             setPriCuo(0); // O puedes mostrar un mensaje de error si lo prefieres
         }
 
-        // Imprime en la consola para verificar el resultado
-        console.log('priCuoTip:', priCuoTip);
-        console.log('priCuo:', priCuo);
-        
-
         // Calcular cargos administrativos usando PriCuo
         const s_number = inputPeriodo.valor / diasPorPerSel;
         const cargosAdministrativos = priCuo;
@@ -323,6 +318,16 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         // Calcular cuota
         const calculoCuota = CuotaMensual + CargoAdministrativoxCuota;
         const cuota =  calculoCuota.toFixed(2);
+
+        //Variables de la formula 
+        console.log('Monto', monto);
+        console.log('Tasa final', tasaInteresDecimal);
+        console.log('Plazo', inputPeriodo.valor);
+        console.log('Cargo administrativo', cargosAdministrativos);
+        console.log('Numerador', numeradorRedondeado);
+        console.log('Denomidador', denomidadorRedondeado);
+        console.log('Cuota mensual', CuotaMensual);
+        console.log('Cuota', cuota);
     
         contratoEditado = contratoEditado.replaceAll('%{cuota}%', `${numeral(cuota).format('0,0.00')} Lempiras`);
     
