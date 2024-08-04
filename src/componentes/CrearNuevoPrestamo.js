@@ -219,99 +219,117 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             // Sacamos el interes por periodo
             var interesPeriodo = params.pricelistData.PriInt;
             console.log('interesPeriodo', interesPeriodo);
-            if(tipo === 'semanal') set_interesPeriodo((interesPeriodo/52).toFixed(10));
-            if(tipo === 'quincenal') set_interesPeriodo((interesPeriodo/26).toFixed(10));
+            if(tipo === 'semanal') set_interesPeriodo((interesPeriodo/52.13).toFixed(2));
+            if(tipo === 'quincenal') set_interesPeriodo((interesPeriodo/26.07).toFixed(10));
             if(tipo === 'mensual') set_interesPeriodo((interesPeriodo/12).toFixed(10));
+            //52.13, 26.07 y 12 
         }
 
     // eslint-disable-next-line
     },[params]);
 
-    
+    //hola
+    const [cuota, setCuota] = useState(null);
+    const [priCuo, setPriCuo] = useState(0);
 
-    useEffect(()=>{
-        
+
+    useEffect(() => {
         var contratoEditado = contratoRaw || "";
-        // var contratoEditado = textContrato() || "";
-        
-        // contratoEditado = contratoEditado.replace('%{realname}%', usuarioDetalle.realname);
-        // contratoEditado = contratoEditado.replace('%{midname}%', usuarioDetalle.midname);
-        // contratoEditado = contratoEditado.replace('%{surname}%', usuarioDetalle.surname);
-        // contratoEditado = contratoEditado.replace('%{midname2}%', usuarioDetalle.midname2);
-
-        
-        // contratoEditado = contratoEditado.replaceAll('$$NOMBRE COMPLETO$$', ("<b>"+usuarioDetalle.realname+" "+usuarioDetalle.midname+" "+usuarioDetalle.surname+" "+usuarioDetalle.midname2+"</b>").toUpperCase());
+    
+        // Reemplazos de valores de usuario
         contratoEditado = contratoEditado.replaceAll('%{realname}%', usuarioDetalle.realname?.toUpperCase());
         contratoEditado = contratoEditado.replaceAll('%{midname}%', usuarioDetalle.midname?.toUpperCase());
         contratoEditado = contratoEditado.replaceAll('%{surname}%', usuarioDetalle.surname?.toUpperCase());
         contratoEditado = contratoEditado.replaceAll('%{midname2}%', usuarioDetalle.midname2?.toUpperCase());
-        
         contratoEditado = contratoEditado.replaceAll('%{ESTADO CIVIL}%', usuarioDetalle.marital_status?.toUpperCase());
         contratoEditado = contratoEditado.replaceAll('%{city}%', usuarioDetalle.county?.toUpperCase());
         contratoEditado = contratoEditado.replaceAll('%{CIUDAD}%', usuarioDetalle.county?.toUpperCase());
         contratoEditado = contratoEditado.replaceAll('%{region}%', usuarioDetalle.region?.toUpperCase());
-        
         contratoEditado = contratoEditado.replaceAll('%{person_code}%', usuarioDetalle.person_code?.toUpperCase());
-
+    
+        // Convertir cantidad a letras y formato
         let cantidadEnLetras = NumerosALetras(inputCantidadDinero.valor, 'lempiras');
         cantidadEnLetras = cantidadEnLetras.replace(/\(/g, '').replace(/\)/g, '').replace('Pesos', '').replace('M.N.', 'Lempiras');
         contratoEditado = contratoEditado.replaceAll('%{amount}%', `${cantidadEnLetras} (${numeral(inputCantidadDinero.valor).format('0,0')} Lempiras)`);
-
+    
+        // Reemplazos de valores de contrato
         contratoEditado = contratoEditado.replaceAll('%{period}%', inputPeriodo.valor);
-        contratoEditado = contratoEditado.replaceAll('%{s_number}%', inputPeriodo.valor/diasPorPerSel);
-
+        contratoEditado = contratoEditado.replaceAll('%{s_number}%', (inputPeriodo.valor / diasPorPerSel).toFixed(2));
+    
         let tipoDePago;
-
-        if (diasPorPerSel === 7) {
-            tipoDePago = 'semanal';
-        } else if (diasPorPerSel === 15) {
-            tipoDePago = 'quincenal';
-        } else if (diasPorPerSel === 30) {
-            tipoDePago = 'mensual';
-        } else {
-            tipoDePago = 'desconocido';
-        }
-
+        if (diasPorPerSel === 7) tipoDePago = 'semanal';
+        else if (diasPorPerSel === 15) tipoDePago = 'quincenal';
+        else if (diasPorPerSel === 30) tipoDePago = 'mensual';
+        else tipoDePago = 'desconocido';
+    
         contratoEditado = contratoEditado.replaceAll('%{payment_type}%', tipoDePago.toUpperCase());
-
-        contratoEditado = contratoEditado.replaceAll('%{interest}%%', parseFloat(interesPeriodo).toFixed(2)+"%");
+        contratoEditado = contratoEditado.replaceAll('%{interest}%%', parseFloat(interesPeriodo).toFixed(2) + "%");
         contratoEditado = contratoEditado.replaceAll('%{created_day}%', moment().format('DD'));
         contratoEditado = contratoEditado.replaceAll('%{NOMBRE MES}%', moment().format('MMMM')?.toUpperCase());
         contratoEditado = contratoEditado.replaceAll('%{AÑO}%', moment().format('YYYY'));
-
-        var fechaFinal = moment().add(inputPeriodo.valor, 'days').format('YYYY-MM-DD');
-
+    
+        // Calcular fecha final
+        const fechaFinal = moment().add(inputPeriodo.valor, 'days').format('YYYY-MM-DD');
         contratoEditado = contratoEditado.replaceAll('%{fecha_final}%', fechaFinal);
+    
+        // Obtener el tipo de PriCuoTip y el valor de PriCuo
+        const priCuoTip = params.pricelistData.PriCuoTip || 'Cliente no existe';
+        const priCuoRaw = params.pricelistData.PriCuo || '0';
+        const cantidadDinero = parseFloat(inputCantidadDinero.valor) || 0;
 
-        let s_number = inputPeriodo.valor/diasPorPerSel;
+        // Calcula el valor de priCuo según el tipo
+        if (priCuoTip === 'Cantidad fija') {
+            // Si es una cantidad fija, usa el valor de priCuoRaw directamente
+            setPriCuo(parseFloat(priCuoRaw) || 0);
+        } else if (priCuoTip === 'Porcentaje del importe mensual') {
+            // Si es un porcentaje, calcula el monto sobre cantidadDinero
+            const porcentaje = parseFloat(priCuoRaw) || 0;
+            setPriCuo((cantidadDinero * porcentaje) / 100);
+        } else {
+            // Si el tipo no es válido, establece priCuo en 0 o maneja el error
+            setPriCuo(0); // O puedes mostrar un mensaje de error si lo prefieres
+        }
 
-        let cargosAdministrativos = 13.8166667 * (s_number - 1); 
+        // Imprime en la consola para verificar el resultado
+        console.log('priCuoTip:', priCuoTip);
+        console.log('priCuo:', priCuo);
+        
+
+        // Calcular cargos administrativos usando PriCuo
+        const s_number = inputPeriodo.valor / diasPorPerSel;
+        const cargosAdministrativos = priCuo;
         console.log('cargosAdministrativos', cargosAdministrativos.toFixed(2));
-        
-        let monto = inputCantidadDinero.valor;
-        console.log('monto', monto);
-        
-        let interesTotal = monto  / (interesPeriodo * 100) ;
-        console.log('interesTotal', interesTotal);
-        
-        let cantidadTotal = monto + interesTotal + cargosAdministrativos;
-        console.log('cantidadTotal', cantidadTotal);
-        
-        let cuota = (cantidadTotal / s_number).toFixed(2);
-        console.log('cuota', cuota);
-        
-        contratoEditado = contratoEditado.replaceAll('%{cuota}%', `${numeral(cuota).format('0,0.00')} Lempiras`);
-        
-        // contratoEditado = contratoEditado.replace('%{s_number}%', 'FUNCIONA2');
-        // contratoEditado = contratoEditado.replace('%{s_amount}%', 'FUNCIONA2');
-        // contratoEditado = contratoEditado.replace('%{s_amount}%', 'FUNCIONA2');
-        // contratoEditado = contratoEditado.replace('%{ESTADO CIVIL}%', 'FUNCIONA2');
-        // contratoEditado = contratoEditado.replace('%{interest}%%', 'FUNCIONA2');
-       
+    
+        // Calcular interés total
+        const monto = parseFloat(inputCantidadDinero.valor);
+        const tasaInteresDecimal = parseFloat(interesPeriodo) / 100;
+        const interesTotal = monto * tasaInteresDecimal * s_number;
 
+        // Calcula el numerador
+        const numerador = (1 + tasaInteresDecimal) ** s_number * tasaInteresDecimal;
+        const numeradorRedondeado = numerador.toFixed(9); // Redondea a 9 decimales
+
+        const denomidador = (1 + tasaInteresDecimal) ** s_number - 1;
+        const denomidadorRedondeado = denomidador.toFixed(9); // Redondea a 9 decimales     // Muestra el valor calculado
+
+        //Cuota mensual 
+        const CuotaMensual = monto * (numerador / denomidador);
+
+        const CargoAdministrativoxCuota = cargosAdministrativos / s_number;
+
+        // Calcular monto total
+        const cantidadTotal = monto;
+    
+        // Calcular cuota
+        const calculoCuota = CuotaMensual + CargoAdministrativoxCuota;
+        const cuota =  calculoCuota.toFixed(2);
+    
+        contratoEditado = contratoEditado.replaceAll('%{cuota}%', `${numeral(cuota).format('0,0.00')} Lempiras`);
+    
         set_contratoFinal(contratoEditado);
         // eslint-disable-next-line
-    },[usuarioDetalle, contratoRaw, inputAceptoContrato]);
+    }, [usuarioDetalle, contratoRaw, inputAceptoContrato]);
+    
 
 
     const change_inputVerAceptoContrato = (e)=>{
@@ -351,6 +369,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     // Pagare logica
 
     useEffect(() => {
+
         var pagareEditado = pagareRaw || '';
     
         pagareEditado = pagareEditado.replaceAll('%{realname}%', usuarioDetalle.realname?.toUpperCase());
@@ -373,8 +392,14 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         pagareEditado = pagareEditado.replaceAll('%{created_day}%', moment().format('DD'));
         pagareEditado = pagareEditado.replaceAll('%{NOMBRE MES}%', moment().format('MMMM')?.toUpperCase());
         pagareEditado = pagareEditado.replaceAll('%{AÑO}%', moment().format('YYYY'));
+        
+        // Calcular total pagare
+        const totalPagare = cuota * 2;
+        pagareEditado = pagareEditado.replaceAll('%{totalPago}%', `${numeral(totalPagare.toFixed(2)).format('0,0.00')} Lempiras`);
+
     
         set_pagareFinal(pagareEditado);
+
       }, [usuarioDetalle, pagareRaw, inputAceptoPagare, inputCantidadDinero, inputPeriodo, diasPorPerSel, interesPeriodo]);
     
       const change_inputVerAceptoPagare = (e) => {
