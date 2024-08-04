@@ -46,6 +46,9 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     const [pagareFinal, set_pagareFinal] = useState(false);
     const [validadoParaContrato, set_validadoParaContrato] = useState(false);
     const [openVentanaCalculadora, set_openVentanaCalculadora] = useState(false);
+    const [cuota, setCuota] = useState(0); // Asegúrate de inicializar la cuota
+    const [s_number, setSNumber] = useState(0); // Asegúrate de inicializar s_number
+    const [totalPrestamo, setTotalPrestamo] = useState(0);
     
     
     // const [permisoP, set_permisoP] = useState(false);
@@ -70,7 +73,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         if(valor > params.pricelistData.PriMntHas){
             validado = false;
         }
-        console.log('valor: ', numeral(valor));
         set_inputCantidadDinero({
             validado: validado,
             valor: valor,
@@ -133,7 +135,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                 gContext.set_logeado({estado: false, token: ''});
             }
             if(res.data.status === "OK"){
-                console.log('usuarioDetalle', res.data.payload.data);
                 set_usuarioDetalle(res.data.payload.data);
             }
            
@@ -161,10 +162,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     useEffect(()=>{
 
         set_botonEnviarHabilitado(false);
-        console.log('inputPeriodo.validado', inputPeriodo.validado);
-        console.log('inputCantidadDinero.validado', inputCantidadDinero.validado);
-        console.log('inputAceptoContrato', inputAceptoContrato);
-        console.log('inputAceptoPagare', inputAceptoPagare);
         if( inputPeriodo.validado && inputCantidadDinero.validado && inputAceptoContrato && inputAceptoBanco  && inputAceptoPagare){
             set_botonEnviarHabilitado(true);
         }
@@ -178,12 +175,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     
     useEffect(()=>{
 
-        console.log('params', params);
-
         if(params.pricelistData && params.productSelected){
-            // console.log('pricelistData', params.pricelistData);
-            // console.log(params.pricelistData.PriMntHas);
-            // console.log(params.pricelistData.PriMntDes);
 
             
             let texto = "Minimo L"+numeral(params.pricelistData.PriMntDes).format('0,0')+", máximo de L"+numeral(params.pricelistData.PriMntHas).format('0,0');
@@ -205,7 +197,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             // let diasmin = params.pricelistData.PriTerDes;
             let diasmax = params.pricelistData.PriTerHas;
             let persmax = diasmax / diasporper;
-            console.log(persmax);
             let arrayPersSelect = [];
             for (let index = 1; index <= parseInt(persmax); index++) {
                 arrayPersSelect.push(
@@ -214,11 +205,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             }
             set_listadoPeriodos(arrayPersSelect);
 
-            console.log("priceListData", params.pricelistData);
-
             // Sacamos el interes por periodo
             var interesPeriodo = params.pricelistData.PriInt;
-            console.log('interesPeriodo', interesPeriodo);
             if(tipo === 'semanal') set_interesPeriodo((interesPeriodo/52.13).toFixed(2));
             if(tipo === 'quincenal') set_interesPeriodo((interesPeriodo/26.07).toFixed(10));
             if(tipo === 'mensual') set_interesPeriodo((interesPeriodo/12).toFixed(10));
@@ -229,7 +217,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     },[params]);
 
     //hola
-    const [cuota, setCuota] = useState(null);
     const [priCuo, setPriCuo] = useState(0);
 
 
@@ -262,7 +249,9 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         else if (diasPorPerSel === 30) tipoDePago = 'mensual';
         else tipoDePago = 'desconocido';
     
+        const interesAnual = params.pricelistData.PriInt || 'No tiene interes asignado'; 
         contratoEditado = contratoEditado.replaceAll('%{payment_type}%', tipoDePago.toUpperCase());
+        contratoEditado = contratoEditado.replaceAll('%{interest_anual}%', parseFloat(interesAnual).toFixed(2) + "%");
         contratoEditado = contratoEditado.replaceAll('%{interest}%%', parseFloat(interesPeriodo).toFixed(2) + "%");
         contratoEditado = contratoEditado.replaceAll('%{created_day}%', moment().format('DD'));
         contratoEditado = contratoEditado.replaceAll('%{NOMBRE MES}%', moment().format('MMMM')?.toUpperCase());
@@ -332,17 +321,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             // Si el tipo no es válido, establece priCuo en 0 o maneja el error
             setPriCuo(0); // O puedes mostrar un mensaje de error si lo prefieres
         }
-
-        //Variables de la formula 
-        // console.log('PriCuoTip', priCuoTip);
-        // console.log('PriCuo', priCuo);
-        // console.log('Monto', monto);
-        // console.log('Tasa final', tasaInteresDecimal);
-        // console.log('Plazo', inputPeriodo.valor);
-        // console.log('Cargo administrativo cli nuevo:', cargosAdministrativos);
-        // console.log('Numerador', numeradorRedondeado);
-        // console.log('Denomidador', denomidadorRedondeado);
-        // console.log('Cuota mensual', CuotaMensual.toFixed(2));
   
 
         const cargosadminprueba = monto * priCuo/30 * inputPeriodo.valor/s_number.toFixed(2);
@@ -352,12 +330,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         const CuotaMensualNumerico = parseFloat(CuotaMensual.toFixed(2));
         const cargosAdmExistenteNumerico = parseFloat(cargosAdmExistente);
 
-        //const cuotaNuevo =  calculoCuota.toFixed(2);
-
-        //const cuotaExistente = CuotaMensualNumerico + cargosAdmExistenteNumerico;
-        // Calcular la cuota final según el tipo de PriCuoTip
-
         let cuota;
+        let totalprestamo;
 
         if (priCuoTip === 'Cantidad fija') {
             // Si es 'Cantidad fija', usa calculoCuota
@@ -371,15 +345,16 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
         // Actualiza el estado con el valor calculado
         setCuota(cuota);
+        setBank(totalprestamo);
 
-        // Imprime en la consola para verificar el resultado
-        // console.log('Cuota:', cuota.toFixed(2));
-    
+        const totalPrestamo = cuota * s_number;
+
         contratoEditado = contratoEditado.replaceAll('%{cuota}%', `${numeral(cuota).format('0,0.00')} Lempiras`);
     
         set_contratoFinal(contratoEditado);
         // eslint-disable-next-line
-    }, [usuarioDetalle, contratoRaw, inputAceptoContrato]);
+        setTotalPrestamo(cuota * s_number);
+    }, [usuarioDetalle, contratoRaw, inputAceptoContrato, cuota, s_number]);
     
 
 
@@ -438,20 +413,21 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         pagareEditado = pagareEditado.replaceAll('%{amount}%', numeral(inputCantidadDinero.valor).format('0,0'));
         pagareEditado = pagareEditado.replaceAll('%{period}%', inputPeriodo.valor);
         pagareEditado = pagareEditado.replaceAll('%{s_number}%', inputPeriodo.valor / diasPorPerSel);
-    
+
+
+        const interesAnual = params.pricelistData.PriInt || 'No tiene interes asignado';
         pagareEditado = pagareEditado.replaceAll('%{interest}%%', parseFloat(interesPeriodo).toFixed(2)+"%");
+        pagareEditado = pagareEditado.replaceAll('%{interest_anual}%', parseFloat(interesAnual).toFixed(2) + "%");
         pagareEditado = pagareEditado.replaceAll('%{created_day}%', moment().format('DD'));
         pagareEditado = pagareEditado.replaceAll('%{NOMBRE MES}%', moment().format('MMMM')?.toUpperCase());
         pagareEditado = pagareEditado.replaceAll('%{AÑO}%', moment().format('YYYY'));
         
-        // Calcular total pagare
-        const totalPagare = cuota * 2;
-        pagareEditado = pagareEditado.replaceAll('%{totalPago}%', `${numeral(totalPagare.toFixed(2)).format('0,0.00')} Lempiras`);
-
+        // Aquí reemplazas totalPago con el totalPrestamo calculado
+        pagareEditado = pagareEditado.replaceAll('%{totalPago}%', `${numeral(totalPrestamo.toFixed(2)).format('0,0.00')} Lempiras`);
     
         set_pagareFinal(pagareEditado);
 
-      }, [usuarioDetalle, pagareRaw, inputAceptoPagare, inputCantidadDinero, inputPeriodo, diasPorPerSel, interesPeriodo]);
+      }, [usuarioDetalle, pagareRaw, inputAceptoPagare, inputCantidadDinero, inputPeriodo, diasPorPerSel, interesPeriodo, totalPrestamo]);
     
       const change_inputVerAceptoPagare = (e) => {
         set_inputAceptoPagare(e.target.checked);
@@ -1757,7 +1733,6 @@ function FormCambiarBanco({setOpen}){
                 set_terminoEditar(true);
             }
         }).catch(err => {
-            console.log(err.message);
             set_errorAjax(err.message);
         });
     }
