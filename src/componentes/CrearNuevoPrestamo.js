@@ -257,9 +257,16 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         contratoEditado = contratoEditado.replaceAll('%{NOMBRE MES}%', moment().format('MMMM')?.toUpperCase());
         contratoEditado = contratoEditado.replaceAll('%{AÑO}%', moment().format('YYYY'));
     
+        // Capturar la fecha actual
+        const fechaActual = moment().format('YYYY-MM-DD');
+        console.log("fecha actual", fechaActual);
+
+
         // Calcular fecha final
-        const fechaFinal = moment().add(inputPeriodo.valor, 'days').format('YYYY-MM-DD');
+        const fechaFinal = moment().add(diasPorPerSel, 'days').format('DD-MM-YYYY');
         contratoEditado = contratoEditado.replaceAll('%{fecha_final}%', fechaFinal);
+        console.log("Fecha final", fechaFinal);
+        console.log("dias de pago", diasPorPerSel);
     
         // Obtener el tipo de PriCuoTip y el valor de PriCuo
         const priCuoTip = params.pricelistData.PriCuoTip || 'Cliente no existe';
