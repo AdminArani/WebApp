@@ -227,7 +227,7 @@ function Login(){
                                 <Link style={{color: '#4c74e9'}} to="/recuperarpass">{"Recuperar contraseña"}</Link>
                             </Grid>
                             <Grid item>
-                                <Link style={{color: '#4c74e9'}} to="/registro">{"Registrarse"}</Link>
+                                {/* <Link style={{color: '#4c74e9'}} to="/registro">{"Registrarse"}</Link> */}
                             </Grid>
                         </Grid>
                     </Box>

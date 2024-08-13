@@ -259,14 +259,10 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     
         // Capturar la fecha actual
         const fechaActual = moment().format('YYYY-MM-DD');
-        console.log("fecha actual", fechaActual);
-
-
+        
         // Calcular fecha final
         const fechaFinal = moment().add(diasPorPerSel, 'days').format('DD-MM-YYYY');
         contratoEditado = contratoEditado.replaceAll('%{fecha_final}%', fechaFinal);
-        console.log("Fecha final", fechaFinal);
-        console.log("dias de pago", diasPorPerSel);
     
         // Obtener el tipo de PriCuoTip y el valor de PriCuo
         const priCuoTip = params.pricelistData.PriCuoTip || 'Cliente no existe';
@@ -580,7 +576,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         })
         .then((res) => {
             if (res.data.status === "OK") {
-                console.log('get_bankaccount', res.data.payload?.data);
 
                 let cuentaActiva = false;
                 for (const key in res.data.payload?.data) {
@@ -608,15 +603,22 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         });
     }
 
-    
-    const [bank, setBank] = useState(null);
+    const [bank, setBank] = useState(null); // Estado para el valor del banco
+    const [nombreBanco, setNombreBanco] = useState(''); // Estado para el nombre del banco
 
     useEffect(() => {
-        fetchInformacionUsuario(); // Llama a la función para obtener la información del usuario
+        fetchInformacionUsuario();
     }, []);
 
-    // Función para obtener la información del usuario
-    const fetchInformacionUsuario = (callback) => {
+    useEffect(() => {
+        // Solo actualizar el nombre del banco cuando `bank` cambie y sea válido
+        if (bank !== null && bank !== undefined) {
+            const nombre = obtenerNombreBanco(bank);
+            setNombreBanco(nombre);
+        }
+    }, [bank]); // Dependencia en `bank`
+
+    const fetchInformacionUsuario = () => {
         axios.request({
             url: `${config.apiUrl}/api/app/getProfile.php`,
             method: "post",
@@ -625,77 +627,47 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             },
         })
         .then((res) => {
-            if (res.data.status === "ER") {
-                console.log(res.data.payload.message);
-            } else if (res.data.status === "ERS") {
-                localStorage.removeItem('arani_session_id');
-                gContext.set_logeado({ estado: false, token: '' });
-            } else if (res.data.status === "OK") {
-                console.log('usuarioDetalle', res.data.payload.data);
-                set_usuarioDetalle(res.data.payload.data);
-
-                // Almacena el valor del banco en una variable
-                const bankValue = res.data.payload.data.bank;
-                setBank(bankValue); // Actualiza el estado con el valor del banco
-                console.log("Valor del banco:", bankValue);
-
-                // Obtener el nombre del banco utilizando el valor numérico
-                const nombreBanco = obtenerNombreBanco(bankValue);
-                set_inputBanco({
-                    ...inputBanco,
-                    valor: nombreBanco,
-                    validado: true
-                });
-
-                console.log("Nombre del banco:", nombreBanco);
+            if (res.data.status === "OK") {
+                const bankValue = res.data.payload.data?.bank; // Verificar si `data` existe
+                if (bankValue !== undefined && bankValue !== null) {
+                    setBank(bankValue);
+                } else {
+                    console.warn('Valor del banco no disponible en la respuesta');
+                }
             }
-
-            if (typeof callback === 'function') callback();
         })
         .catch(err => {
-            console.log(err.message);
+            console.log('Error en la solicitud:', err.message);
         });
-    }; 
-    
+    };
+
     const obtenerNombreBanco = (valorBanco) => {
-        console.log("Valor del banco al case:", valorBanco)
         switch (parseInt(valorBanco)) {
-            case 1:
-                return 'Bac Credomatic';
-            case 2:
-                return 'Banco Atlantida';
-            case 3:
-                return 'Banco Azteca';
-            case 4:
-                return 'Banco Banrural';
-            case 5:
-                return 'Banco Davivienda';
-            case 6:
-                return 'Banco de Honduras';
-            case 7:
-                return 'Banco de los Trabajadores';
-            case 8:
-                return 'Banco de Occidente';
-            case 9:
-                return 'Banco del Pais';
-            case 10:
-                return 'Banco Ficensa';
-            case 11:
-                return 'Banco Hondureño del Café';
-            case 12:
-                return 'Banco Lafise';
-            case 13:
-                return 'Banco Popular';
-            case 14:
-                return 'Banco Promerica';
-            case 15:
-                return 'Banco Ficohsa';
-            case 16:
-                return 'Tigo Money';
-            default:
-                return 'Banco No Registrado';
+            case 1: return 'Bac Credomatic';
+            case 2: return 'Banco Atlantida';
+            case 3: return 'Banco Azteca';
+            case 4: return 'Banco Banrural';
+            case 5: return 'Banco Davivienda';
+            case 6: return 'Banco de Honduras';
+            case 7: return 'Banco de los Trabajadores';
+            case 8: return 'Banco de Occidente';
+            case 9: return 'Banco del Pais';
+            case 10: return 'Banco Ficensa';
+            case 11: return 'Banco Hondureño del Café';
+            case 12: return 'Banco Lafise';
+            case 13: return 'Banco Popular';
+            case 14: return 'Banco Promerica';
+            case 15: return 'Banco Ficohsa';
+            case 16: return 'Tigo Money';
+            default: return 'Banco No Registrado';
         }
     };
+
+    const handleAceptarClick = () => {
+        setOpen(false);
+        fetchInformacionUsuario(); // Actualizar el nombre del banco al cerrar el modal
+    };
+
     
     
     const esPantallaPequeña = useMediaQuery('(max-width:600px)');
@@ -951,7 +923,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 {'Confirma que la cuenta '}
                                 <span style={{fontWeight: 'bold'}}>{inputCuentaBanco.valor}</span>
                                 {' de '}
-                                <span style={{fontWeight: 'bold'}}>{obtenerNombreBanco(bank)}</span>
+                                <span style={{fontWeight: 'bold'}}>{nombreBanco}</span>
                                 {' es la correcta para desembolsar tu dinero'}
                             </Typography>
                             </Grid>
