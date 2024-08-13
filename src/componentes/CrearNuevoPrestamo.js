@@ -565,6 +565,8 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
     const [inputCuentaBanco, set_inputCuentaBanco] = useState({ valor: '', validado: false });
     const [inputBanco, set_inputBanco] = useState({ valor: '', validado: false });
     const [validado, set_validado] = useState(false);
+    const [bank, setBank] = useState(null); // Estado para el valor del banco
+    const [nombreBanco, setNombreBanco] = useState(''); // Estado para el nombre del banco
 
     const cargarCuentaBanco = () => {
         axios.request({
@@ -576,7 +578,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         })
         .then((res) => {
             if (res.data.status === "OK") {
-
                 let cuentaActiva = false;
                 for (const key in res.data.payload?.data) {
                     if (Object.hasOwnProperty.call(res.data.payload?.data, key)) {
@@ -602,21 +603,6 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
             console.log(err.message);
         });
     }
-
-    const [bank, setBank] = useState(null); // Estado para el valor del banco
-    const [nombreBanco, setNombreBanco] = useState(''); // Estado para el nombre del banco
-
-    useEffect(() => {
-        fetchInformacionUsuario();
-    }, []);
-
-    useEffect(() => {
-        // Solo actualizar el nombre del banco cuando `bank` cambie y sea válido
-        if (bank !== null && bank !== undefined) {
-            const nombre = obtenerNombreBanco(bank);
-            setNombreBanco(nombre);
-        }
-    }, [bank]); // Dependencia en `bank`
 
     const fetchInformacionUsuario = () => {
         axios.request({
@@ -663,10 +649,23 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
         }
     };
 
-    const handleAceptarClick = () => {
-        setOpen(false);
-        fetchInformacionUsuario(); // Actualizar el nombre del banco al cerrar el modal
-    };
+    useEffect(() => {
+        // Inicializar el intervalo para consultar cada segundo
+        const intervalId = setInterval(() => {
+            fetchInformacionUsuario();
+        }, 1000);
+
+        // Limpiar el intervalo cuando el componente se desmonte
+        return () => clearInterval(intervalId);
+    }, []);
+
+    useEffect(() => {
+        // Solo actualizar el nombre del banco cuando `bank` cambie y sea válido
+        if (bank !== null && bank !== undefined) {
+            const nombre = obtenerNombreBanco(bank);
+            setNombreBanco(nombre);
+        }
+    }, [bank]);
 
     
     
