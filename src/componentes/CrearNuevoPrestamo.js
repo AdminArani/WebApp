@@ -721,104 +721,123 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                     </div>
                 }
                 {(!enviandoAlApi && seRegistro) &&
-                <div style={{width: esPantallaPequeña ? '100%' : '400px', margin: '0%'}}>
-                    <Typography variant="h5" sx={{pt: 1, pb: 0}} style={{fontSize: '18px',textAlign: 'center', fontWeight: 'bold'}}>Resumen de tu préstamo</Typography>
-                    <br/>
-                    <Box style={{backgroundColor: '#dcdcdc', boxSizing: 'border-box', marginLeft: '-24px', marginRight: '-24px'}}>
-                        <div style={{padding: '10px', paddingTop: '2px', marginLeft: '30px', marginRight:'24px'}}>
-                            <br/>
-                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Cantidad solicitada: </Typography>
-                                <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(cantidadSolicitada).format('0,0.00')}</Typography>
-                            </div>
-                            <br/>
-                            {/* <Typography variant="body2" sx={{}} >Total de pagos: {inputPeriodo.valor/diasPorPerSel}</Typography>
-                            <Typography variant="body2" sx={{}} >Periodicidad: {params.productSelected.ProTip}</Typography> */}
-                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Interes:</Typography>
-                                <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(intereses).format('0,0.00')}</Typography>
-                            </div>
-                            <br/>
-                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Gastos administrativos: </Typography>
-                                <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(gastosAdministrativos).format('0,0.00')}</Typography>
-                            </div>
-                            <br/>
-                            <Divider sx={{ mb: 1, mt: 1 }}></Divider>
-                            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Total a Pagar: </Typography>
-                                <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(totalAPagar).format('0,0.00')}</Typography>
-                            </div>
-                        </div>
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semi-transparente
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999 // Asegúrate de que esté por encima de otros elementos
+                }}>
+                    <div style={{
+                        width: esPantallaPequeña ? '100%' : '400px',
+                        margin: '0%',
+                        backgroundColor: 'white', // Fondo blanco para el contenido
+                        padding: '20px',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        boxSizing: 'border-box',
+                    }}>
+                        <Typography variant="h5" sx={{pt: 1, pb: 0}} style={{fontSize: '18px',textAlign: 'center', fontWeight: 'bold'}}>Resumen de tu préstamo</Typography>
                         <br/>
-                    </Box>
-
-                    <Box style={{padding: '0',boxSizing: 'border-box', margin: '35px'}}>
-                    <div>
-                        <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                            <div>
-                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Pagos a realizar: </Typography>
-                                <Typography variant="body2" style={{fontSize: '12px'}}>{`Solicitaste un plazo de ${pagosARealizar} semanas`}</Typography>
-                            </div>
-                            <Typography variant="body2" style={{fontSize: '16px'}}>{(pagosARealizar)}</Typography>
-                        </div>
-                        <br/>
-                        {pagos && pagos.map((pago, index) => (
-                            <div key={index} style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <div>
-                                    <Typography variant="body2" style={{fontSize: '16px', color: '#647cf8', fontWeight: 'bold'}}>{numeroAOrdinal(index + 1)} pago: </Typography>
-                                    <Typography variant="body2" style={{fontSize: '12px'}}>{pago.fechaDePago}</Typography>
-                                    <br/>
+                        <Box style={{backgroundColor: '#dcdcdc', boxSizing: 'border-box', marginLeft: '-20px', marginRight: '-20px'}}>
+                            <div style={{padding: '10px', paddingTop: '2px', marginLeft: '30px', marginRight:'24px'}}>
+                                <br/>
+                                <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                    <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Cantidad solicitada: </Typography>
+                                    <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(cantidadSolicitada).format('0,0.00')}</Typography>
                                 </div>
-                                <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>L {numeral(pago.cantidad).format('0,0.00')}</Typography>
+                                <br/>
+                                <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                    <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Interes:</Typography>
+                                    <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(intereses).format('0,0.00')}</Typography>
+                                </div>
+                                <br/>
+                                <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                    <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Gastos administrativos: </Typography>
+                                    <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(gastosAdministrativos).format('0,0.00')}</Typography>
+                                </div>
+                                <br/>
+                                <Divider sx={{ mb: 1, mt: 1 }}></Divider>
+                                <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                    <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Total a Pagar: </Typography>
+                                    <Typography variant="body2" style={{fontSize: '16px'}}>L {numeral(totalAPagar).format('0,0.00')}</Typography>
+                                </div>
                             </div>
-                        ))}
-                    </div>
-                </Box>
-                    
-                    <div 
-                    style={{
-                        display:'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: '100%',
-                       }}
-                    >
-                        <br/>
-                        <br/>
-                        <br/>
-                        <Button 
-                            onClick={todobiencallback} 
-                            variant="contained" 
-                            sx={{ mt: 1, mr: 1 }} 
+                            <br/>
+                        </Box>
+                
+                        <Box style={{padding: '0',boxSizing: 'border-box', margin: '35px'}}>
+                            <div>
+                                <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                    <div>
+                                        <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>Pagos a realizar: </Typography>
+                                        <Typography variant="body2" style={{fontSize: '12px'}}>{`Solicitaste un plazo de ${pagosARealizar} semanas`}</Typography>
+                                    </div>
+                                    <Typography variant="body2" style={{fontSize: '16px'}}>{(pagosARealizar)}</Typography>
+                                </div>
+                                <br/>
+                                {pagos && pagos.map((pago, index) => (
+                                    <div key={index} style={{display: 'flex', justifyContent: 'space-between'}}>
+                                        <div>
+                                            <Typography variant="body2" style={{fontSize: '16px', color: '#647cf8', fontWeight: 'bold'}}>{numeroAOrdinal(index + 1)} pago: </Typography>
+                                            <Typography variant="body2" style={{fontSize: '12px'}}>{pago.fechaDePago}</Typography>
+                                            <br/>
+                                        </div>
+                                        <Typography variant="body2" style={{fontSize: '16px', fontWeight: 'bold'}}>L {numeral(pago.cantidad).format('0,0.00')}</Typography>
+                                    </div>
+                                ))}
+                            </div>
+                        </Box>
+                            
+                        <div 
                             style={{
-                                    backgroundColor: '#647cf8',
-                                    textAlign: 'center',
-                                    alignItems: 'center',
-                                    color: 'white',
-                                    height: '40px',
-                                    width: '35%',
-                                    marginTop: '10px',
-                                    fontSize: '12px',
-                                    boxShadow: 'none',
-                                    border: '1px solid grey',
-                                    borderRadius: '20px',
-                                    textTransform: 'none',
-                                    marginLeft: '10px',
-                                    padding: '4px',
-                                    fontWeight: 'bold',
-                                    '@media (max-width:600px)': { 
-                                        width: '50%',
-                                        fontSize: '16px',
-                                        height: '40px', 
-                                    }
+                                display:'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                width: '100%',
                             }}
                         >
-                            Finalizar
-                        </Button>
+                            <br/>
+                            <br/>
+                            <br/>
+                            <Button 
+                                onClick={todobiencallback} 
+                                variant="contained" 
+                                sx={{ mt: 1, mr: 1 }} 
+                                style={{
+                                        backgroundColor: '#647cf8',
+                                        textAlign: 'center',
+                                        alignItems: 'center',
+                                        color: 'white',
+                                        height: '40px',
+                                        width: '35%',
+                                        marginTop: '10px',
+                                        fontSize: '12px',
+                                        boxShadow: 'none',
+                                        border: '1px solid grey',
+                                        borderRadius: '20px',
+                                        textTransform: 'none',
+                                        marginLeft: '10px',
+                                        padding: '4px',
+                                        fontWeight: 'bold',
+                                        '@media (max-width:600px)': { 
+                                            width: '50%',
+                                            fontSize: '16px',
+                                            height: '40px', 
+                                        }
+                                }}
+                            >
+                                Finalizar
+                            </Button>
+                        </div>
                     </div>
-                    
                 </div>
+                
                 }
                 {(!enviandoAlApi && !seRegistro) && 
                 <div>
