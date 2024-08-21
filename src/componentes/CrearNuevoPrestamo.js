@@ -1352,44 +1352,55 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                     <Dialog
                         className="miDialogo"
                         open={open}  // El diálogo se mostrará si 'open' es true
-                        onClose={handleClose}  // Cuando se cierra el diálogo, llamamos a la función 'handleClose'
+                        onClose={(e, reason) => {
+                            // Solo cerrar el diálogo si el motivo es diferente a 'backdropClick'
+                            if (reason !== 'backdropClick') {
+                            handleClose();
+                            }
+                        }}  // Cuando se cierra el diálogo, llamamos a la función 'handleClose'
                         aria-labelledby="alert-dialog-title"
                         aria-describedby="alert-dialog-description"
-                        style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-                    >
-                           
-                            <br/>
-                            <br/>
+                        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                        PaperProps={{
+                            style: {
+                            zIndex: 1300, // Asegúrate de que el diálogo esté por encima de otros elementos
+                            }
+                        }}
+                        >
+                        <br />
+                        <br />
                         <Box display="flex" justifyContent="center" alignItems="center">
-                            <img src={`${process.env.PUBLIC_URL}/logowhite.png`} alt="Logo" height={'100px'} width={'100px'}/>
+                            <img src={`${process.env.PUBLIC_URL}/logowhite.png`} alt="Logo" height={'100px'} width={'100px'} />
                         </Box>
-                        <DialogTitle id="alert-dialog-title" style={{display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', textAlign: 'center'}}>{"¡Tu solicitud ha sido enviada!"}</DialogTitle>
-                        <br/>
-                       
-                        <DialogContent style={{textAlign: 'center'}}>
-                            <DialogContentText className="miDialogoTexto" id="alert-dialog-description" style={{color: 'white', textAlign: 'center'}}>
-                            En un máximo de 24 horas <br/> estarás recibiendo una respuesta.
+                        <DialogTitle id="alert-dialog-title" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', textAlign: 'center' }}>
+                            {"¡Tu solicitud ha sido enviada!"}
+                        </DialogTitle>
+                        <br />
+                        <DialogContent style={{ textAlign: 'center' }}>
+                            <DialogContentText className="miDialogoTexto" id="alert-dialog-description" style={{ color: 'white', textAlign: 'center' }}>
+                            En un máximo de 24 horas <br /> estarás recibiendo una respuesta.
                             </DialogContentText>
                         </DialogContent>
-                        <DialogActions className="miDialogoAcciones" style={{display: 'flex', justifyContent: 'center'}}>
-                        <Button className="miDialogoBoton" onClick={(e) => {
+                        <DialogActions className="miDialogoAcciones" style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Button className="miDialogoBoton" onClick={(e) => {
                             e.preventDefault();
                             enviarInformacionAlApi();
-                        }} 
-                        color="primary" 
-                        autoFocus 
-                        style={{
-                            background: 'white', 
-                            alignContent: 'center', 
-                            fontSize: '12px', 
-                            borderRadius: '20px', 
-                            width: '200px', 
-                            textTransform: 'none',
+                            }}
+                            color="primary"
+                            autoFocus
+                            style={{
+                                background: 'white',
+                                alignContent: 'center',
+                                fontSize: '12px',
+                                borderRadius: '20px',
+                                width: '200px',
+                                textTransform: 'none',
                             }}>
                             Ver información de mi préstamo
-                        </Button>
+                            </Button>
                         </DialogActions>
-                    </Dialog>
+                </Dialog>
+
                 </Grid>
                 </div>
                 }
