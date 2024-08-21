@@ -1523,7 +1523,7 @@ function FormEditEstadoCivil({cerrar, reiniciarpantalla, apiCamposConstructor, u
     return (
         <Box>
             <Typography variant="h5" sx={{}} >Editar</Typography>
-            <Typography variant="body" sx={{mb: '1rem'}} >Ingresa el tipo de ingreso que tiene actualmente.</Typography>
+            <Typography variant="body" sx={{mb: '1rem'}} >Ingresa su estatus civil.</Typography>
             <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                 <Grid item xs={12} sm={12}>
                     <FormControl fullWidth>
@@ -2018,7 +2018,7 @@ function FormEditVivienda({cerrar, reiniciarpantalla, apiCamposConstructor, usua
     return (
         <Box>
             <Typography variant="h5" sx={{}} >Editar</Typography>
-            <Typography variant="body" sx={{mb: '1rem'}} >Ingresa el tipo de ingreso que tiene actualmente.</Typography>
+            <Typography variant="body" sx={{mb: '1rem'}} >Ingresa el tipo de vivienda que tiene.</Typography>
             <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                 <Grid item xs={12} sm={12}>
                     <FormControl fullWidth>
@@ -2193,7 +2193,7 @@ function FormEditNumeroDependientes({cerrar, reiniciarpantalla, usuarioDetalle})
     return (
         <Box>
             <Typography variant="h5" sx={{}} >Editar</Typography>
-            <Typography variant="body" sx={{mb: '1rem'}} >Ingrese el nombre de la empresa o negocio donde trabaja.</Typography>
+            <Typography variant="body" sx={{mb: '1rem'}} >Ingrese la cantidad de dependientes.</Typography>
             <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                 <Grid item xs={12} sm={6}>
                     <FormControl fullWidth>
@@ -2391,7 +2391,7 @@ function FormEditGradoEducativo({cerrar, reiniciarpantalla, apiCamposConstructor
     return (
         <Box>
             <Typography variant="h5" sx={{}} >Editar</Typography>
-            <Typography variant="body" sx={{mb: '1rem'}} >Ingresa el tipo de ingreso que tiene actualmente.</Typography>
+            <Typography variant="body" sx={{mb: '1rem'}} >Ingresa el grado educativo.</Typography>
             <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                 <Grid item xs={12} sm={12}>
                     <FormControl fullWidth>
@@ -2509,7 +2509,7 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
     return (
         <Box>
             <Typography variant="h5" sx={{}} >Editar</Typography>
-            <Typography variant="body" sx={{mb: '1rem'}} >Ingresa el tipo de ingreso que tiene actualmente.</Typography>
+            <Typography variant="body" sx={{mb: '1rem'}} >Ingresa la antiguedad laboral.</Typography>
             <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                 <Grid item xs={12} sm={12}>
                     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={"es"}>
