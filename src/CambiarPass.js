@@ -30,7 +30,7 @@ function CambiarPass(){
         event.preventDefault();
         let valor = event.target.value;
         let validado = false;
-        let textoAyuda = "Min. 8 letras, 1 mayúscula y 1 carácter especial o número.";
+        let textoAyuda = "Minimo debe tener 8 letras, 1 mayúscula 1 carácter especial y un número.";
         let regexp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm;
         if(valor.match(regexp)){
             validado = true;
@@ -52,7 +52,7 @@ function CambiarPass(){
         event.preventDefault();
         let valor = event.target.value;
         let validado = false;
-        let textoAyuda = "Min. 8 letras, 1 mayúscula y 1 carácter especial o número.";
+        let textoAyuda = "Minimo debe tener 8 letras, 1 mayúscula 1 carácter especial y un número.";
         let regexp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm;
         // console.log(valor);
         // console.log(inputPass1.valor);

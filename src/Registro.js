@@ -1,5 +1,5 @@
 import config from './config';
-import { AppBar, Box, Button, Checkbox, Container, Dialog, DialogActions, DialogContent,DialogContentText, DialogTitle, Divider, FormControl, FormHelperText, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, Step, StepContent, StepLabel, Stepper, TextField, Toolbar, Tooltip, Typography } from "@mui/material";
+import { AppBar, Box, Button, Checkbox, Container, Dialog, DialogActions, DialogContent,DialogContentText, DialogTitle, Divider, FormControl, FormHelperText, Grid, IconButton, InputAdornment, InputLabel, MenuItem, OutlinedInput, Paper, Select, Step,FormControlLabel, StepContent, StepLabel, Stepper, TextField, Toolbar, Tooltip, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useContext, useEffect, useState } from "react";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -269,7 +269,7 @@ function VerticalLinearStepper2(){
         event.preventDefault();
         let valor = event.target.value;
         let validado = false;
-        let textoAyuda = "Min. 8 letras, 1 mayúscula y 1 carácter especial o número. ";
+        let textoAyuda = "Minimo debe tener 8 letras, 1 mayúscula 1 carácter especial y un número.";
         let regexp = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^\w\d]).{8,}$/;
         if(valor.match(regexp)){
             validado = true;
@@ -291,7 +291,7 @@ function VerticalLinearStepper2(){
         event.preventDefault();
         let valor = event.target.value;
         let validado = false;
-        let textoAyuda = "Min. 8 letras, 1 mayúscula y 1 carácter especial o número.";
+        let textoAyuda = "Minimo debe tener 8 letras, 1 mayúscula 1 carácter especial y un número.";
         let regexp = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^\w\d]).{8,}$/;
         // console.log(valor);
         // console.log(inputPass1.valor);
@@ -536,7 +536,7 @@ function VerticalLinearStepper2(){
                 procesar_login(inputCorreo.valor, inputPass1.valor, function(data){
                     gContext.set_logeado({estado: true, token: data.payload.sid});
                     localStorage.setItem('arani_session_id', data.payload.sid);
-                    navigate("/");
+                    navigate("/perfil");
                 }, function(messageerr){
                     console.log(messageerr);
                 });
@@ -720,14 +720,14 @@ function VerticalLinearStepper2(){
         }else{
             set_ventanaSeEncontoDataDB(false);
         }
-
-
+        
     },[dataUsuarioRDB, inputGenero, inputNombre1, inputNombre2, inputNombre3, inputNombre4, inputFechaNac]);
 
     return (
         <Box>
             <Typography variant="body1" sx={{mb: 3}} >
-                Para empezar a solicitar préstamos debes rellenar los siguientes campos con la información correcta. 
+                1 de 2 Para poder comenzar a solicitar prestamos en nuestra plataforma debes crear tu perfil. <br/>
+                El primer paso es llenar los campos a continuación: 
             </Typography>
             <Stepper activeStep={activeStep} orientation="vertical">
                 <Step key={0}>
@@ -799,7 +799,7 @@ function VerticalLinearStepper2(){
                                 
                                 <Grid item xs={12} sm={12}>
                                     <Button disabled={(pasoValidacionGrupo0)?false:true} variant="contained" onClick={handleNext} sx={{ mt: 1, mr: 1 }} >Paso siguiente</Button>
-                                    <Button disabled={true} onClick={handleBack} sx={{ mt: 1, mr: 1 }} >Paso anterior</Button>
+                                    {/* <Button disabled={true} onClick={handleBack} sx={{ mt: 1, mr: 1 }} >Paso anterior</Button> */}
                                 </Grid>
                             </Grid>
                         </Box>
@@ -882,7 +882,7 @@ function VerticalLinearStepper2(){
                     </StepContent>
                 </Step>
                 <Step key={2}>
-                    <StepLabel optional={<Typography variant="caption">Último paso</Typography>}>Datos de cuenta</StepLabel>
+                    <StepLabel optional={<Typography variant="caption">Tercer paso</Typography>}>Datos de cuenta</StepLabel>
                     <StepContent>
                         <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                             <Grid item xs={12} sm={12}>
@@ -949,8 +949,16 @@ function VerticalLinearStepper2(){
                                     <Button autoFocus onClick={()=>{ set_ventanaCondicionesOpen(false); set_inputAceptoCondiciones(true); }}>Acepto</Button>
                                     </DialogActions>
                                 </Dialog>
+
+                                
+                                
                             </Grid>
                             <Grid item xs={12} sm={12}>
+                            {/* {pasoValidacionGrupo2 && (
+                                <Typography variant="body2" color="textSecondary">
+                                 Has terminado los primeros pasos para poder crear tu perfil. Presiona el botón <strong>PASAR A ETAPA 2</strong> para continuar con el proceso de registro.<br/>
+                                </Typography>
+                            )} */}
                                 <Button variant="contained" disabled={!pasoValidacionGrupo2} onClick={handleNext} sx={{ mt: 1, mr: 1 }} >Siguiente</Button>
                                 <Button disabled={false} onClick={handleBack} sx={{ mt: 1, mr: 1 }} >Volver</Button>
                             </Grid>
@@ -1000,7 +1008,7 @@ function VerticalLinearStepper2(){
                             <Button autoFocus onClick={()=>{ handleReset(); }}>Revisar</Button>
                             </DialogActions>
                         </Dialog>
-                        <Typography sx={{}}>Has terminado todos los pasos, presiona el siguiente boton para terminar el proceso de registro.</Typography>
+                        <Typography sx={{}}>Has terminado los primeros pasos para poder crear tu perfil. Presiona el botón <strong>PASAR A ETAPA 2</strong> para continuar con el proceso de registro.</Typography>
                         {mensajeFinalError && <Typography variant="body2" sx={{color: 'red', pt: 2, pb: 1}}><b>Error: </b>{mensajeFinalError}</Typography>}
                         {mensajeFinalOk && 
                             <Typography variant="body2" sx={{color: 'green', pt: 2, pb: 1}}>
@@ -1017,7 +1025,7 @@ function VerticalLinearStepper2(){
                             {/* Boton de enviar registro */}
                             <Grid item xs={12} sm={6}>
                                 <Button fullWidth disabled={enviandoDataFinal} onClick={enviarARegistroApi} variant="contained" sx={{ mt: 1, mr: 1 }}>
-                                    {(enviandoDataFinal)?"Enviando...":"Terminar registro"}
+                                    {(enviandoDataFinal)?"Enviando...":"Pasar a etapa 2"}
                                 </Button>
                             </Grid>
 
@@ -1044,7 +1052,7 @@ function Registro(){
                             <IconButton component={Link} to="/login" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
                                 <span className="material-symbols-outlined">arrow_back</span>
                             </IconButton>
-                            <Typography variant="h6" color="inherit" component="div">Registrarse una cuenta</Typography>
+                            <Typography variant="h6" color="inherit" component="div"><strong>ETAPA1: </strong>Crea tu perfil</Typography>
                         </Toolbar>
                     </AppBar>
                     <Box sx={{ p: 6 }}>

@@ -821,7 +821,7 @@ function FormEditNombres({cerrar, reiniciarpantalla}){
     function handleChange_inputIngresoMensual(event){
         let valor = event.target.value;
         let validado = false;
-        let textoAyuda = "Solo letras sin espacios";
+        let textoAyuda = "Solo numeros sin espacios";
         if(valor.length >= 1 && valor.match(/^[a-zA-ZÀ-ÿ]+$/)){
             validado = true;
             textoAyuda = "";
@@ -1043,7 +1043,7 @@ function FormEditIncome({cerrar, reiniciarpantalla, usuarioDetalle}){
     function handleChange_inputIngresoMensual(event){
         let valor = event.target.value;
         let validado = false;
-        let textoAyuda = "Solo letras sin espacios";
+        let textoAyuda = "Solo numeros sin espacios";
         if(valor.match(/^[0-9]+$/)){
             validado = true;
             textoAyuda = "";
@@ -2783,7 +2783,7 @@ function FormCambiarClave({cerrar, reiniciarpantalla}){
         event.preventDefault();
         let valor = event.target.value;
         let validado = false;
-        let textoAyuda = "Min. 8 letras, 1 mayúscula y 1 carácter especial o número. ";
+        let textoAyuda = "Minimo debe tener 8 letras, 1 mayúscula 1 carácter especial y un número.";
         let regexp = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^\w\d]).{8,}$/;
         if(valor.match(regexp)){
             validado = true;
@@ -2805,7 +2805,7 @@ function FormCambiarClave({cerrar, reiniciarpantalla}){
         event.preventDefault();
         let valor = event.target.value;
         let validado = false;
-        let textoAyuda = "Min. 8 letras, 1 mayúscula y 1 carácter especial o número.";
+        let textoAyuda = "Minimo debe tener 8 letras, 1 mayúscula 1 carácter especial y un número.";
         let regexp = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^\w\d]).{8,}$/;
         // console.log(valor);
         // console.log(inputPass1.valor);
