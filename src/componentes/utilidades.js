@@ -16,9 +16,10 @@ export const nombreEstadoPrestamo = {
 export const nombreEstadoPago = {
     0: 'Pendiente',
     1: 'Pagado',
-    4: 'Atrasado**',
-    3: 'Atrasado*',
     2: 'Pago próximo',
+    3: 'Atrasado*',
+    4: 'Atrasado**',
+    5: 'Pago Actual',
     6: 'Ultimo Pago',
 }
 

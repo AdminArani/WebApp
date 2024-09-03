@@ -392,7 +392,7 @@ function Plan() {
                                         <ListItemText primaryTypographyProps={{component: 'div', fontSize: '1.5rem'}} secondaryTypographyProps={{component: 'div'}} primary={"Pago "+(index+1)+"/"+listaPagos.length} secondary={<>
                                             <Typography variant="body2">Fecha de pago: {moment(element.schedule_date).format("LL")}</Typography>
                                             <Typography variant="body2">Estado: {(nombreEstadoPago[element.status] || element.status)}</Typography>
-                                            {(parseInt(element.status) === 4 || parseInt(element.status) === 3 || parseInt(element.status) === 2 || parseInt(element.status) === 1) && <Button onClick={()=>{set_openSubirComprobantePago(true); set_pagoseleccionado(element); set_fDOCComprobante(false);}} variant="outlined" startIcon={<span className="material-symbols-outlined">attach_file</span>}>
+                                            {(parseInt(element.status) === 5 ||parseInt(element.status) === 4 || parseInt(element.status) === 3 || parseInt(element.status) === 2 || parseInt(element.status) === 1 || parseInt(element.status) === 0) && <Button onClick={()=>{set_openSubirComprobantePago(true); set_pagoseleccionado(element); set_fDOCComprobante(false);}} variant="outlined" startIcon={<span className="material-symbols-outlined">attach_file</span>}>
                                                 Adjuntar comprobante
                                             </Button>}
                                         </>} />
