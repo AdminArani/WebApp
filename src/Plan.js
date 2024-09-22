@@ -17,6 +17,7 @@ import { nombreEstadoPrestamo, nombreEstadoPago } from "./componentes/utilidades
 // import Contrato from "./componentes/Contrato";
 import parse from "html-react-parser";
 
+
 function Plan() {
     let { idprestamoparam } = useParams();
     const gContext = useContext(AppContext);
@@ -40,6 +41,12 @@ function Plan() {
     const [showAplicarLink, setShowAplicarLink] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [ubicacion, setUbicacion] = useState('');
+
+    const [openModalComprobante, setOpenModalComprobante] = useState(false);
+    const [openModalBAC, setOpenModalBAC] = useState(false);
+    const [ setFDOCComprobante] = useState(null);
+    const [setCargandoEnviandoComprobante] = useState(false);
+
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(async (position) => {
@@ -279,16 +286,11 @@ function Plan() {
         // sid: id de sesion
         // containerId: codigo de prestamo
         // DOC: documento a enviar
-
-
-
         const formData = new FormData();
         formData.append('DOC', fDOCComprobante);
         formData.append('sid', gContext.logeado?.token);
         formData.append('containerId', prestamoSeleccionado.container_id);
         formData.append('idpago', pagoseleccionado.id);
-
-
 
         // console.log(pagoseleccionado);
         set_cargandoEnviandoComprobante(true);
@@ -308,6 +310,50 @@ function Plan() {
             console.log(err.message);
         });
     }
+
+    const [fotoComprobante, setFotoComprobante] = useState(null);
+    
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          setFotoComprobante(file);
+        }
+    };
+
+    const enviarComprobante = () => {
+        const formData = new FormData();
+        formData.append('idCliente', '44');
+        formData.append('nombreCliente', 'test de prueba envio app');
+        formData.append('correoElectronico', 'rolando@gmail.com');
+        formData.append('celular', '32604928');
+        formData.append('fechaPago', '2024-09-21');
+        formData.append('numReferencia', '1234');
+        formData.append('cuota', '203.45');
+        formData.append('montoPago', '203.45');
+        formData.append('validado', 'pendiente');
+        formData.append('descripcion', 'Pago_Bac');
+        formData.append('comentario', 'Sin comentarios');
+        formData.append('enviarMensaje', '0');
+        formData.append('usuarioValidador_id', '1');
+        formData.append('identidadCliente', '1006-1997-00221');
+        formData.append('fotoComprobante', fotoComprobante); // Asegúrate de que este archivo sea válido
+    
+        axios.post('https://app.aranih.com/api/app/post_pago_bac.php', formData, {
+            headers: {
+                'Authorization': '70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa',
+                'Content-Type': 'multipart/form-data'
+            },
+        })
+        .then((response) => {
+            console.log('Respuesta de la API:', response.data);
+            setFotoComprobante(null); // Limpia la imagen después del envío
+        })
+        .catch((error) => {
+            console.error('Error al enviar el comprobante:', error);
+        });
+    };
+    
 
     function changefileComprobante(e){
         let file = e.target.files[0];
@@ -389,18 +435,61 @@ function Plan() {
                                             <span className="material-symbols-outlined">payments</span>
                                         </ListItemIcon> */}
                                         {/* {console.log(element.status)} */}
-                                        <ListItemText primaryTypographyProps={{component: 'div', fontSize: '1.5rem'}} secondaryTypographyProps={{component: 'div'}} primary={"Pago "+(index+1)+"/"+listaPagos.length} secondary={<>
-                                            <Typography variant="body2">Fecha de pago: {moment(element.schedule_date).format("LL")}</Typography>
-                                            <Typography variant="body2">Estado: {(nombreEstadoPago[element.status] || element.status)}</Typography>
-                                            {(parseInt(element.status) === 5 ||parseInt(element.status) === 4 || parseInt(element.status) === 3 || parseInt(element.status) === 2 || parseInt(element.status) === 1 || parseInt(element.status) === 0) && <Button onClick={()=>{set_openSubirComprobantePago(true); set_pagoseleccionado(element); set_fDOCComprobante(false);}} variant="outlined" startIcon={<span className="material-symbols-outlined">attach_file</span>}>
-                                                Adjuntar comprobante
-                                            </Button>}
-                                        </>} />
-                                        <Typography variant="h6" >
-                                            <span>L. {numeral(element.charge+element.administrator_fee+element.amount+element.late_fee).format("0,0.[00]")}</span>
-                                            {element.late_fee && <Typography variant="body2" >Mora de L {numeral(element.late_fee).format("0,0.00")}</Typography>}
-                                        </Typography>
                                         
+
+                                        <ListItemText 
+                                        primaryTypographyProps={{component: 'div', fontSize: '1.5rem'}} 
+                                        secondaryTypographyProps={{component: 'div'}} 
+                                        primary={"Pago " + (index+1) + "/" + listaPagos.length} 
+                                        secondary={
+                                            <>
+                                            <Typography variant="body2">
+                                                Fecha de pago: {moment(element.schedule_date).format("LL")}
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                Estado: {(nombreEstadoPago[element.status] || element.status)}
+                                            </Typography>
+                                            <Typography variant="h6" >
+                                                <span>L. {numeral(element.charge+element.administrator_fee+element.amount+element.late_fee).format("0,0.[00]")}</span>
+                                                {element.late_fee && <Typography variant="body2" >Mora de L {numeral(element.late_fee).format("0,0.00")}</Typography>}
+                                            </Typography>
+
+                                            {(parseInt(element.status) >= 0 && parseInt(element.status) <= 5) && 
+                                                <Box sx={{ 
+                                                display: 'flex', 
+                                                gap: '10px', 
+                                                flexDirection: { xs: 'column', sm: 'row' } // Cambia a columna en pantallas xs (<600px)
+                                                }}>
+                                                {/* Botón para adjuntar comprobante */}
+                                                <Button
+                                                    onClick={() => {
+                                                    set_openSubirComprobantePago(true); 
+                                                    set_pagoseleccionado(element); 
+                                                    set_fDOCComprobante(false);
+                                                    }} 
+                                                    variant="outlined" 
+                                                    sx={{ backgroundColor: 'blue', color: 'white' }} 
+                                                    startIcon={<span className="material-symbols-outlined">attach_file</span>}
+                                                >
+                                                    Adjuntar comprobante TIGO
+                                                </Button>
+
+                                                {/* Botón rojo adicional */}
+                                                <Button 
+                                                    onClick={() => 
+                                                    setOpenModalBAC(true)} 
+                                                    variant="contained" 
+                                                    sx={{ backgroundColor: 'red', color: 'white' }}
+                                                    startIcon={<span className="material-symbols-outlined">attach_file</span>}
+                                                >
+                                                    Adjuntar comprobante BAC
+                                                </Button>
+
+                                                </Box>
+                                            }
+                                            </>
+                                        }
+                                        />                        
                                       </ListItem>)
                                 })}
                             </List>
@@ -411,8 +500,8 @@ function Plan() {
                     </Box>}
                     <Dialog onClose={()=>{set_openSubirComprobantePago(false)}} open={openSubirComprobantePago}>
                     <DialogContent>
-                        <Typography variant="h5">Subir archivo</Typography>
-                        <Typography variant="body2" sx={{mb: 2}}>Adjunte su comprobante de pago.</Typography>
+                        <Typography variant="h5">Subir archivo TIGO</Typography>
+                        <Typography variant="body2" sx={{mb: 2}}>Adjunte su comprobante de pago Tigo Money.</Typography>
                         <Button disabled={Boolean(fDOCComprobante)} fullWidth variant="contained" component="label" startIcon={<span className="material-symbols-outlined">cloud_upload</span>}>
                             Adjuntar documento
                             <input onChange={changefileComprobante} hidden accept="image/*" multiple type="file" />
@@ -422,6 +511,32 @@ function Plan() {
                         <Button disabled={Boolean(!fDOCComprobante) || cargandoEnviandoComprobante} onClick={guardarAdjuntarComprobante} variant="contained">{(cargandoEnviandoComprobante)?"Subiendo....":"Enviar comprobante"}</Button>
                     </DialogContent>
                 </Dialog>
+
+
+
+                {/* Modal para BAC */}
+                <Dialog open={openModalBAC} onClose={() => setOpenModalBAC(false)}>
+                    <DialogContent>
+                    <Typography variant="h5">Subir Archivo BAC</Typography>
+                    <Typography variant="body2" sx={{mb: 2}}>Adjunte su comprobante de pago BAC.</Typography>
+                    <Button fullWidth variant="contained" component="label" startIcon={<span className="material-symbols-outlined">cloud_upload</span>}>
+                        Adjuntar documento
+                        <input type="file" onChange={handleFileChange} accept="image/*" hidden multiple />
+                    </Button>
+                    <Typography variant="body2" sx={{mt: 2}}>Una vez enviado, será revisado por uno de nuestros agentes para validar que el pago se haya realizado correctamente.</Typography>
+                    <Divider sx={{mb: 2, mt: 2}}></Divider>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
+                        <Button 
+                            onClick={enviarComprobante} 
+                            disabled={!fotoComprobante} 
+                            variant="contained" 
+                        >
+                            Enviar comprobante
+                        </Button>
+                    </Box>
+                    </DialogContent>
+                </Dialog>
+
                     {(!cargando && !prestamoSeleccionado) && <Box sx={{m: '8rem 0', textAlign: 'center', color: 'silver'}}>
                         <Typography variant="body2" sx={{maxWidth: '30rem', display: 'block', margin: '0 auto', pb: 3}} component={"div"} >No tienes préstamos aprobados aún, puedes solicitar un nuevo préstamo o ver el estado de tu solicitud.</Typography>
                         {showAplicarLink ? (
