@@ -417,10 +417,10 @@ function Plan() {
         formData.append('fechaPago', fechaHoyUTC6);
         formData.append('numReferencia', numReferencia);
         formData.append('idpago', pagoseleccionado.id);
-        formData.append('cuota', totalFee);
+        formData.append('cuota', parseFloat(montoPago).toFixed(2));
         formData.append('montoPago', totalFee);
         formData.append('validado', 'pendiente');
-        formData.append('descripcion', 'Pago_Bac_WebApp');
+        formData.append('descripcion', 'Pago_Bac');
         formData.append('comentario', 'Sin comentarios');
         formData.append('enviarMensaje', '0');
         formData.append('usuarioValidador_id', '3');
@@ -632,7 +632,15 @@ function Plan() {
                 <DialogContent>
                     <Typography variant="h5">Subir Archivo BAC</Typography>
                     <Typography variant="body2" sx={{mb: 2}}>Adjunte su comprobante de pago BAC.</Typography>
-                    
+                    {/* Input para el montoPago */}
+                    <TextField
+                        label="Monto a Pagar"
+                        value={montoPago}
+                        onChange={handleMontoPagoChange}
+                        type="number"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    />
 
                     <TextField
                                 label="Número de Referencia"
