@@ -203,12 +203,17 @@ function Plan() {
         })
         .then((res) => {
             set_cargando(false);
+
+            // Muestra la respuesta completa en la consola
+            console.log('Respuesta completa:', res.data);
+
             if(res.data.status === "ER"){
                 // console.log(res.data.payload.message);
             }
             if(res.data.status === "OK"){
                 // console.log(res.data.payload);
                 set_listaPagos(res.data.payload);
+                console.log('lista de pagos: ', res.data.payload);
                 // console.log('listado de pagos: ', res.data.payload);
                 
                 let numpagosrealizados = 0;
@@ -395,6 +400,15 @@ function Plan() {
             clienteData.midname2,
             clienteData.surname
         ].filter(Boolean).join(' ');
+
+        const charge = parseFloat(pagoseleccionado.charge) || 0;
+        const administratorFee = parseFloat(pagoseleccionado.administrator_fee) || 0;
+        const amount = parseFloat(pagoseleccionado.amount) || 0;
+        const lateFee = parseFloat(pagoseleccionado.late_fee) || 0;
+
+        // Sumar los valores
+        const totalFee = charge + administratorFee + amount + lateFee;
+        
     
         formData.append('idCliente', clienteData.customer_id);
         formData.append('nombreCliente', nombreCompleto);
@@ -402,8 +416,9 @@ function Plan() {
         formData.append('celular', clienteData.mob_phone);
         formData.append('fechaPago', fechaHoyUTC6);
         formData.append('numReferencia', numReferencia);
-        formData.append('cuota', parseFloat(montoPago).toFixed(2));
-        formData.append('montoPago', parseFloat(montoPago).toFixed(2));
+        formData.append('idpago', pagoseleccionado.id);
+        formData.append('cuota', totalFee);
+        formData.append('montoPago', totalFee);
         formData.append('validado', 'pendiente');
         formData.append('descripcion', 'Pago_Bac');
         formData.append('comentario', 'Sin comentarios');
@@ -458,7 +473,7 @@ function Plan() {
         let file = e.target.files[0];
         set_fDOCComprobante(file);
     }
-    
+
     return (
         <Container disableGutters sx={{ minHeight: '100vh', display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"  }} component="main" maxWidth="md">
             {/* <Contrato /> */}
@@ -569,7 +584,10 @@ function Plan() {
 
                                                 {/* Botón rojo adicional */}
                                                 <Button 
-                                                    onClick={handleOpenModal}  // Primero carga el perfil y luego abre el modal
+                                                    onClick={() => {
+                                                        set_pagoseleccionado(element); // Establece el elemento seleccionado
+                                                        handleOpenModal();              // Luego abre el modal
+                                                    }}
                                                     variant="contained" 
                                                     sx={{ backgroundColor: 'red', color: 'white' }}
                                                     startIcon={<span className="material-symbols-outlined">attach_file</span>}
@@ -614,15 +632,7 @@ function Plan() {
                 <DialogContent>
                     <Typography variant="h5">Subir Archivo BAC</Typography>
                     <Typography variant="body2" sx={{mb: 2}}>Adjunte su comprobante de pago BAC.</Typography>
-                    {/* Input para el montoPago */}
-                    <TextField
-                        label="Monto a Pagar"
-                        value={montoPago}
-                        onChange={handleMontoPagoChange}
-                        type="number"
-                        fullWidth
-                        sx={{ mt: 2 }}
-                    />
+                    
 
                     <TextField
                                 label="Número de Referencia"
