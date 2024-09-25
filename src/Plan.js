@@ -420,7 +420,7 @@ function Plan() {
         formData.append('cuota', totalFee);
         formData.append('montoPago', totalFee);
         formData.append('validado', 'pendiente');
-        formData.append('descripcion', 'Pago_Bac');
+        formData.append('descripcion', 'Pago_Bac_WebApp');
         formData.append('comentario', 'Sin comentarios');
         formData.append('enviarMensaje', '0');
         formData.append('usuarioValidador_id', '3');
