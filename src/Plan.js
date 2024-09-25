@@ -2,7 +2,7 @@ import config from './config';
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 // import logoArani from "./images/logoarani.png";
-import {Button, Chip, Dialog, DialogActions, DialogContent, Divider, Grid, List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
+import {Button, Chip, Dialog, DialogActions, DialogContent, TextField,Divider, Grid, List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
 import { useContext, useState } from "react";
 // import axios from "axios";
 import { AppContext } from "./App";
@@ -42,6 +42,9 @@ function Plan() {
     const [errorMessage, setErrorMessage] = useState('');
     const [ubicacion, setUbicacion] = useState('');
 
+    
+    const [montoPago, setMontoPago] = useState('');
+    const [numReferencia, setNumReferencia] = useState('');
     const [openModalComprobante, setOpenModalComprobante] = useState(false);
     const [openModalBAC, setOpenModalBAC] = useState(false);
     const [ setFDOCComprobante] = useState(null);
@@ -294,6 +297,10 @@ function Plan() {
 
         // console.log(pagoseleccionado);
         set_cargandoEnviandoComprobante(true);
+
+        formData.forEach((value, key) => {
+            console.log(`${key}: ${value}`);
+        });
         axios.post(`${config.apiUrl}/api/app/send_recipemail.php`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -321,23 +328,93 @@ function Plan() {
         }
     };
 
-    const enviarComprobante = () => {
+    const handleMontoPagoChange = (event) => {
+        setMontoPago(event.target.value); // Actualiza el estado cuando cambia el input
+    };
+
+    const handleNumReferenciaChange = (event) => {
+        setNumReferencia(event.target.value);
+    };
+
+    const [clienteData, setClienteData] = useState(null);
+
+    {/* Validar perfil en core  */}
+    const validarPerfilEnCore = () => {
+        return axios.request({
+            url: `${config.apiUrl}/api/app/getProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+            },
+        })
+        .then((res) => {
+            set_cargando(false);
+            if (res.data.status === "OK") {
+                console.log('usuarioDetalle', res.data.payload.data);
+                const clienteData = res.data.payload.data;
+                return clienteData;  // Retorna los datos del cliente para luego usarlos
+            } else {
+                console.log(res.data.payload.message);
+                throw new Error('Error al validar perfil');
+            }
+        })
+        .catch((err) => {
+            console.log(err.message);
+            navigate("/login");
+            throw err; // Rechaza la promesa si ocurre un error
+        });
+    };
+    
+    const hoy = new Date();
+
+    // Obtener la hora UTC
+    const utcYear = hoy.getUTCFullYear();
+    const utcMonth = hoy.getUTCMonth();
+    const utcDay = hoy.getUTCDate();
+    const utcHours = hoy.getUTCHours();
+
+    // Restar 6 horas a la hora UTC
+    const fechaUTC6 = new Date(Date.UTC(utcYear, utcMonth, utcDay, utcHours - 6));
+
+    // Extraer solo la fecha
+    const fechaHoyUTC6 = fechaUTC6.toISOString().split('T')[0];
+    console.log(fechaHoyUTC6);
+
+    const [cargandoEnvio, setCargandoEnvio] = useState(false);
+    const [exitoEnvio, setExitoEnvio] = useState(false);
+    
+    const enviarComprobante = (clienteData) => {
+        setCargandoEnvio(true);  // Inicia el estado de carga
+        setExitoEnvio(false);     // Resetea el mensaje de éxito
+
         const formData = new FormData();
-        formData.append('idCliente', '44');
-        formData.append('nombreCliente', 'test de prueba envio app');
-        formData.append('correoElectronico', 'rolando@gmail.com');
-        formData.append('celular', '32604928');
-        formData.append('fechaPago', '2024-09-21');
-        formData.append('numReferencia', '1234');
-        formData.append('cuota', '203.45');
-        formData.append('montoPago', '203.45');
+    
+        const nombreCompleto = [
+            clienteData.realname,
+            clienteData.midname,
+            clienteData.midname2,
+            clienteData.surname
+        ].filter(Boolean).join(' ');
+    
+        formData.append('idCliente', clienteData.customer_id);
+        formData.append('nombreCliente', nombreCompleto);
+        formData.append('correoElectronico', clienteData.email);
+        formData.append('celular', clienteData.mob_phone);
+        formData.append('fechaPago', fechaHoyUTC6);
+        formData.append('numReferencia', numReferencia);
+        formData.append('cuota', parseFloat(montoPago).toFixed(2));
+        formData.append('montoPago', parseFloat(montoPago).toFixed(2));
         formData.append('validado', 'pendiente');
         formData.append('descripcion', 'Pago_Bac');
         formData.append('comentario', 'Sin comentarios');
         formData.append('enviarMensaje', '0');
-        formData.append('usuarioValidador_id', '1');
-        formData.append('identidadCliente', '1006-1997-00221');
+        formData.append('usuarioValidador_id', '3');
+        formData.append('identidadCliente', clienteData.person_code);
         formData.append('fotoComprobante', fotoComprobante); // Asegúrate de que este archivo sea válido
+    
+        formData.forEach((value, key) => {
+            console.log(`${key}: ${value}`);
+        });
     
         axios.post('https://app.aranih.com/api/app/post_pago_bac.php', formData, {
             headers: {
@@ -348,10 +425,32 @@ function Plan() {
         .then((response) => {
             console.log('Respuesta de la API:', response.data);
             setFotoComprobante(null); // Limpia la imagen después del envío
+            setOpenModalBAC(false);   // Cierra el modal
+            setExitoEnvio(true);
+
+            setTimeout(() => {
+                setExitoEnvio(false);  // Oculta el mensaje
+            }, 3000); // 3000 milisegundos = 3 segundos
         })
         .catch((error) => {
             console.error('Error al enviar el comprobante:', error);
+            setOpenModalBAC(false);   // Cierra el modal si hay error
+        })
+        .finally(() => {
+            setCargandoEnvio(false);  // Finaliza el estado de carga
         });
+    };
+    
+    // Manejar la apertura del modal:
+    const handleOpenModal = () => {
+        validarPerfilEnCore()
+            .then((clienteData) => {
+                setClienteData(clienteData);  // Guarda los datos del cliente para usarlos en el envío
+                setOpenModalBAC(true);        // Abre el modal
+            })
+            .catch((err) => {
+                console.error("Error al cargar el perfil del cliente:", err);
+            });
     };
     
 
@@ -412,13 +511,7 @@ function Plan() {
                                 {(prestamoSeleccionado.confirmed_date !== '0000-00-00 00:00:00') && <Chip size="small" label={"Aprobación: "+moment(prestamoSeleccionado.confirmed_date).format("LL")} variant="outlined" sx={{color: "#FFFFFF"}} />}
                                 <Chip size="small" label={"Estado: "+nombreEstadoPrestamo[prestamoSeleccionado.status]} variant="outlined" sx={{color: "#FFFFFF"}} />
                             </Box>
-
-
-
-                            
-                            
-                            
-                            
+   
                         </div>
 
                         <Box sx={{textAlign: 'right'}}><Button onClick={()=>{set_ventanaContrato(true)}}>Ver contrato</Button></Box>
@@ -476,8 +569,7 @@ function Plan() {
 
                                                 {/* Botón rojo adicional */}
                                                 <Button 
-                                                    onClick={() => 
-                                                    setOpenModalBAC(true)} 
+                                                    onClick={handleOpenModal}  // Primero carga el perfil y luego abre el modal
                                                     variant="contained" 
                                                     sx={{ backgroundColor: 'red', color: 'white' }}
                                                     startIcon={<span className="material-symbols-outlined">attach_file</span>}
@@ -515,27 +607,70 @@ function Plan() {
 
 
                 {/* Modal para BAC */}
-                <Dialog open={openModalBAC} onClose={() => setOpenModalBAC(false)}>
-                    <DialogContent>
+                <Dialog open={openModalBAC} onClose={() => {
+                    setOpenModalBAC(false);
+                    setExitoEnvio(false); // Resetea el mensaje de éxito al cerrar el modal
+                }}>
+                <DialogContent>
                     <Typography variant="h5">Subir Archivo BAC</Typography>
                     <Typography variant="body2" sx={{mb: 2}}>Adjunte su comprobante de pago BAC.</Typography>
-                    <Button fullWidth variant="contained" component="label" startIcon={<span className="material-symbols-outlined">cloud_upload</span>}>
+                    {/* Input para el montoPago */}
+                    <TextField
+                        label="Monto a Pagar"
+                        value={montoPago}
+                        onChange={handleMontoPagoChange}
+                        type="number"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    />
+
+                    <TextField
+                                label="Número de Referencia"
+                                value={numReferencia}
+                                onChange={handleNumReferenciaChange}
+                                type="text"
+                                fullWidth
+                                sx={{ mt: 2 }}
+                    />
+                    
+                    <Button 
+                        fullWidth 
+                        variant="contained" 
+                        component="label" 
+                        startIcon={<span className="material-symbols-outlined">cloud_upload</span>} 
+                        sx={{ mt: 2 }}
+                    >
                         Adjuntar documento
                         <input type="file" onChange={handleFileChange} accept="image/*" hidden multiple />
                     </Button>
                     <Typography variant="body2" sx={{mt: 2}}>Una vez enviado, será revisado por uno de nuestros agentes para validar que el pago se haya realizado correctamente.</Typography>
+                    
+                    {/* Mostrar estado de envío */}
+                    {cargandoEnvio && (
+                        <Typography variant="body2" sx={{ color: 'blue', mt: 2 }}>
+                            Cargando...
+                        </Typography>
+                    )}
+
+                    {exitoEnvio && (
+                        <Typography variant="body2" sx={{ color: 'green', mt: 2 }}>
+                            Comprobante enviado con éxito
+                        </Typography>
+                    )}
+
                     <Divider sx={{mb: 2, mt: 2}}></Divider>
+
                     <Box sx={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
                         <Button 
-                            onClick={enviarComprobante} 
+                            onClick={() => enviarComprobante(clienteData)}  // Usa los datos del cliente obtenidos previamente
                             disabled={!fotoComprobante} 
                             variant="contained" 
                         >
                             Enviar comprobante
                         </Button>
                     </Box>
-                    </DialogContent>
-                </Dialog>
+                </DialogContent>
+            </Dialog>
 
                     {(!cargando && !prestamoSeleccionado) && <Box sx={{m: '8rem 0', textAlign: 'center', color: 'silver'}}>
                         <Typography variant="body2" sx={{maxWidth: '30rem', display: 'block', margin: '0 auto', pb: 3}} component={"div"} >No tienes préstamos aprobados aún, puedes solicitar un nuevo préstamo o ver el estado de tu solicitud.</Typography>
