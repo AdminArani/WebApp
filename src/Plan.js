@@ -681,7 +681,7 @@ function Plan() {
                                                                 }} 
                                                             startIcon={<span className="material-symbols-outlined">attach_file</span>}
                                                         >
-                                                            Adjuntar comprobante TIGO
+                                                            Enviar comprobante TIGO
                                                         </Button>
                                                     </Box>
                                                 )}
@@ -717,7 +717,7 @@ function Plan() {
                                                         startIcon={<span className="material-symbols-outlined">attach_file</span>}
                                                         disabled={!estaEnRango()} // Deshabilita el botón si no está en el rango
                                                     >
-                                                        Adjuntar comprobante BAC
+                                                        Enviar comprobante BAC
                                                     </Button>
                                                     
                                                     {/* Mostrar mensaje si el botón está deshabilitado */}
