@@ -2,7 +2,7 @@ import config from './config';
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 // import logoArani from "./images/logoarani.png";
-import {Button, Chip, Dialog, DialogActions, DialogContent, TextField,Divider, Grid, List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
+import {Select,Button,MenuItem,Chip, Dialog, DialogActions, DialogContent, TextField,Divider, Grid, List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
 import { useContext, useState } from "react";
 // import axios from "axios";
 import { AppContext } from "./App";
@@ -16,6 +16,8 @@ import moment from "moment";
 import { nombreEstadoPrestamo, nombreEstadoPago } from "./componentes/utilidades.js";
 // import Contrato from "./componentes/Contrato";
 import parse from "html-react-parser";
+import logobac from './images/logoBaccuadro.jpg';
+import logotigo from './images/tigoMoneycuadrado.png';
 
 
 function Plan() {
@@ -341,6 +343,24 @@ function Plan() {
         setNumReferencia(event.target.value);
     };
 
+    const [opcionSeleccionada, setOpcionSeleccionada] = useState('');
+    const [element, setElement] = useState(null);
+
+    const handleChange = (event) => {
+        setOpcionSeleccionada(event.target.value);
+    };
+
+    const handleClick = () => {
+        if (opcionSeleccionada === 'tigo') {
+            set_openSubirComprobantePago(true);
+            set_pagoseleccionado(element);
+            set_fDOCComprobante(false);
+        } else if (opcionSeleccionada === 'bac') {
+            set_pagoseleccionado(element);
+            handleOpenModal();
+        }
+    };
+
     const [clienteData, setClienteData] = useState(null);
 
     {/* Validar perfil en core  */}
@@ -377,6 +397,18 @@ function Plan() {
     const utcMonth = hoy.getUTCMonth();
     const utcDay = hoy.getUTCDate();
     const utcHours = hoy.getUTCHours();
+
+    const obtenerHoraActualUTC6 = () => {
+        const ahora = new Date();
+        const utc6 = new Date(ahora.getTime()); // Restar 6 horas para UTC-6
+        return utc6.getHours(); // Devolver la hora en formato 24 horas
+    };
+
+    const estaEnRango = () => {
+        const hora = obtenerHoraActualUTC6();
+        console.log('hora actual:', hora);
+        return (hora >= 2 || hora < 6); // Entre las 20:00 y las 00:01
+    };
 
     // Restar 6 horas a la hora UTC
     const fechaUTC6 = new Date(Date.UTC(utcYear, utcMonth, utcDay, utcHours - 6));
@@ -563,39 +595,133 @@ function Plan() {
                                             </Typography>
 
                                             {(parseInt(element.status) >= 0 && parseInt(element.status) <= 5) && 
-                                                <Box sx={{ 
-                                                display: 'flex', 
-                                                gap: '10px', 
-                                                flexDirection: { xs: 'column', sm: 'row' } // Cambia a columna en pantallas xs (<600px)
-                                                }}>
-                                                {/* Botón para adjuntar comprobante */}
-                                                <Button
-                                                    onClick={() => {
-                                                    set_openSubirComprobantePago(true); 
-                                                    set_pagoseleccionado(element); 
-                                                    set_fDOCComprobante(false);
-                                                    }} 
-                                                    variant="outlined" 
-                                                    sx={{ backgroundColor: 'blue', color: 'white' }} 
-                                                    startIcon={<span className="material-symbols-outlined">attach_file</span>}
-                                                >
-                                                    Adjuntar comprobante TIGO
-                                                </Button>
-
-                                                {/* Botón rojo adicional */}
-                                                <Button 
-                                                    onClick={() => {
-                                                        set_pagoseleccionado(element); // Establece el elemento seleccionado
-                                                        handleOpenModal();              // Luego abre el modal
-                                                    }}
-                                                    variant="contained" 
-                                                    sx={{ backgroundColor: 'red', color: 'white' }}
-                                                    startIcon={<span className="material-symbols-outlined">attach_file</span>}
-                                                >
-                                                    Adjuntar comprobante BAC
-                                                </Button>
-
-                                                </Box>
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                                            {/* Selector con logos */}
+                                            <Select
+                                                value={opcionSeleccionada}
+                                                onChange={handleChange}
+                                                displayEmpty
+                                                sx={{ width: '100%' }} // Asegura que el Select ocupe todo el ancho
+                                                renderValue={(selected) => {
+                                                    if (!selected) {
+                                                        return <em>Selecciona el comprobante</em>;
+                                                    }
+                                                    return (
+                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                            <img 
+                                                                src={selected === 'tigo' ? logotigo : logobac} 
+                                                                alt="Logo"
+                                                                style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
+                                                            />
+                                                            <span><strong>{selected === 'tigo' ? 'TIGO MONEY' : 'BAC'}</strong></span>
+                                                        </Box>
+                                                    );
+                                                }}
+                                            >
+                                                <MenuItem value="tigo">
+                                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                        <img 
+                                                            src={logotigo} 
+                                                            alt="Comprobante TIGO" 
+                                                            style={{ width: '50px', height: '50px', marginBottom: '5px' }}
+                                                        />
+                                                        <span><strong>TIGO MONEY</strong></span>
+                                                    </Box>
+                                                </MenuItem>
+                                                <MenuItem value="bac">
+                                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                        <img 
+                                                            src={logobac} 
+                                                            alt="Comprobante BAC" 
+                                                            style={{ width: '50px', height: '50px', marginBottom: '5px' }}
+                                                        />
+                                                        <span><strong>BAC</strong></span>
+                                                    </Box>
+                                                </MenuItem>
+                                            </Select>
+                                        
+                                            {/* Contenedor morado para el botón */}
+                                            <Box
+                                                sx={{ 
+                                                    display: 'flex', 
+                                                    gap: '10px', 
+                                                    flexDirection: { xs: 'column', sm: 'row' }, 
+                                                    width: '100%', // Asegura que el contenedor ocupe todo el ancho
+                                                    height: '150px',
+                                                }}
+                                            >
+                                                {/* Cuadro alrededor del botón de TIGO */}
+                                                {opcionSeleccionada === 'tigo' && (
+                                                    <Box
+                                                        sx={{
+                                                            backgroundColor: '#ecf2fa', // Color claro
+                                                            padding: '20px',
+                                                            borderRadius: '8px',
+                                                            display: 'flex',
+                                                            justifyContent: 'center',
+                                                            alignItems: 'center',
+                                                            width: '100%' // Asegura que el cuadro tenga el mismo tamaño que el Select
+                                                        }}
+                                                    >
+                                                        <Button
+                                                            onClick={() => {
+                                                                set_openSubirComprobantePago(true);  // Abre la ventana para subir el comprobante
+                                                                set_pagoseleccionado(element);       // Asigna el pago seleccionado
+                                                                set_fDOCComprobante(false);          // Cambia el estado de 'fDOCComprobante'
+                                                            }} 
+                                                            variant="outlined" 
+                                                            sx={{ backgroundColor: 'blue', 
+                                                                    color: 'white',
+                                                                    '&:hover': {
+                                                                    backgroundColor: 'darkblue', // Cambia a un azul más oscuro en hover
+                                                                    borderColor: 'darkblue',     // Opcional, si quieres que el borde también cambie de color
+                                                                    }, 
+                                                                }} 
+                                                            startIcon={<span className="material-symbols-outlined">attach_file</span>}
+                                                        >
+                                                            Adjuntar comprobante TIGO
+                                                        </Button>
+                                                    </Box>
+                                                )}
+                                        
+                                                {/* Cuadro alrededor del botón de BAC */}
+                                                {opcionSeleccionada === 'bac' && (
+                                                    <Box
+                                                        sx={{
+                                                            backgroundColor: '#ecf2fa', // Color claro
+                                                            padding: '20px',
+                                                            borderRadius: '8px',
+                                                            display: 'flex',
+                                                            justifyContent: 'center',
+                                                            alignItems: 'center',
+                                                            width: '100%' // Asegura que el cuadro tenga el mismo tamaño que el Select
+                                                        }}
+                                                    >
+                                                        <Button 
+                                                            onClick={() => {
+                                                                set_pagoseleccionado(element);       // Establece el elemento seleccionado para BAC
+                                                                handleOpenModal();                   // Abre el modal correspondiente
+                                                            }}
+                                                            variant="contained" 
+                                                            sx={{ backgroundColor: 'red', 
+                                                                color: 'white',
+                                                                '&:hover': {
+                                                                    backgroundColor: 'darkred', // Cambia a un azul más oscuro en hover
+                                                                    borderColor: 'darkred',     // Opcional, si quieres que el borde también cambie de color
+                                                                    },
+                                                             }}
+                                                            startIcon={<span className="material-symbols-outlined">attach_file</span>}
+                                                            disabled={estaEnRango()}
+                                                        >
+                                                            Adjuntar comprobante BAC
+                                                        </Button>
+                                                    </Box>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                        
+                                            
+                                    
                                             }
                                             </>
                                         }
