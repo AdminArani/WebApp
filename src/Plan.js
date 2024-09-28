@@ -399,17 +399,19 @@ function Plan() {
     const utcHours = hoy.getUTCHours();
 
     const obtenerHoraActualUTC6 = () => {
-        const ahora = new Date();
-        const utc6 = new Date(ahora.getTime()); // Restar 6 horas para UTC-6
-        return utc6.getHours(); // Devolver la hora en formato 24 horas
+        const ahora = new Date(); // Obtener la hora actual
+        console.log('Hora actual (UTC):', ahora.toUTCString()); // Verifica la hora actual en UTC
+        const utc6 = new Date(ahora.getTime()); // Ajustar a UTC-6 sin modificar 'ahora'
+        console.log('Hora ajustada a UTC-6:', utc6.toString()); // Verifica la hora ajustada
+        return utc6; // Retornar el objeto Date
     };
-
+    
     const estaEnRango = () => {
-        const hora = obtenerHoraActualUTC6();
-        console.log('hora actual:', hora);
-        return (hora >= 2 || hora < 6); // Entre las 20:00 y las 00:01
+        const hora = obtenerHoraActualUTC6().getHours(); // Obtener solo la hora
+        console.log('Hora actual:', hora); // Verifica el valor de hora
+        return (hora >= 0 && hora < 20); // Habilita el botón si está entre 00:00 y 19:59
     };
-
+    
     // Restar 6 horas a la hora UTC
     const fechaUTC6 = new Date(Date.UTC(utcYear, utcMonth, utcDay, utcHours - 6));
 
@@ -687,35 +689,44 @@ function Plan() {
                                                 {/* Cuadro alrededor del botón de BAC */}
                                                 {opcionSeleccionada === 'bac' && (
                                                     <Box
-                                                        sx={{
-                                                            backgroundColor: '#ecf2fa', // Color claro
-                                                            padding: '20px',
-                                                            borderRadius: '8px',
-                                                            display: 'flex',
-                                                            justifyContent: 'center',
-                                                            alignItems: 'center',
-                                                            width: '100%' // Asegura que el cuadro tenga el mismo tamaño que el Select
+                                                    sx={{
+                                                        backgroundColor: '#ecf2fa', // Color claro
+                                                        padding: '20px',
+                                                        borderRadius: '8px',
+                                                        display: 'flex',
+                                                        justifyContent: 'center',
+                                                        alignItems: 'center',
+                                                        flexDirection: 'column', // Cambiar a columna para alinear el texto y el botón
+                                                        width: '100%' // Asegura que el cuadro tenga el mismo tamaño que el Select
+                                                    }}
+                                                >
+                                                    <Button
+                                                        onClick={() => {
+                                                            set_pagoseleccionado(element); // Establece el elemento seleccionado para BAC
+                                                            handleOpenModal(); // Abre el modal correspondiente
                                                         }}
+                                                        variant="contained"
+                                                        sx={{
+                                                            backgroundColor: 'red',
+                                                            color: 'white',
+                                                            '&:hover': {
+                                                                backgroundColor: 'darkred',
+                                                                borderColor: 'darkred',
+                                                            },
+                                                        }}
+                                                        startIcon={<span className="material-symbols-outlined">attach_file</span>}
+                                                        disabled={!estaEnRango()} // Deshabilita el botón si no está en el rango
                                                     >
-                                                        <Button 
-                                                            onClick={() => {
-                                                                set_pagoseleccionado(element);       // Establece el elemento seleccionado para BAC
-                                                                handleOpenModal();                   // Abre el modal correspondiente
-                                                            }}
-                                                            variant="contained" 
-                                                            sx={{ backgroundColor: 'red', 
-                                                                color: 'white',
-                                                                '&:hover': {
-                                                                    backgroundColor: 'darkred', // Cambia a un azul más oscuro en hover
-                                                                    borderColor: 'darkred',     // Opcional, si quieres que el borde también cambie de color
-                                                                    },
-                                                             }}
-                                                            startIcon={<span className="material-symbols-outlined">attach_file</span>}
-                                                            disabled={estaEnRango()}
-                                                        >
-                                                            Adjuntar comprobante BAC
-                                                        </Button>
-                                                    </Box>
+                                                        Adjuntar comprobante BAC
+                                                    </Button>
+                                                    
+                                                    {/* Mostrar mensaje si el botón está deshabilitado */}
+                                                    {!estaEnRango() && (
+                                                        <strong style={{ marginTop: '10px', color: 'black' }}>
+                                                            Fuera de horario operativo 😢
+                                                        </strong>
+                                                    )}
+                                                </Box>
                                                 )}
                                             </Box>
                                         </Box>
