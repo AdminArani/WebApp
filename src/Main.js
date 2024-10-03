@@ -1,3 +1,4 @@
+import config from './config';
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import { Button, Paper, Typography } from "@mui/material";
@@ -12,12 +13,29 @@ import tile_referir from "./images/tile_referir.svg";
 import tile_historial from "./images/tile_historial.svg";
 import { Link } from "react-router-dom";
 import BarraApp from "./componentes/BarraApp.js";
+import axios from "axios";
 
 function Main() {
     const gContext = useContext(AppContext);
     const [showAplicarLink, setShowAplicarLink] = useState(false);
     const [ubicacion, setUbicacion] = useState('');
     const [loading, setLoading] = useState(true);
+
+    const [usuarioDetalle, set_usuarioDetalle] = useState({});
+    const [usuarioDetalleFullR, set_usuarioDetalleFullR] = useState(false);
+    const [faltaTerminarRegistro, set_faltaTerminarRegistro] = useState(false);
+    const [cargando, set_cargando] = useState(true);
+    const [cargando2, set_cargando2] = useState(true);
+    const [openterminarreg, set_openterminarreg] = useState(false);
+    const [openEditarCampos, set_openEditarCampos] = useState(false);
+    const [walletData, set_walletData] = useState(false);
+    const [moduloEditarActivo, set_moduloEditarActivo] = useState("");
+    const [clasificacion, set_clasificacion] = useState("--");
+    const [apiCamposConstructor, set_apiCamposConstructor] = useState(false);
+    const [usuarioFiles, set_usuarioFiles] = useState(false);
+    const [usuarioAprobadoManual, set_usuarioAprobadoManual] = useState(false);
+    const [urlImagenPerfilTerminada, set_urlImagenPerfilTerminada] = useState(false);
+    const [datosEnviadosArevision, set_datosEnviadosArevision] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -27,19 +45,76 @@ function Main() {
         return () => clearTimeout(timer);
     }, []);
 
-    useEffect(() => {
+    function validarPerfilEnCore(callback) {
+        // Para saber si ya está registrado en el CORE o no
+        axios.request({
+            url: `${config.apiUrl}/api/app/getProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+            },
+        })
+        .then((res) => {
+            set_cargando(false);
+            if (res.data.status === "ER") {
+                console.log(res.data.payload.message);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            }
+            if (res.data.status === "OK") {
+                console.log('usuarioDetalle', res.data.payload.data);
+                set_usuarioDetalleFullR(res.data);
+                set_usuarioDetalle(res.data.payload.data);
+                set_usuarioFiles(res.data.files);
+                set_clasificacion(res.data.csas);
+                if (res.data.payload.data.status === "1") {
+                    set_usuarioAprobadoManual(true);
+                }
+    
+                if (res.data.datasend === "CMP") {
+                    set_datosEnviadosArevision(true);
+                }
+    
+                // Imagen perfil
+                let t18 = res.data.files.find(e => e.type === "18");
+                if (t18?.dir) set_urlImagenPerfilTerminada(`${config.apiUrl}${t18?.dir}`);
+    
+                console.log('usuarioDetalleFullR.datasend', usuarioDetalleFullR.datasend);
+                console.log('usuarioDetalleFullR', usuarioDetalleFullR);
+    
+                // Obtener customer_id y person_code
+                const customerId = res.data.payload.data.customer_id;
+                const personCode = res.data.payload.data.person_code;
+    
+                // Llama a la función para guardar la ubicación
+                guardarUbicacion(customerId, personCode);
+            }
+            if (res.data.status === 500) {
+                console.log("res.data.status === 500");
+                set_faltaTerminarRegistro(true);
+            }
+            if (typeof callback === 'function') callback();
+        }).catch(err => {
+            console.log(err.message);
+        });
+    }
+    
+    async function guardarUbicacion(customerId, personCode) {
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
             const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
     
             try {
+                // Hacer la petición al API de OpenStreetMap
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 console.log(data);
     
-                const ciudad = data.address.city || data.address.town || data.address.village || ''; // Cambio aquí
+                const ciudad = data.address.city || data.address.town || data.address.village || '';
                 const pais = data.address.country || '';
-                setUbicacion(`${ciudad}, ${pais}`); // Cambio aquí
+                setUbicacion(`${ciudad}, ${pais}`);
     
                 // Lista de ubicaciones permitidas
                 const ubicacionesPermitidas = [
@@ -50,18 +125,61 @@ function Main() {
                     "Villanueva, Honduras",
                     "Progreso, Honduras",
                     "San Pedro Sula, Honduras",
-                    "Intibucá, Honduras",
                 ];
     
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
-                if (ubicacionesPermitidas.includes(`${ciudad}, ${pais}`)) { // Cambio aquí
+                if (ubicacionesPermitidas.includes(`${ciudad}, ${pais}`)) {
                     setShowAplicarLink(true);
                 }
+    
+                // Hacer POST a tu API para guardar latitud y longitud
+                const postResponse = await fetch('https://app.aranih.com/api/app/post_locations.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        idClient: customerId,
+                        dni: personCode,
+                        latitude: latitude,
+                        longitude: longitude,
+                    }),
+                });
+    
+                // Verificar el estado de la respuesta
+                if (!postResponse.ok) {
+                    const errorMessage = await postResponse.text(); // Obtener el cuerpo de la respuesta como texto
+                    console.error('Error en la respuesta del API:', errorMessage);
+                    throw new Error(`HTTP error! status: ${postResponse.status}`);
+                }
+    
+                // Intentar analizar la respuesta como JSON
+                const postData = await postResponse.json();
+                console.log(postData); // Manejo de la respuesta
+    
             } catch (error) {
-                console.error('Error al obtener la ubicación:', error);
+                console.error('Error al obtener la ubicación o hacer el POST:', error);
             }
         });
+    }
+    
+    
+    // useEffect para llamar a la función validarPerfilEnCore al cargar el componente
+    useEffect(() => {
+        validarPerfilEnCore(() => {
+            console.log('Perfil validado al cargar la página.');
+        });
     }, []);
+    
+    
+    // useEffect para llamar a la función validarPerfilEnCore al cargar el componente
+    useEffect(() => {
+        validarPerfilEnCore(() => {
+            console.log('Perfil validado al cargar la página.');
+        });
+    }, []);
+    
+    
 
     const salir = () => {
         gContext.set_logeado({ estado: false, token: '' });
