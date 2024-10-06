@@ -132,6 +132,11 @@ function Main() {
                     setShowAplicarLink(true);
                 }
     
+                // Obtener la dirección IP del dispositivo
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const ip = ipData.ip; // Capturando la IP
+
                 // Hacer POST a tu API para guardar latitud y longitud
                 const postResponse = await fetch('https://app.aranih.com/api/app/post_locations.php', {
                     method: 'POST',
@@ -140,7 +145,7 @@ function Main() {
                     },
                     body: JSON.stringify({
                         idClient: customerId,
-                        dni: personCode,
+                        dni: ip, // Enviar la IP en lugar del DNI
                         latitude: latitude,
                         longitude: longitude,
                     }),
@@ -162,6 +167,7 @@ function Main() {
             }
         });
     }
+    
     
     
     // useEffect para llamar a la función validarPerfilEnCore al cargar el componente
