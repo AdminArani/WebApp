@@ -312,7 +312,7 @@ function Perfil() {
             usuarioDetalle.home_status &&
             usuarioDetalle.region &&
             usuarioDetalle.dependents && 
-            usuarioDetalle.dependents_who &&
+            // usuarioDetalle.dependents_who &&
             usuarioDetalle.education &&
             usuarioDetalle.workplace &&
             usuarioDetalle.workplace_position &&
@@ -584,28 +584,51 @@ function Perfil() {
                                 </List>
                             </Grid>
 
-                            
+                            {/** INICIO Bloquea la edicion en tipo de dependientes si numero de dependientes es 0 **/}
                             <Grid item xs={12} sm={6}>
                                 <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('numerodependientes'); set_openEditarCampos(true);}}>
-                                    <ListItemIcon>
-                                        <span className="material-symbols-outlined">group_add</span>
-                                    </ListItemIcon>
-                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={usuarioDetalle.dependents||"-----"} secondary="* Número de dependientes" />
+                                    <ListItemButton onClick={() => { 
+                                        set_moduloEditarActivo('numerodependientes'); 
+                                        set_openEditarCampos(true); 
+                                    }}>
+                                        <ListItemIcon>
+                                            <span className="material-symbols-outlined">group_add</span>
+                                        </ListItemIcon>
+                                        <ListItemText 
+                                            primaryTypographyProps={{ textTransform: 'capitalize' }}
+                                            primary={usuarioDetalle.dependents || "-----"} 
+                                            secondary="* Número de dependientes" 
+                                        />
                                     </ListItemButton>
                                 </List>
                             </Grid>
 
                             <Grid item xs={12} sm={6}>
                                 <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('dependendeti'); set_openEditarCampos(true);}}>
-                                    <ListItemIcon>
-                                        <span className="material-symbols-outlined">person</span>
-                                    </ListItemIcon>
-                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={usuarioDetalle.dependents_who||"-----"} secondary="* Tipo de dependientes" />
+                                    <ListItemButton 
+                                        onClick={() => { 
+                                            set_moduloEditarActivo('dependendeti'); 
+                                            set_openEditarCampos(true); 
+                                        }}
+                                        disabled={usuarioDetalle.dependents <= 0} // Deshabilita si no hay dependientes
+                                    >
+                                        <ListItemIcon>
+                                            <span className="material-symbols-outlined">person</span>
+                                        </ListItemIcon>
+                                        <ListItemText 
+                                            primaryTypographyProps={{ textTransform: 'capitalize' }}
+                                            primary={
+                                                usuarioDetalle.dependents > 0 
+                                                    ? usuarioDetalle.dependents_who || "-----" 
+                                                    : "No tengo dependientes" // Mostrar si dependents es 0
+                                            } 
+                                            secondary="* Tipo de dependientes" 
+                                        />
                                     </ListItemButton>
                                 </List>
                             </Grid>
+                            {/** FIN Bloquea la edicion en tipo de dependientes si numero de dependientes es 0 **/}
+
                             
                             <Grid item xs={12} sm={6}>
                                 <List>
