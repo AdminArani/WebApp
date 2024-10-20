@@ -343,7 +343,7 @@ function Plan() {
         setNumReferencia(event.target.value);
     };
 
-    const [opcionSeleccionada, setOpcionSeleccionada] = useState('');
+    const [opcionSeleccionada, setOpcionSeleccionada] = useState('bac');
     const [element, setElement] = useState(null);
 
     const handleChange = (event) => {
@@ -620,47 +620,38 @@ function Plan() {
                                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
                                                 {/* Selector con logos */}
                                                 <Select
-                                                    value={opcionSeleccionada}
-                                                    onChange={handleChange}
-                                                    displayEmpty
-                                                    sx={{ width: '100%' }} // Asegura que el Select ocupe todo el ancho
-                                                    renderValue={(selected) => {
-                                                        if (!selected) {
-                                                            return <em>Selecciona el comprobante</em>;
-                                                        }
-                                                        return (
-                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                                <img 
-                                                                    src={selected === 'bac' ? logobac : logotigo} 
-                                                                    alt="Logo"
-                                                                    style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
-                                                                />
-                                                                <span><strong>{selected === 'bac' ? 'BAC' : 'TIGO MONEY'}</strong></span>
-                                                            </Box>
-                                                        );
-                                                    }}
-                                                >
-                                                    <MenuItem value="bac">
-                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                            <img 
-                                                                src={logobac} 
-                                                                alt="Comprobante BAC" 
-                                                                style={{ width: '50px', height: '50px', marginBottom: '5px' }}
-                                                            />
-                                                            <span><strong>BAC</strong></span>
-                                                        </Box>
-                                                    </MenuItem>
-                                                    <MenuItem value="tigo">
-                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                            <img 
-                                                                src={logotigo} 
-                                                                alt="Comprobante TIGO" 
-                                                                style={{ width: '50px', height: '50px', marginBottom: '5px' }}
-                                                            />
-                                                            <span><strong>TIGO MONEY</strong></span>
-                                                        </Box>
-                                                    </MenuItem>
-                                                </Select>
+    value={opcionSeleccionada}
+    onChange={handleChange}
+    displayEmpty
+    sx={{ width: '100%' }} // Asegura que el Select ocupe todo el ancho
+    renderValue={(selected) => {
+        if (!selected) {
+            return <em>Selecciona el comprobante</em>;
+        }
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <img 
+                    src={logobac} 
+                    alt="Logo BAC"
+                    style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
+                />
+                <span><strong>BAC</strong></span>
+            </Box>
+        );
+    }}
+>
+    <MenuItem value="bac">
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <img 
+                src={logobac} 
+                alt="Comprobante BAC" 
+                style={{ width: '50px', height: '50px', marginBottom: '5px' }}
+            />
+            <span><strong>BAC</strong></span>
+        </Box>
+    </MenuItem>
+</Select>
+
                                             
                                                 {/* Contenedor morado para el botón */}
                                                 <Box
