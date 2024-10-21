@@ -409,7 +409,7 @@ function Plan() {
     const estaEnRango = () => {
         const hora = obtenerHoraActualUTC6().getHours(); // Obtener solo la hora
         console.log('Hora actual:', hora); // Verifica el valor de hora
-        return (hora >= 0 && hora < 23); // Habilita el botón si está entre 00:00 y 19:59
+        return (hora >= 0 && hora < 20); // Habilita el botón si está entre 00:00 y 19:59
     };
     
     // Restar 6 horas a la hora UTC
@@ -620,37 +620,37 @@ function Plan() {
                                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
                                                 {/* Selector con logos */}
                                                 <Select
-    value={opcionSeleccionada}
-    onChange={handleChange}
-    displayEmpty
-    sx={{ width: '100%' }} // Asegura que el Select ocupe todo el ancho
-    renderValue={(selected) => {
-        if (!selected) {
-            return <em>Selecciona el comprobante</em>;
-        }
-        return (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <img 
-                    src={logobac} 
-                    alt="Logo BAC"
-                    style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
-                />
-                <span><strong>BAC</strong></span>
-            </Box>
-        );
-    }}
->
-    <MenuItem value="bac">
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <img 
-                src={logobac} 
-                alt="Comprobante BAC" 
-                style={{ width: '50px', height: '50px', marginBottom: '5px' }}
-            />
-            <span><strong>BAC</strong></span>
-        </Box>
-    </MenuItem>
-</Select>
+                                                    value={opcionSeleccionada}
+                                                    onChange={handleChange}
+                                                    displayEmpty
+                                                    sx={{ width: '100%' }} // Asegura que el Select ocupe todo el ancho
+                                                    renderValue={(selected) => {
+                                                        if (!selected) {
+                                                            return <em>Selecciona el comprobante</em>;
+                                                        }
+                                                        return (
+                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                                <img 
+                                                                    src={logobac} 
+                                                                    alt="Logo BAC"
+                                                                    style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
+                                                                />
+                                                                <span><strong>BAC</strong></span>
+                                                            </Box>
+                                                        );
+                                                    }}
+                                                >
+                                                        <MenuItem value="bac">
+                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                                <img 
+                                                                    src={logobac} 
+                                                                    alt="Comprobante BAC" 
+                                                                    style={{ width: '50px', height: '50px', marginBottom: '5px' }}
+                                                                />
+                                                                <span><strong>BAC</strong></span>
+                                                            </Box>
+                                                        </MenuItem>
+                                                </Select>
 
                                             
                                                 {/* Contenedor morado para el botón */}
