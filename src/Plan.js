@@ -611,131 +611,82 @@ function Plan() {
                                             </Typography>
 
                                             {(parseInt(element.status) >= 0 && parseInt(element.status) <= 5) && 
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-                                                {/* Selector con logos */}
-                                                <Select
-                                                    value={opcionSeleccionada}
-                                                    onChange={handleChange}
-                                                    displayEmpty
-                                                    sx={{ width: '100%' }} // Asegura que el Select ocupe todo el ancho
-                                                    renderValue={(selected) => {
-                                                        if (!selected) {
-                                                            return <em>Selecciona el comprobante</em>;
-                                                        }
-                                                        return (
-                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                                <img 
-                                                                    src={logobac} 
-                                                                    alt="Logo BAC"
-                                                                    style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
-                                                                />
-                                                                <span><strong>BAC</strong></span>
-                                                            </Box>
-                                                        );
-                                                    }}
-                                                >
-                                                        <MenuItem value="bac">
-                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                                <img 
-                                                                    src={logobac} 
-                                                                    alt="Comprobante BAC" 
-                                                                    style={{ width: '50px', height: '50px', marginBottom: '5px' }}
-                                                                />
-                                                                <span><strong>BAC</strong></span>
-                                                            </Box>
-                                                        </MenuItem>
-                                                </Select>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+        {/* Visualización estática de BAC */}
+        <Box 
+            sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'flex-start', 
+                width: '100%', 
+                border: '1px solid #ccc', 
+                borderRadius: '8px',
+                padding: '10px',
+                backgroundColor: '#f5f5f5'
+            }}
+        >
+            <img 
+                src={logobac} 
+                alt="Logo BAC" 
+                style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
+            />
+            <span><strong>BAC</strong></span>
+        </Box>
 
-                                            
-                                                {/* Contenedor morado para el botón */}
-                                                <Box
-                                                    sx={{ 
-                                                        display: 'flex', 
-                                                        gap: '10px', 
-                                                        flexDirection: { xs: 'column', sm: 'row' }, 
-                                                        width: '100%', // Asegura que el contenedor ocupe todo el ancho
-                                                        height: '150px',
-                                                    }}
-                                                >
-                                                    {/* Cuadro alrededor del botón de TIGO */}
-                                                    {opcionSeleccionada === 'tigo' && (
-                                                        <Box
-                                                            sx={{
-                                                                backgroundColor: '#ecf2fa', // Color claro
-                                                                padding: '20px',
-                                                                borderRadius: '8px',
-                                                                display: 'flex',
-                                                                justifyContent: 'center',
-                                                                alignItems: 'center',
-                                                                width: '100%' // Asegura que el cuadro tenga el mismo tamaño que el Select
-                                                            }}
-                                                        >
-                                                            <Button
-                                                                onClick={() => {
-                                                                    set_openSubirComprobantePago(true);  // Abre la ventana para subir el comprobante
-                                                                    set_pagoseleccionado(element);       // Asigna el pago seleccionado
-                                                                    set_fDOCComprobante(false);          // Cambia el estado de 'fDOCComprobante'
-                                                                }} 
-                                                                variant="outlined" 
-                                                                sx={{ backgroundColor: 'blue', 
-                                                                        color: 'white',
-                                                                        '&:hover': {
-                                                                        backgroundColor: 'darkblue', // Cambia a un azul más oscuro en hover
-                                                                        borderColor: 'darkblue',     // Opcional, si quieres que el borde también cambie de color
-                                                                        }, 
-                                                                    }} 
-                                                                startIcon={<span className="material-symbols-outlined">attach_file</span>}
-                                                            >
-                                                                Enviar comprobante TIGO
-                                                            </Button>
-                                                        </Box>
-                                                    )}
-                                            
-                                                    {/* Cuadro alrededor del botón de BAC */}
-                                                    {opcionSeleccionada === 'bac' && (
-                                                        <Box
-                                                        sx={{
-                                                            backgroundColor: '#ecf2fa', // Color claro
-                                                            padding: '20px',
-                                                            borderRadius: '8px',
-                                                            display: 'flex',
-                                                            justifyContent: 'center',
-                                                            alignItems: 'center',
-                                                            flexDirection: 'column', // Cambiar a columna para alinear el texto y el botón
-                                                            width: '100%' // Asegura que el cuadro tenga el mismo tamaño que el Select
-                                                        }}
-                                                    >
-                                                        <Button
-                                                            onClick={() => {
-                                                                set_pagoseleccionado(element); // Establece el elemento seleccionado para BAC
-                                                                handleOpenModal(); // Abre el modal correspondiente
-                                                            }}
-                                                            variant="contained"
-                                                            sx={{
-                                                                backgroundColor: 'red',
-                                                                color: 'white',
-                                                                '&:hover': {
-                                                                    backgroundColor: 'darkred',
-                                                                    borderColor: 'darkred',
-                                                                },
-                                                            }}
-                                                            startIcon={<span className="material-symbols-outlined">attach_file</span>}
-                                                            disabled={!estaEnRango()} // Deshabilita el botón si no está en el rango
-                                                        >
-                                                            Enviar comprobante BAC
-                                                        </Button>
-                                                        
-                                                        {/* Mostrar mensaje si el botón está deshabilitado */}
-                                                        {!estaEnRango() && (
-                                                            <strong style={{ marginTop: '10px', color: 'black' }}>
-                                                                Fuera de horario operativo 😢
-                                                            </strong>
-                                                        )}
-                                                    </Box>
-                                                    )}
-                                                </Box>
-                                            </Box>
-                                            }
+        {/* Contenedor morado para el botón */}
+        <Box
+            sx={{ 
+                display: 'flex', 
+                gap: '10px', 
+                flexDirection: { xs: 'column', sm: 'row' }, 
+                width: '100%',
+                height: '150px',
+            }}
+        >
+            {/* Cuadro alrededor del botón de BAC */}
+            <Box
+                sx={{
+                    backgroundColor: '#ecf2fa', 
+                    padding: '20px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'column', 
+                    width: '100%' 
+                }}
+            >
+                <Button
+                    onClick={() => {
+                        set_pagoseleccionado(element); // Establece el elemento seleccionado para BAC
+                        handleOpenModal(); // Abre el modal correspondiente
+                    }}
+                    variant="contained"
+                    sx={{
+                        backgroundColor: 'red',
+                        color: 'white',
+                        '&:hover': {
+                            backgroundColor: 'darkred',
+                            borderColor: 'darkred',
+                        },
+                    }}
+                    startIcon={<span className="material-symbols-outlined">attach_file</span>}
+                    disabled={!estaEnRango()} // Deshabilita el botón si no está en el rango
+                >
+                    Enviar comprobante BAC
+                </Button>
+
+                {/* Mostrar mensaje si el botón está deshabilitado */}
+                {!estaEnRango() && (
+                    <strong style={{ marginTop: '10px', color: 'black' }}>
+                        Fuera de horario operativo 😢
+                    </strong>
+                )}
+            </Box>
+        </Box>
+    </Box>
+}
+
                                             </>
                                         }
                                         />                        
