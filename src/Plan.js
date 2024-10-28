@@ -400,15 +400,14 @@ function Plan() {
 
     const obtenerHoraActualUTC6 = () => {
         const ahora = new Date(); // Obtener la hora actual
-        console.log('Hora actual (UTC):', ahora.toUTCString()); // Verifica la hora actual en UTC
+        // console.log('Hora actual (UTC):', ahora.toUTCString()); // Verifica la hora actual en UTC
         const utc6 = new Date(ahora.getTime()); // Ajustar a UTC-6 sin modificar 'ahora'
-        console.log('Hora ajustada a UTC-6:', utc6.toString()); // Verifica la hora ajustada
+        // console.log('Hora ajustada a UTC-6:', utc6.toString()); // Verifica la hora ajustada
         return utc6; // Retornar el objeto Date
     };
     
     const estaEnRango = () => {
         const hora = obtenerHoraActualUTC6().getHours(); // Obtener solo la hora
-        console.log('Hora actual:', hora); // Verifica el valor de hora
         return (hora >= 0 && hora < 20); // Habilita el botón si está entre 00:00 y 19:59
     };
     
@@ -417,41 +416,38 @@ function Plan() {
 
     // Extraer solo la fecha
     const fechaHoyUTC6 = fechaUTC6.toISOString().split('T')[0];
-    console.log(fechaHoyUTC6);
 
     const [openConfirmacionPago, setOpenConfirmacionPago] = useState(false);
     const [cargandoEnvio, setCargandoEnvio] = useState(false);
     const [exitoEnvio, setExitoEnvio] = useState(false);
     
     const enviarComprobante = (clienteData) => {
-        setCargandoEnvio(true);  // Inicia el estado de carga
-        setExitoEnvio(false);     // Resetea el mensaje de éxito
-
-        const formData = new FormData();
+        setCargandoEnvio(true);
+        setExitoEnvio(false);
     
+        const formData = new FormData();
         const nombreCompleto = [
             clienteData.realname,
             clienteData.midname,
             clienteData.midname2,
             clienteData.surname
         ].filter(Boolean).join(' ');
-
+    
         const charge = parseFloat(pagoseleccionado.charge) || 0;
         const administratorFee = parseFloat(pagoseleccionado.administrator_fee) || 0;
         const amount = parseFloat(pagoseleccionado.amount) || 0;
         const lateFee = parseFloat(pagoseleccionado.late_fee) || 0;
-
-        // Sumar los valores
-        const totalFee = charge + administratorFee + amount + lateFee;
-        
     
+        const totalFee = charge + administratorFee + amount + lateFee;
+
+        formData.append('identificadorPago', pagoseleccionado.schedule_position);
+        formData.append('identificadorPrestamo', pagoseleccionado.container_id);
         formData.append('idCliente', clienteData.customer_id);
         formData.append('nombreCliente', nombreCompleto);
         formData.append('correoElectronico', clienteData.email);
         formData.append('celular', clienteData.mob_phone);
         formData.append('fechaPago', fechaHoyUTC6);
         formData.append('numReferencia', numReferencia);
-        formData.append('idpago', pagoseleccionado.id);
         formData.append('cuota', parseFloat(montoPago).toFixed(2));
         formData.append('montoPago', totalFee);
         formData.append('validado', 'pendiente');
@@ -460,13 +456,13 @@ function Plan() {
         formData.append('enviarMensaje', '0');
         formData.append('usuarioValidador_id', '3');
         formData.append('identidadCliente', clienteData.person_code);
-        formData.append('fotoComprobante', fotoComprobante); // Asegúrate de que este archivo sea válido
+        formData.append('fotoComprobante', fotoComprobante);
     
         formData.forEach((value, key) => {
             console.log(`${key}: ${value}`);
         });
     
-        axios.post('https://app.aranih.com/api/app/post_pago_bac.php', formData, {
+        axios.post('https://app.aranih.com/api/chatbot/pagosBac/postBacPago.php', formData, {
             headers: {
                 'Authorization': '70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa',
                 'Content-Type': 'multipart/form-data'
@@ -474,28 +470,26 @@ function Plan() {
         })
         .then((response) => {
             console.log('Respuesta de la API:', response.data);
-            setFotoComprobante(null); // Limpia la imagen después del envío
+            setFotoComprobante(null);
             setExitoEnvio(true);
-        
-            // Espera 3 segundos antes de cerrar el modal
+            
             setTimeout(() => {
-                setOpenModalBAC(false);   // Cierra el modal después de esperar 3 segundos
+                setOpenModalBAC(false);
             }, 1000);
-        
+            
             setTimeout(() => {
-                setExitoEnvio(false);  // Oculta el mensaje
-            }, 1000); // 33 segundos para ocultar el mensaje de éxito
+                setExitoEnvio(false);
+            }, 1000);
         })
         .catch((error) => {
-            console.error('Error al enviar el comprobante:', error);
-        
-            // Espera 3 segundos antes de cerrar el modal en caso de error también
+            console.error('Error al enviar el comprobante:', error.response ? error.response.data : error.message);
+            
             setTimeout(() => {
-                setOpenModalBAC(false);   // Cierra el modal si hay error después de 3 segundos
+                setOpenModalBAC(false);
             }, 1000);
         })
         .finally(() => {
-            setCargandoEnvio(false);  // Finaliza el estado de carga
+            setCargandoEnvio(false);
         });
     };
     
