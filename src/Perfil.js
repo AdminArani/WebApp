@@ -72,7 +72,7 @@ function Perfil() {
                     "Villanueva, Honduras",
                     "Progreso, Honduras",
                     "San Pedro Sula, Honduras",
-                    "Puerto Cortes, Honduras",
+                    "Puerto Cortés, Honduras",
                 ];
     
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
