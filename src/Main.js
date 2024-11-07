@@ -120,12 +120,18 @@ function Main() {
                 const ubicacionesPermitidas = [
                     "Tegucigalpa, Honduras",
                     "Comayagüela, Honduras",
+                    "Valle de Angeles, Honduras",
                     "Choloma, Honduras",
                     "La Lima, Honduras",
                     "Villanueva, Honduras",
                     "Progreso, Honduras",
                     "San Pedro Sula, Honduras",
                     "Puerto Cortés, Honduras",
+                    "El Progreso, Honduras",
+                    "Choluteca,Honduras",
+                    "Comayagua, Honduras",
+                    "Siguatepeque, Honduras",
+                    "La Ceiba, Honduras",
                 ];
     
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
@@ -198,6 +204,27 @@ function Main() {
         myLandbot.open();
     };
 
+    const [ubicacionNoDisponible, setUbicacionNoDisponible] = useState(false);
+
+    useEffect(() => {
+        const fetchUbicacion = async () => {
+            setUbicacion('Cargando ubicación...'); // Mostrar mensaje de carga
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            const ubicacionExistente = false;  // Cambia esto según el resultado de tu API
+            
+            if (!ubicacionExistente) {
+                setUbicacion('Para aplicar a un préstamo debes permitir que Arani conozca tu ubicación');
+            } else {
+                setUbicacion('Ubicación obtenida con éxito');
+            }
+
+            setLoading(false);
+        };
+
+        fetchUbicacion();
+    }, []);
+
     return (   
             <Container disableGutters sx={{ minHeight: '100vh', display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }} component="main" maxWidth="md">
             {loading ? (
@@ -219,7 +246,14 @@ function Main() {
                 <Paper elevation={6} sx={{ p: 6 }}>
                     <BarraApp />
                     <Typography variant="h5" sx={{ mt: 6 }}>Inicio</Typography>
-                    <p>{ubicacion}</p> 
+                    <p>
+                        <strong>Ubicación: </strong> 
+                        {loading ? 'Cargando...' : (
+                            <span style={{ color: ubicacionNoDisponible ? 'black' : 'black' }}>
+                                {ubicacion}
+                            </span>
+                        )}
+                    </p>
                     <div className="contetilebotonpri">
                         <Link to="/perfil" className="tilebotonpri">
                             <div className="tilebotonpri-tit">Perfil</div>

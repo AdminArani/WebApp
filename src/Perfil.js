@@ -734,7 +734,7 @@ function Perfil() {
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">assignment_ind</span>
                                     </ListItemIcon>
-                                    <ListItemText primary={(usuarioDetalle.file4)?usuarioDetalle.file1.substr(-19):"-----"} secondary="* Foto de perfil" />
+                                    <ListItemText primary={(usuarioDetalle.file4)?usuarioDetalle.file1.substr(-19):"-----"} secondary="* Foto Selfie" />
                                     </ListItemButton>
                                 </List>
                             </Grid>
@@ -3333,7 +3333,7 @@ function FormEditFile3({reiniciarpantalla, usuarioFiles}){
     return (
         <Box>
             <Typography variant="h5" sx={{}} >Recibo publico</Typography>
-            <Typography variant="body2" sx={{textAlign: ''}}>Sube una foto de un recibo publico para validar tu residencia, ejem: Recibo de luz o recibo de agua.</Typography>
+            <Typography variant="body2" sx={{textAlign: ''}}>Sube una foto de un recibo publico para validar tu residencia, ejem: Recibo de luz o recibo de agua (Ultimos 6 meses).</Typography>
             <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                
                 <Grid item xs={12} sm={12}>
