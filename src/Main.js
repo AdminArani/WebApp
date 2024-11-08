@@ -211,17 +211,17 @@ function Main() {
             setUbicacion('Cargando ubicación...'); // Mostrar mensaje de carga
             await new Promise(resolve => setTimeout(resolve, 2000));
             
-            const ubicacionExistente = false;  // Cambia esto según el resultado de tu API
+            const ubicacionExistente = false; // Cambia esto según el resultado de tu API
             
             if (!ubicacionExistente) {
                 setUbicacion('Para aplicar a un préstamo debes permitir que Arani conozca tu ubicación');
             } else {
                 setUbicacion('Ubicación obtenida con éxito');
             }
-
+    
             setLoading(false);
         };
-
+    
         fetchUbicacion();
     }, []);
 
@@ -249,7 +249,7 @@ function Main() {
                     <p>
                         <strong>Ubicación: </strong> 
                         {loading ? 'Cargando...' : (
-                            <span style={{ color: ubicacionNoDisponible ? 'black' : 'black' }}>
+                            <span style={{ color: ubicacion === 'Para aplicar a un préstamo debes permitir que Arani conozca tu ubicación' ? 'red' : 'black' }}>
                                 {ubicacion}
                             </span>
                         )}
