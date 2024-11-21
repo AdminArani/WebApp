@@ -547,10 +547,7 @@ function Plan() {
 
                             <Grid container sx={{position: 'relative', zIndex: 2, mb: 2}}>
                                 <Grid item xs={12} sm={6}>
-                                    <Typography sx={{verticalAlign: 'middle'}} >Cuenta virtual: L {numeral(walletData?.amount_wallet_balance).format('0,0.00')} Saldo</Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography align="right" >Número de préstamo: {prestamoSeleccionado.container_id}</Typography>
+                                    <Typography align="center" >Número de préstamo: {prestamoSeleccionado.container_id}</Typography>
                                 </Grid>
                             </Grid>
 
@@ -558,20 +555,25 @@ function Plan() {
                             <div className="bloqueprestamopdt-tit">
                                 <span>Total a pagar</span>
                                 <h4><span>L</span>{numeral(prestamoSeleccionado.debt).format('0,0.00')}</h4>
+                                <Grid item xs={12} sm={6}>
+                                    <Typography sx={{verticalAlign: 'middle'}} >Deposito por aplicar: <strong>L {numeral(walletData?.amount_wallet_balance).format('0,0.00')}</strong></Typography>
+                                </Grid>
+                                <br></br>
                             </div>
                             <div className="bloqueprestamopdt-bar">
                                 <div className="bloqueprestamopdt-barstatus">Pagos {pagosrealizadosnum} / {listaPagos.length}</div>
                                 <div className="bloqueprestamopdt-barllena" style={{width: ((pagosrealizadosnum/listaPagos.length)*100)+"%"}}></div>
                             </div>
+                            <br></br>
                             
 
                             
 
                             <Box className="bloqueprestamopdt-dtll">
-                                <Chip size="small" label={"Creación: "+moment(prestamoSeleccionado.created).format("LL")} variant="outlined" sx={{color: "#FFFFFF"}} />
+                                {/* <Chip size="small" label={"Creación: "+moment(prestamoSeleccionado.created).format("LL")} variant="outlined" sx={{color: "#FFFFFF"}} /> */}
                                 <Chip size="small" label={"Interes "+productoSeleccionado.ProTip+": "+interesPeriodo+"%"} variant="outlined" sx={{color: "#FFFFFF"}} />
                                 <Chip size="small" label={"Terminos: "+productoSeleccionado.ProTip} variant="outlined" sx={{color: "#FFFFFF"}} />
-                                {(prestamoSeleccionado.confirmed_date !== '0000-00-00 00:00:00') && <Chip size="small" label={"Aprobación: "+moment(prestamoSeleccionado.confirmed_date).format("LL")} variant="outlined" sx={{color: "#FFFFFF"}} />}
+                                {/* {(prestamoSeleccionado.confirmed_date !== '0000-00-00 00:00:00') && <Chip size="small" label={"Aprobación: "+moment(prestamoSeleccionado.confirmed_date).format("LL")} variant="outlined" sx={{color: "#FFFFFF"}} />} */}
                                 <Chip size="small" label={"Estado: "+nombreEstadoPrestamo[prestamoSeleccionado.status]} variant="outlined" sx={{color: "#FFFFFF"}} />
                             </Box>
    
