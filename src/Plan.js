@@ -609,85 +609,84 @@ function Plan() {
                                             </Typography>
                                             <Typography variant="h6" >
                                                 <span>L. {numeral(element.charge+element.administrator_fee+element.amount+element.late_fee).format("0,0.[00]")}</span>
-                                                {element.late_fee && <Typography variant="body2" >Mora de L {numeral(element.late_fee).format("0,0.00")}</Typography>}
                                             </Typography>
 
                                             {(parseInt(element.status) >= 0 && parseInt(element.status) <= 5) && 
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-        {/* Visualización estática de BAC */}
-        <Box 
-            sx={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'flex-start', 
-                width: '100%', 
-                border: '1px solid #ccc', 
-                borderRadius: '8px',
-                padding: '10px',
-                backgroundColor: '#f5f5f5'
-            }}
-        >
-            <img 
-                src={logobac} 
-                alt="Logo BAC" 
-                style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
-            />
-            <span><strong>BAC</strong></span>
-        </Box>
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                                                {/* Visualización estática de BAC */}
+                                                <Box 
+                                                    sx={{ 
+                                                        display: 'flex', 
+                                                        flexDirection: 'column', 
+                                                        alignItems: 'flex-start', 
+                                                        width: '100%', 
+                                                        border: '1px solid #ccc', 
+                                                        borderRadius: '8px',
+                                                        padding: '10px',
+                                                        backgroundColor: '#f5f5f5'
+                                                    }}
+                                                >
+                                                    <img 
+                                                        src={logobac} 
+                                                        alt="Logo BAC" 
+                                                        style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
+                                                    />
+                                                    <span><strong>BAC</strong></span>
+                                                </Box>
 
-        {/* Contenedor morado para el botón */}
-        <Box
-            sx={{ 
-                display: 'flex', 
-                gap: '10px', 
-                flexDirection: { xs: 'column', sm: 'row' }, 
-                width: '100%',
-                height: '150px',
-            }}
-        >
-            {/* Cuadro alrededor del botón de BAC */}
-            <Box
-                sx={{
-                    backgroundColor: '#ecf2fa', 
-                    padding: '20px',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'column', 
-                    width: '100%' 
-                }}
-            >
-                <Button
-                    onClick={() => {
-                        set_pagoseleccionado(element); // Establece el elemento seleccionado para BAC
-                        handleOpenModal(); // Abre el modal correspondiente
-                    }}
-                    variant="contained"
-                    sx={{
-                        backgroundColor: 'red',
-                        color: 'white',
-                        '&:hover': {
-                            backgroundColor: 'darkred',
-                            borderColor: 'darkred',
-                        },
-                    }}
-                    startIcon={<span className="material-symbols-outlined">attach_file</span>}
-                    disabled={!estaEnRango()} // Deshabilita el botón si no está en el rango
-                >
-                    Enviar comprobante BAC
-                </Button>
+                                                {/* Contenedor morado para el botón */}
+                                                <Box
+                                                    sx={{ 
+                                                        display: 'flex', 
+                                                        gap: '10px', 
+                                                        flexDirection: { xs: 'column', sm: 'row' }, 
+                                                        width: '100%',
+                                                        height: '150px',
+                                                    }}
+                                                >
+                                                    {/* Cuadro alrededor del botón de BAC */}
+                                                    <Box
+                                                        sx={{
+                                                            backgroundColor: '#ecf2fa', 
+                                                            padding: '20px',
+                                                            borderRadius: '8px',
+                                                            display: 'flex',
+                                                            justifyContent: 'center',
+                                                            alignItems: 'center',
+                                                            flexDirection: 'column', 
+                                                            width: '100%' 
+                                                        }}
+                                                    >
+                                                        <Button
+                                                            onClick={() => {
+                                                                set_pagoseleccionado(element); // Establece el elemento seleccionado para BAC
+                                                                handleOpenModal(); // Abre el modal correspondiente
+                                                            }}
+                                                            variant="contained"
+                                                            sx={{
+                                                                backgroundColor: 'red',
+                                                                color: 'white',
+                                                                '&:hover': {
+                                                                    backgroundColor: 'darkred',
+                                                                    borderColor: 'darkred',
+                                                                },
+                                                            }}
+                                                            startIcon={<span className="material-symbols-outlined">attach_file</span>}
+                                                            disabled={!estaEnRango()} // Deshabilita el botón si no está en el rango
+                                                        >
+                                                            Enviar comprobante BAC
+                                                        </Button>
 
-                {/* Mostrar mensaje si el botón está deshabilitado */}
-                {!estaEnRango() && (
-                    <strong style={{ marginTop: '10px', color: 'black' }}>
-                        Fuera de horario operativo 😢
-                    </strong>
-                )}
-            </Box>
-        </Box>
-    </Box>
-}
+                                                        {/* Mostrar mensaje si el botón está deshabilitado */}
+                                                        {!estaEnRango() && (
+                                                            <strong style={{ marginTop: '10px', color: 'black' }}>
+                                                                Fuera de horario operativo 😢
+                                                            </strong>
+                                                        )}
+                                                    </Box>
+                                                </Box>
+                                            </Box>
+                                        }
 
                                             </>
                                         }
