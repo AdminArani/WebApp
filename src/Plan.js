@@ -611,7 +611,7 @@ function Plan() {
                                                 <span>L. {numeral(element.charge+element.administrator_fee+element.amount+element.late_fee).format("0,0.[00]")}</span>
                                             </Typography>
 
-                                            {(parseInt(element.status) >= 0 && parseInt(element.status) <= 5) && 
+                                            {(parseInt(element.status) >= 2 && parseInt(element.status) <= 6) && 
                                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
                                                 {/* Visualización estática de BAC */}
                                                 <Box 
