@@ -608,7 +608,7 @@ function Plan() {
                                                 Estado: {(nombreEstadoPago[element.status] || element.status)}
                                             </Typography>
                                             <Typography variant="h6" >
-                                                <span>L. {numeral(element.charge+element.administrator_fee+element.amount+element.late_fee).format("0,0.[00]")}</span>
+                                                <span>L. {numeral(element.charge+element.administrator_fee+element.amount+element.late_fee-element.amount_covered-element.charge_covered-element.administrator_fee_covered-element.cinterest_covered).format("0,0.[00]")}</span>
                                             </Typography>
 
                                             {(parseInt(element.status) >= 2 && parseInt(element.status) <= 6) && 
