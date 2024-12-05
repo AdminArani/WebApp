@@ -226,11 +226,11 @@ function Main() {
     }, []);
 
     const mensajesErrores = {
-        1: "Foto de perfil",
-        2: "Recibo Publico",
-        3: "Documentos",
-        4: "DNI",
-        5: "Menor de edad",
+        1: "No pudimos confirmar tu foto selfie",
+        2: "Tu recibo publico no es valido",
+        3: "No pudimos confirmar tus documentos",
+        4: "No pudimos confirmar tu DNI",
+        5: "Eres menor de edad y no aplicas",
     };
 
     const styles = {
@@ -286,7 +286,7 @@ function Main() {
                     {usuarioDetalle.status === "0" && (
                     <div style={styles.container}>
                         <Typography style={styles.text}>
-                        Error en validación: {mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil}
+                            Lo sentimos: {mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil}
                         </Typography>
                     </div>
                     )}
