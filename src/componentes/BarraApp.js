@@ -94,34 +94,36 @@ function Notificaciones({chstdopen}){
     const [cargando, set_cargando] = useState(false);
     const [listaNotis, set_listaNotis] = useState([]);
    
-    function cargarnotificaciones(){
+    function cargarnotificaciones() {
         set_cargando(true);
         axios.request({
             url: `${config.apiUrl}/api/app/getNotification.php`,
             method: "post",
             data: {
                 sid: gContext.logeado?.token,
-              },
+            },
         })
         .then((res) => {
             set_cargando(false);
-            if(res.data.status === "ERS"){
+            if (res.data.status === "ERS") {
                 localStorage.removeItem('arani_session_id');
                 localStorage.removeItem('arani_session_data');
-                gContext.set_logeado({estado: false, token: '', data: {}});
+                gContext.set_logeado({ estado: false, token: '', data: {} });
             }
-            if(res.data.status === "ER"){
+            if (res.data.status === "ER") {
                 console.log(res.data.payload.message);
             }
-            if(res.data.status === "OK"){
-                // console.log(res.data.payload);
-                set_listaNotis(res.data.payload);
-                
+            if (res.data.status === "OK") {
+                // Ordenar las notificaciones por fecha descendente y tomar la más reciente
+                const notificaciones = res.data.payload.sort((a, b) => new Date(b.NotFch) - new Date(a.NotFch));
+                const ultimaNotificacion = notificaciones.length > 0 ? [notificaciones[0]] : [];
+                set_listaNotis(ultimaNotificacion); // Actualizar con la última notificación
             }
         }).catch(err => {
             console.log(err.message);
         });
     }
+    
 
     function eliminarNotificacion(id){
         axios.request({
