@@ -225,6 +225,34 @@ function Main() {
         fetchUbicacion();
     }, []);
 
+    const mensajesErrores = {
+        1: "Foto de perfil",
+        2: "Recibo Publico",
+        3: "Documentos",
+        4: "DNI",
+        5: "Menor de edad",
+    };
+
+    const styles = {
+        container: {
+          padding: '16px',
+          margin: '16px auto',
+          maxWidth: '500px',
+          backgroundColor: '#fff5f5',
+          border: '1px solid #f5c2c2',
+          borderRadius: '8px',
+          textAlign: 'center',
+          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+        },
+        text: {
+          color: '#e74c3c',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          lineHeight: '1.5',
+        },
+    };
+      
+
     return (   
             <Container disableGutters sx={{ minHeight: '100vh', display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }} component="main" maxWidth="md">
             {loading ? (
@@ -254,6 +282,17 @@ function Main() {
                             </span>
                         )}
                     </p>
+
+                    {usuarioDetalle.status === "0" && (
+                    <div style={styles.container}>
+                        <Typography style={styles.text}>
+                        Error en validación: {mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil}
+                        </Typography>
+                    </div>
+                    )}
+
+
+
                     <div className="contetilebotonpri">
                         <Link to="/perfil" className="tilebotonpri">
                             <div className="tilebotonpri-tit">Perfil</div>

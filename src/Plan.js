@@ -434,11 +434,17 @@ function Plan() {
         ].filter(Boolean).join(' ');
     
         const charge = parseFloat(pagoseleccionado.charge) || 0;
+        const charge_covered = parseFloat(pagoseleccionado.charge_covered) || 0;
         const administratorFee = parseFloat(pagoseleccionado.administrator_fee) || 0;
+        const administrator_fee_covered = parseFloat(pagoseleccionado.administrator_fee_covered) || 0;
         const amount = parseFloat(pagoseleccionado.amount) || 0;
+        const amount_covered = parseFloat(pagoseleccionado.amount_covered) || 0;
         const lateFee = parseFloat(pagoseleccionado.late_fee) || 0;
+        const late_fee_covered = parseFloat(pagoseleccionado.late_fee_covered) || 0;
+        const penalty = parseFloat(pagoseleccionado.penalty_fee) || 0;
+        const penalty_covered = parseFloat(pagoseleccionado.penalty_covered) || 0;
     
-        const totalFee = charge + administratorFee + amount + lateFee;
+        const totalFee = charge - charge_covered + administratorFee - administrator_fee_covered + amount - amount_covered + lateFee - late_fee_covered + penalty - penalty_covered;
 
         formData.append('identificadorPago', pagoseleccionado.schedule_position);
         formData.append('identificadorPrestamo', pagoseleccionado.container_id);
