@@ -976,11 +976,11 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                             >
                                 {inputAceptoBanco ? 
                                     <span>
-                                        <span role="img" aria-label="check" style={{ paddingRight: '10px' }}>✔️</span>
-                                        La información bancaria es correcta
+                                        <span role="img" aria-label="check" style={{ paddingRight: '15px' }}>✔️</span>
+                                        Si, mi información bancaria es correcta
                                     </span> 
                                     : 
-                                    'La información bancaria es correcta'
+                                    'Si, mi información bancaria es correcta'
                                 }
                             </Button>
                         </div>
@@ -1012,7 +1012,7 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                     textTransform: 'none',
                                 }} 
                             >
-                                Actualizar cuenta de banco
+                                No, Quiero actualizar mi cuenta bancaria
                             </Button>
                         </div>
                     </Grid>
