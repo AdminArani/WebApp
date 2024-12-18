@@ -226,11 +226,11 @@ function Main() {
     }, []);
 
     const mensajesErrores = {
-        1: "No pudimos confirmar tu foto selfie",
-        2: "Tu recibo publico no es valido",
-        3: "No pudimos confirmar tus documentos",
-        4: "No pudimos confirmar tu DNI",
-        5: "Eres menor de edad y no aplicas",
+        1: "No pudimos confirmar tu foto selfie en tu perfil",
+        2: "Tu recibo publico no es valido en tu perfil",
+        3: "No pudimos confirmar tus documentos en tu perfil",
+        4: "No pudimos confirmar tu DNI en tu perfil",
+        5: "Eres menor de edad y no aplicas en tu perfil",
     };
 
     const styles = {
