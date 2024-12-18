@@ -944,50 +944,31 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 <span style={{fontWeight: 'bold'}}>{nombreBanco}</span>
                                 {' es la correcta para desembolsar tu dinero'}
                             </Typography>
-                            </Grid>
+                        </Grid>
 
                         <br/>
-                        <Grid item xs={12} sm={12} style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <div style={{'@media (max-width:600px)': { height: '50px' }}}>
-                            <Button 
-                                variant="contained" 
-                                onMouseOver={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'black';
-                                    e.currentTarget.style.color = 'white';
-                                }}
-                                onMouseOut={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'white';
-                                    e.currentTarget.style.color = 'black';
-                                }}
-                                style={{
-                                    marginLeft: '30px',
-                                    backgroundColor: 'white',
-                                    color: 'black',
-                                    height: '65%',
-                                    width: '80%',
-                                    marginTop: '10px',
-                                    fontSize: '10px',
-                                    boxShadow: 'none',
-                                    border: '1px solid grey',
-                                    borderRadius: '20px',
-                                    textTransform: 'none',
-                                }} 
-                                onClick={() => set_inputAceptoBanco(!inputAceptoBanco)}
+                        <Grid
+                            item
+                            xs={12}
+                            sm={12}
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                flexWrap: 'wrap', // Permite que los elementos se ajusten en pantallas pequeñas
+                            }}
                             >
-                                {inputAceptoBanco ? 
-                                    <span>
-                                        <span role="img" aria-label="check" style={{ paddingRight: '15px' }}>✔️</span>
-                                        Si, mi información bancaria es correcta
-                                    </span> 
-                                    : 
-                                    'Si, mi información bancaria es correcta'
-                                }
-                            </Button>
-                        </div>
-
-                        <div style={{'@media (max-width:600px)': { height: '50px' }}}>
-                            <Button 
-                                onClick={()=>{set_openEditarBanco(true)}} 
+                            <div
+                                style={{
+                                display: 'flex',
+                                flexDirection: 'column', // Por defecto en columna para pantallas pequeñas
+                                width: '100%',
+                                '@media (min-width:600px)': {
+                                    flexDirection: 'row', // Cambiar a fila en pantallas grandes
+                                    justifyContent: 'space-between',
+                                },
+                                }}
+                            >
+                                <Button
                                 variant="contained"
                                 onMouseOver={(e) => {
                                     e.currentTarget.style.backgroundColor = 'black';
@@ -998,23 +979,60 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                     e.currentTarget.style.color = 'black';
                                 }}
                                 style={{
-                                    marginLeft: '30px',
-                                    marginRight: '30px',
+                                    margin: '10px auto', // Alinear botones centrados en vista responsiva
                                     backgroundColor: 'white',
                                     color: 'black',
-                                    height: '65%',
+                                    height: '40px',
                                     width: '80%',
-                                    marginTop: '10px',
                                     fontSize: '10px',
                                     boxShadow: 'none',
                                     border: '1px solid grey',
                                     borderRadius: '20px',
                                     textTransform: 'none',
-                                }} 
-                            >
+                                }}
+                                onClick={() => set_inputAceptoBanco(!inputAceptoBanco)}
+                                >
+                                {inputAceptoBanco ? (
+                                    <span>
+                                    <span role="img" aria-label="check" style={{ paddingRight: '15px' }}>
+                                        ✔️
+                                    </span>
+                                    Si, mi información bancaria es correcta
+                                    </span>
+                                ) : (
+                                    'Si, mi información bancaria es correcta'
+                                )}
+                                </Button>
+
+                                <Button
+                                onClick={() => {
+                                    set_openEditarBanco(true);
+                                }}
+                                variant="contained"
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'black';
+                                    e.currentTarget.style.color = 'white';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'white';
+                                    e.currentTarget.style.color = 'black';
+                                }}
+                                style={{
+                                    margin: '10px auto', // Igual al anterior
+                                    backgroundColor: 'white',
+                                    color: 'black',
+                                    height: '40px',
+                                    width: '80%',
+                                    fontSize: '10px',
+                                    boxShadow: 'none',
+                                    border: '1px solid grey',
+                                    borderRadius: '20px',
+                                    textTransform: 'none',
+                                }}
+                                >
                                 No, Quiero actualizar mi cuenta bancaria
-                            </Button>
-                        </div>
+                                </Button>
+                            </div>
                     </Grid>
 
                         {/* Modal del contrato */}
