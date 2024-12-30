@@ -3342,12 +3342,19 @@ function FormEditFile3({reiniciarpantalla, usuarioFiles}){
     return (
         <Box>
             <Typography variant="h5" sx={{}} >Recibo publico</Typography>
-            <Typography variant="body2" sx={{textAlign: ''}}>Sube una foto de un recibo publico para validar tu residencia, ejem: Recibo de luz o recibo de agua (Ultimos 6 meses).</Typography>
+            <br/>
+            <Typography variant="body2" sx={{textAlign: ''}}>
+                Sube una foto clara de un recibo publico de <strong>(los ultimos 6 meses)</strong> de cualquiera de las siguientes empresas: <strong>EEH, UMAPS, Aguas de San Pedro, servicios de cable TIGO, Claro y Cable Color</strong>.  <br/> El recibo debe mostrar la direccion de su vivienda.  
+                <br/>
+                <br/>
+                <strong>Si el recibo no cumple las condiciones mencionadas no sera aceptado</strong>
+            </Typography>
             <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                
                 <Grid item xs={12} sm={12}>
                     {subidoArchivo3 && <Typography sx={{textAlign: 'center', color: '#5aad55'}}>Se subio correctamente</Typography>}
                     {(subidoArchivo3||imageFiles3) && <img className="imgprevperfil" src={imagendata3||imageFiles3}  alt="preview" />}
+                    <br/>
                     <Button fullWidth disabled={cargandoArchivo3||subidoArchivo3} variant="contained" component="label" startIcon={<span className="material-symbols-outlined">cloud_upload</span>}>
                         {(cargandoArchivo3)?"Subiendo...":"Subir recibo publico"}
                         <input hidden onChange={enviarArchivo3} accept="image/*" multiple type="file" />
@@ -3415,13 +3422,18 @@ function FormEditFile4({reiniciarpantalla, usuarioFiles}){
 
     return (
         <Box>
-            <Typography variant="h5" sx={{}} >Foto de perfil</Typography>
-            <Typography variant="body" sx={{mb: '1rem'}} >Sube una foto de perfil para tu cuenta.</Typography>
+            <Typography variant="h5" sx={{}}>Foto de perfil</Typography>
+            <br/>
+            <Typography variant="body1" sx={{ mb: '1rem', textAlign: 'justify' }}>
+                Sube una foto selfie que servirá como tu foto de perfil. Asegúrate de que la foto sea a color, muestres tu DNI, y aparezca todo tu rostro y cabello. No uses gorra, sombrero ni lentes de sol. <br/><br/><strong>Las fotos que no cumplan con estas condiciones no serán aceptadas</strong>.
+            </Typography>
+
             <Grid sx={{mt: 1, mb: 1}} container spacing={2}>
                 
                 <Grid item xs={12} sm={12}>
                     {subidoArchivo4 && <Typography sx={{textAlign: 'center', color: '#5aad55'}}>Se subio correctamente</Typography>}
                     {(subidoArchivo4||imageFiles4) && <img className="imgprevperfil" src={imagendata4||imageFiles4} alt="preview" />}
+                    <br/>
                     <Button fullWidth disabled={cargandoArchivo4||subidoArchivo4} variant="contained" component="label" startIcon={<span className="material-symbols-outlined">cloud_upload</span>}>
                         {(cargandoArchivo4)?"Subiendo...":"Foto de perfil"}
                         <input hidden onChange={enviarArchivo4} accept="image/*" multiple type="file" />
