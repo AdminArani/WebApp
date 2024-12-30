@@ -67,12 +67,19 @@ function Perfil() {
                 const ubicacionesPermitidas = [
                     "Tegucigalpa, Honduras",
                     "Comayagüela, Honduras",
+                    "Valle de Angeles, Honduras",
                     "Choloma, Honduras",
                     "La Lima, Honduras",
                     "Villanueva, Honduras",
                     "Progreso, Honduras",
                     "San Pedro Sula, Honduras",
                     "Puerto Cortés, Honduras",
+                    "El Progreso, Honduras",
+                    "Danli,Honduras",
+                    "Choluteca,Honduras",
+                    "Comayagua, Honduras",
+                    "Siguatepeque, Honduras",
+                    "La Ceiba, Honduras",
                 ];
     
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas

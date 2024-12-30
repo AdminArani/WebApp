@@ -1802,37 +1802,37 @@ function FormCambiarBanco({setOpen}){
             </Grid>
                 <Grid item xs={12} sm={6}>
                 <TextField 
-    helperText={inputCuentaBanco.textoAyuda} 
-    required 
-    value={inputCuentaBanco.valor} 
-    onBlur={() => set_inputCuentaBanco({ ...inputCuentaBanco, blur: true })}
-    onChange={handleChange_inputCuentaBanco} 
-    error={!inputCuentaBanco.validado && inputCuentaBanco.blur} 
-    autoComplete="off" 
-    fullWidth 
-    label={"# de cuenta" }
-    InputProps={{
-        style: {
-            fontSize: '12px',
-            borderRadius: '20px',
-            overflow: 'hidden',
-            height: '30px',
-        }
-    }}
-    inputProps={{
-        style: {
-            fontSize: '12px',
-        },
-        onInput: (e) => {
-            e.target.value = e.target.value.replace(/-/g, ""); // Elimina los guiones directamente
-        },
-    }}
-    InputLabelProps={{
-        style: {
-            fontSize: '12px',
-        }
-    }}
-/>
+                        helperText={inputCuentaBanco.textoAyuda} 
+                        required 
+                        value={inputCuentaBanco.valor} 
+                        onBlur={() => set_inputCuentaBanco({ ...inputCuentaBanco, blur: true })}
+                        onChange={handleChange_inputCuentaBanco} 
+                        error={!inputCuentaBanco.validado && inputCuentaBanco.blur} 
+                        autoComplete="off" 
+                        fullWidth 
+                        label={"# de cuenta" }
+                        InputProps={{
+                            style: {
+                                fontSize: '12px',
+                                borderRadius: '20px',
+                                overflow: 'hidden',
+                                height: '30px',
+                            }
+                        }}
+                        inputProps={{
+                            style: {
+                                fontSize: '12px',
+                            },
+                            onInput: (e) => {
+                                e.target.value = e.target.value.replace(/-/g, ""); // Elimina los guiones directamente
+                            },
+                        }}
+                        InputLabelProps={{
+                            style: {
+                                fontSize: '12px',
+                            }
+                        }}
+                    />
 
                     </Grid>
                     <Grid item xs={12} sm={12}>
