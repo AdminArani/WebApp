@@ -3422,7 +3422,7 @@ function FormEditFile4({reiniciarpantalla, usuarioFiles}){
 
     return (
         <Box>
-            <Typography variant="h5" sx={{}}>Foto de perfil</Typography>
+            <Typography variant="h5" sx={{}}>Foto selfie</Typography>
             <br/>
             <Typography variant="body1" sx={{ mb: '1rem', textAlign: 'justify' }}>
                 Sube una foto selfie que servirá como tu foto de perfil. Asegúrate de que la foto sea a color, muestres tu DNI, y aparezca todo tu rostro y cabello. No uses gorra, sombrero ni lentes de sol. <br/><br/><strong>Las fotos que no cumplan con estas condiciones no serán aceptadas</strong>.
