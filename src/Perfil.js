@@ -75,8 +75,8 @@ function Perfil() {
                     "San Pedro Sula, Honduras",
                     "Puerto Cortés, Honduras",
                     "El Progreso, Honduras",
-                    "Danli,Honduras",
-                    "Choluteca,Honduras",
+                    "Danli, Honduras",
+                    "Choluteca, Honduras",
                     "Comayagua, Honduras",
                     "Siguatepeque, Honduras",
                     "La Ceiba, Honduras",
@@ -3118,24 +3118,16 @@ function FormCambiarBanco({cerrar, reiniciarpantalla, apiCamposConstructor, usua
                 helperText={inputCuentaBanco.textoAyuda} 
                 required 
                 value={inputCuentaBanco.valor} 
-                onBlur={() => set_inputCuentaBanco({ ...inputCuentaBanco, blur: true })}
-                onChange={(e) => {
-                    set_inputCuentaBanco({ ...inputCuentaBanco, valor: e.target.value });
-                }} 
-                error={!inputCuentaBanco.validado && inputCuentaBanco.blur} 
+                onBlur={()=>{set_inputCuentaBanco({...inputCuentaBanco, blur: true})}}
+                onChange={handleChange_inputCuentaBanco} 
+                error={(!inputCuentaBanco.validado && inputCuentaBanco.blur)} 
                 autoComplete="off" 
                 fullWidth 
                 label={"# de cuenta  "}
                 InputLabelProps={{
                     shrink: true,
                 }}
-                inputProps={{
-                    onInput: (e) => {
-                        e.target.value = e.target.value.replace(/-/g, ""); // Elimina los guiones directamente
-                    },
-                }}
             />
-
 
                 </Grid>
                 <Grid item xs={12} sm={12}>
