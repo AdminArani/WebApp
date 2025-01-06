@@ -75,7 +75,7 @@ function Perfil() {
                     "San Pedro Sula, Honduras",
                     "Puerto Cortés, Honduras",
                     "El Progreso, Honduras",
-                    "Danli, Honduras",
+                    "Danlí, Honduras",
                     "Choluteca, Honduras",
                     "Comayagua, Honduras",
                     "Siguatepeque, Honduras",

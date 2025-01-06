@@ -128,7 +128,7 @@ function Main() {
                     "San Pedro Sula, Honduras",
                     "Puerto Cortés, Honduras",
                     "El Progreso, Honduras",
-                    "Danli, Honduras",
+                    "Danlí, Honduras",
                     "Choluteca,Honduras",
                     "Comayagua, Honduras",
                     "Siguatepeque, Honduras",
@@ -227,6 +227,7 @@ function Main() {
     }, []);
 
     const mensajesErrores = {
+        0: "Tu perfil sigue en proceso de validación",
         1: "No pudimos confirmar tu foto selfie en tu perfil",
         2: "Tu recibo publico no es valido en tu perfil",
         3: "No pudimos confirmar tus documentos en tu perfil",
