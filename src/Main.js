@@ -215,7 +215,7 @@ function Main() {
             const ubicacionExistente = false; // Cambia esto según el resultado de tu API
             
             if (!ubicacionExistente) {
-                setUbicacion('Para aplicar a un préstamo debes permitir que Arani conozca tu ubicación');
+                setUbicacion('Para continuar con el proceso de solicitud de préstamo en Arani App, es necesario que el navegador acceda a tu ubicación en tu celular.');
             } else {
                 setUbicacion('Ubicación obtenida con éxito');
             }
@@ -279,7 +279,7 @@ function Main() {
                     <p>
                         <strong>Ubicación: </strong> 
                         {loading ? 'Cargando...' : (
-                            <span style={{ color: ubicacion === 'Para aplicar a un préstamo debes permitir que Arani conozca tu ubicación' ? 'red' : 'black' }}>
+                            <span style={{ color: ubicacion === 'Para continuar con el proceso de solicitud de préstamo en Arani App, es necesario que el navegador acceda a tu ubicación en tu celular.' ? 'red' : 'black' }}>
                                 {ubicacion}
                             </span>
                         )}

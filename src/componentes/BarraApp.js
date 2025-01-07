@@ -52,17 +52,19 @@ function BarraApp(){
         <div className="barraapp">
             <div>
                 <img alt="Logo ARANI" style={{width: '15rem', marginRight: '1rem'}} src={AraniLogo} />
+                <br/>
+                <br/>
             </div>
             <div className="barraapp-btnsder">
-                <IconButton component={Link} to="/" sx={{mt: 3}}>
-                    <span style={{fontSize: '2rem'}} className="material-symbols-outlined">home</span>
+                <IconButton component={Link} to="/" sx={{ mt: 3 }} style={{ visibility: 'hidden' }}>
+                    <span style={{ fontSize: '2rem' }} className="material-symbols-outlined">home</span>
                 </IconButton>
-                <IconButton component={Link} to="/perfil" sx={{mt: 3}}>
-                    <span style={{fontSize: '2rem'}} className="material-symbols-outlined">account_circle</span>
+                <IconButton component={Link} to="/perfil" sx={{ mt: 3 }} style={{ visibility: 'hidden' }}>
+                    <span style={{ fontSize: '2rem' }} className="material-symbols-outlined">account_circle</span>
                 </IconButton>
-                <IconButton onClick={handleMenu} sx={{mt: 3}}>
+                <IconButton onClick={handleMenu} sx={{ mt: 3 }} style={{ visibility: 'hidden' }}>
                     <Badge badgeContent={notiNum} color="primary">
-                        <span style={{fontSize: '2rem'}} className="material-symbols-outlined">notifications</span>
+                        <span style={{ fontSize: '2rem' }} className="material-symbols-outlined">notifications</span>
                     </Badge>
                 </IconButton>
                 <Menu id="menu-appbar" keepMounted anchorEl={anchorEl} 
