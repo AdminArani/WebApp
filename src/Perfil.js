@@ -521,183 +521,413 @@ function Perfil() {
                                 <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}>Para poder solicitar préstamos, primero debes llenar todos los cambpos obligatorios, despues se hara una revisión y se aprobara tu cuenta para poder hacer esa solicitud.</Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('tipoingreso'); set_openEditarCampos(true);}}>
-                                    <ListItemIcon>
-                                        <span className="material-symbols-outlined">payments</span>
-                                    </ListItemIcon>
-                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={usuarioDetalle.income_status||"----"} secondary="* Tipo de ingreso" />
-                                    </ListItemButton>
-                                </List>
+                            <List>
+                            <ListItemButton 
+                                onClick={() => {
+                                    if (usuarioDetalle.status === "0") {
+                                        set_moduloEditarActivo('tipoingreso');
+                                        set_openEditarCampos(true);
+                                    } else {
+                                        alert("Este campo está deshabilitado.");
+                                    }
+                                }}
+                                disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                style={{
+                                    cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                    opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <span className="material-symbols-outlined">payments</span>
+                                </ListItemIcon>
+                                <ListItemText 
+                                    primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                    primary={usuarioDetalle.income_status || "----"} 
+                                    secondary="* Tipo de ingreso" 
+                                />
+                            </ListItemButton>
+                        </List>
+
                             </Grid>
                             
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('banco'); set_openEditarCampos(true);}}>
-                                        <ListItemIcon>
-                                            <span className="material-symbols-outlined">account_balance</span>
-                                        </ListItemIcon>
-                                        <ListItemText primary={usuarioDetalle.bank?sacarNombreBanco(usuarioDetalle.bank):"----"} secondary={"* Banco"} />
-                                    </ListItemButton>
-                                </List>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('banco');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">account_balance</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primary={usuarioDetalle.bank ? sacarNombreBanco(usuarioDetalle.bank) : "----"} 
+                                        secondary={"* Banco"} 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
 
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('estadocivil'); set_openEditarCampos(true);}}>
-                                        <ListItemIcon>
-                                            <span className="material-symbols-outlined">mail</span>
-                                        </ListItemIcon>
-                                        <ListItemText primary={apiCamposConstructor.marital_status?.values[usuarioDetalle.marital_status]||"----"} secondary="* Estado cívil" />
-                                    </ListItemButton>
-                                </List>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('estadocivil');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">mail</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primary={apiCamposConstructor.marital_status?.values[usuarioDetalle.marital_status] || "----"} 
+                                        secondary="* Estado civil" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
 
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('income'); set_openEditarCampos(true);}}>
-                                        <ListItemIcon>
-                                            <span className="material-symbols-outlined">account_balance_wallet</span>
-                                        </ListItemIcon>
-                                        <ListItemText primary={(parseInt(usuarioDetalle.income) >= 1)?"L "+numeral(usuarioDetalle.income).format('0,0.[00]'):"----"} secondary="* Ingreso mensual" />
-                                    </ListItemButton>
-                                </List>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('income');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">account_balance_wallet</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primary={(parseInt(usuarioDetalle.income) >= 1) ? "L " + numeral(usuarioDetalle.income).format('0,0.[00]') : "----"} 
+                                        secondary="* Ingreso mensual" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('vivienda'); set_openEditarCampos(true);}}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('vivienda');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">home</span>
                                     </ListItemIcon>
-                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={usuarioDetalle.home_status||"----"} secondary="* Casa" />
-                                    </ListItemButton>
-                                </List>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={usuarioDetalle.home_status || "----"} 
+                                        secondary="* Casa" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
                             
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('ubicacion'); set_openEditarCampos(true);}}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('ubicacion');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">location_on</span>
                                     </ListItemIcon>
-                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={
-                                        
-                                        (usuarioDetalle.region || '----')+", "+
-                                        (usuarioDetalle.county || '----')+", "+
-                                        (usuarioDetalle.city || '----')
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={
+                                            (usuarioDetalle.region || '----') + ", " +
+                                            (usuarioDetalle.county || '----') + ", " +
+                                            (usuarioDetalle.city || '----')
                                         } 
-                                        secondary="* Ubicación domicilio" />
-                                    </ListItemButton>
-                                </List>
+                                        secondary="* Ubicación domicilio" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
 
                             {/** INICIO Bloquea la edicion en tipo de dependientes si numero de dependientes es 0 **/}
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={() => { 
-                                        set_moduloEditarActivo('numerodependientes'); 
-                                        set_openEditarCampos(true); 
-                                    }}>
-                                        <ListItemIcon>
-                                            <span className="material-symbols-outlined">group_add</span>
-                                        </ListItemIcon>
-                                        <ListItemText 
-                                            primaryTypographyProps={{ textTransform: 'capitalize' }}
-                                            primary={usuarioDetalle.dependents || "-----"} 
-                                            secondary="* Número de dependientes" 
-                                        />
-                                    </ListItemButton>
-                                </List>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => { 
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('numerodependientes'); 
+                                            set_openEditarCampos(true); 
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">group_add</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{ textTransform: 'capitalize' }}
+                                        primary={usuarioDetalle.dependents || "-----"} 
+                                        secondary="* Número de dependientes" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
 
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton 
-                                        onClick={() => { 
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => { 
+                                        if (usuarioDetalle.status === "0" && usuarioDetalle.dependents > 0) {
                                             set_moduloEditarActivo('dependendeti'); 
                                             set_openEditarCampos(true); 
-                                        }}
-                                        disabled={usuarioDetalle.dependents <= 0} // Deshabilita si no hay dependientes
-                                    >
-                                        <ListItemIcon>
-                                            <span className="material-symbols-outlined">person</span>
-                                        </ListItemIcon>
-                                        <ListItemText 
-                                            primaryTypographyProps={{ textTransform: 'capitalize' }}
-                                            primary={
-                                                usuarioDetalle.dependents > 0 
-                                                    ? usuarioDetalle.dependents_who || "-----" 
-                                                    : "No tengo dependientes" // Mostrar si dependents es 0
-                                            } 
-                                            secondary="* Tipo de dependientes" 
-                                        />
-                                    </ListItemButton>
-                                </List>
+                                        } else {
+                                            if (usuarioDetalle.dependents <= 0) {
+                                                alert("No tienes dependientes registrados.");
+                                            } else {
+                                                alert("Esta opción está deshabilitada.");
+                                            }
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1" || usuarioDetalle.dependents <= 0}  // Deshabilita si status es "1" o no hay dependientes
+                                    style={{
+                                        cursor: (usuarioDetalle.status === "1" || usuarioDetalle.dependents <= 0) ? "not-allowed" : "pointer", // Cambia el cursor según el estado
+                                        opacity: (usuarioDetalle.status === "1" || usuarioDetalle.dependents <= 0) ? 0.5 : 1 // Hace que el botón se vea deshabilitado
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">person</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{ textTransform: 'capitalize' }}
+                                        primary={
+                                            usuarioDetalle.dependents > 0 
+                                                ? usuarioDetalle.dependents_who || "-----" 
+                                                : "No tengo dependientes" 
+                                        } 
+                                        secondary="* Tipo de dependientes" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
+
                             </Grid>
                             {/** FIN Bloquea la edicion en tipo de dependientes si numero de dependientes es 0 **/}
 
                             
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('gradoeducativo'); set_openEditarCampos(true);}}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => { 
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('gradoeducativo'); 
+                                            set_openEditarCampos(true); 
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"}  // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">school</span>
                                     </ListItemIcon>
-                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={(usuarioDetalle.education)?apiCamposConstructor.education?.values[usuarioDetalle.education]:"-----"} secondary="* Grado educativo" />
-                                    </ListItemButton>
-                                </List>
+                                    <ListItemText 
+                                        primaryTypographyProps={{ textTransform: 'capitalize' }}
+                                        primary={usuarioDetalle.education ? apiCamposConstructor.education?.values[usuarioDetalle.education] : "-----"} 
+                                        secondary="* Grado educativo" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
 
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('lugartrabajo'); set_openEditarCampos(true);}}>
-                                        <ListItemIcon>
-                                            <span className="material-symbols-outlined">apartment</span>
-                                        </ListItemIcon>
-                                        <ListItemText primary={usuarioDetalle.workplace||"----"} secondary="* Lugar de trabajo" />
-                                    </ListItemButton>
-                                </List>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => { 
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('lugartrabajo'); 
+                                            set_openEditarCampos(true); 
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"}  // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">apartment</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primary={usuarioDetalle.workplace || "----"} 
+                                        secondary="* Lugar de trabajo" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
                             {/* Ejemplo de camposs trabajo */}
                             {/* posicion de trabajo  */}
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('posiciontrabajo'); set_openEditarCampos(true);}}>
-                                        <ListItemIcon>
-                                            <span className="material-symbols-outlined">apartment</span>
-                                        </ListItemIcon>
-                                        <ListItemText primary={usuarioDetalle.workplace_position||"----"} secondary="* Posición de trabajo" />
-                                    </ListItemButton>
-                                </List>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => { 
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('posiciontrabajo'); 
+                                            set_openEditarCampos(true); 
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"}  // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">apartment</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primary={usuarioDetalle.workplace_position || "----"} 
+                                        secondary="* Posición de trabajo" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
 
                             {/* Departamento donde se ubica el trabajo */}
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('ubicaciontrabajo'); set_openEditarCampos(true);}}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => { 
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('ubicaciontrabajo'); 
+                                            set_openEditarCampos(true); 
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"}  // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">location_on</span>
                                     </ListItemIcon>
-                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={
-                                        
-                                        (usuarioDetalle.work_region || '----')+", "+
-                                        (usuarioDetalle.work_county || '----')+", "+
-                                        (usuarioDetalle.workplace_address || '----')
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={
+                                            (usuarioDetalle.work_region || '----') + ", " +
+                                            (usuarioDetalle.work_county || '----') + ", " +
+                                            (usuarioDetalle.workplace_address || '----')
                                         } 
-                                        secondary="* Ubicación empleo" />
-                                    </ListItemButton>
-                                </List>
+                                        secondary="* Ubicación empleo" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
                             
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('antiguedadlaboral'); set_openEditarCampos(true);}}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => { 
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('antiguedadlaboral'); 
+                                            set_openEditarCampos(true); 
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"}  // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">work</span>
                                     </ListItemIcon>
-                                    <ListItemText primaryTypographyProps={{textTransform: 'capitalize'}} primary={(usuarioDetalle.work_experience)?moment(usuarioDetalle.work_experience).calendar()+" ("+moment(usuarioDetalle.work_experience).fromNow('Y')+")":"----"} secondary="* Antigüedad laboral" />
-                                    </ListItemButton>
-                                </List>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={
+                                            (usuarioDetalle.work_experience)
+                                                ? moment(usuarioDetalle.work_experience).calendar() + " (" + moment(usuarioDetalle.work_experience).fromNow('Y') + ")"
+                                                : "----"
+                                        } 
+                                        secondary="* Antigüedad laboral" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
 
 
@@ -706,44 +936,104 @@ function Perfil() {
                                 <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}></Divider>
                             </Grid>
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('file1'); set_openEditarCampos(true);}}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('file1'); 
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción estará disponible en 12 meses.");
+                                        }
+                                    }} 
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si es "1"
+                                    style={{ cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", opacity: usuarioDetalle.status === "1" ? 0.5 : 1 }}
+                                >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">badge</span>
                                     </ListItemIcon>
-                                    <ListItemText primary={(usuarioDetalle.file1)?usuarioDetalle.file1.substr(-19):"-----"} secondary="* Identidad frontal" />
-                                    </ListItemButton>
-                                </List>
+                                    <ListItemText 
+                                        primary={(usuarioDetalle.file1) ? usuarioDetalle.file1.substr(-19) : "-----"} 
+                                        secondary="* Identidad frontal" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('file2'); set_openEditarCampos(true);}}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('file2'); 
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción estará disponible en 12 meses.");
+                                        }
+                                    }} 
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si es "1"
+                                    style={{ cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", opacity: usuarioDetalle.status === "1" ? 0.5 : 1 }}
+                                >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">badge</span>
                                     </ListItemIcon>
-                                    <ListItemText primary={(usuarioDetalle.file2)?usuarioDetalle.file1.substr(-19):"-----"} secondary="* Identidad trasera" />
-                                    </ListItemButton>
-                                </List>
+                                    <ListItemText 
+                                        primary={(usuarioDetalle.file2) ? usuarioDetalle.file2.substr(-19) : "-----"} 
+                                        secondary="* Identidad trasera" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('file3'); set_openEditarCampos(true);}}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('file3'); 
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción estará disponible en 12 meses.");
+                                        }
+                                    }} 
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{ cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", opacity: usuarioDetalle.status === "1" ? 0.5 : 1 }}
+                                >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">receipt_long</span>
                                     </ListItemIcon>
-                                    <ListItemText primary={(usuarioDetalle.file3)?usuarioDetalle.file1.substr(-19):"-----"} secondary="* Recibo publico" />
-                                    </ListItemButton>
-                                </List>
+                                    <ListItemText 
+                                        primary={(usuarioDetalle.file3) ? usuarioDetalle.file3.substr(-19) : "-----"} 
+                                        secondary="* Recibo público" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
                             <Grid item xs={12} sm={6}>
-                                <List>
-                                    <ListItemButton onClick={()=>{set_moduloEditarActivo('file4'); set_openEditarCampos(true);}}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('file4'); 
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción estará disponible en 12 meses.");
+                                        }
+                                    }} 
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{ cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", opacity: usuarioDetalle.status === "1" ? 0.5 : 1 }}
+                                >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">assignment_ind</span>
                                     </ListItemIcon>
-                                    <ListItemText primary={(usuarioDetalle.file4)?usuarioDetalle.file1.substr(-19):"-----"} secondary="* Foto Selfie" />
-                                    </ListItemButton>
-                                </List>
+                                    <ListItemText 
+                                        primary={(usuarioDetalle.file4) ? usuarioDetalle.file4.substr(-19) : "-----"} 
+                                        secondary="* Foto Selfie" 
+                                    />
+                                </ListItemButton>
+                            </List>
+
                             </Grid>
                             <Grid item xs={12} sm={12}>
                                 <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}></Divider>
@@ -3263,9 +3553,7 @@ function FormEditFile2({reiniciarpantalla, usuarioFiles}){
         }).catch(err => {
             console.log(err.message);
         });
-    }
-
-    
+    }    
 
     return (
         <Box>
