@@ -581,9 +581,6 @@ function Plan() {
                             </div>
                             <br></br>
                             
-
-                            
-
                             <Box className="bloqueprestamopdt-dtll">
                                 {/* <Chip size="small" label={"Creación: "+moment(prestamoSeleccionado.created).format("LL")} variant="outlined" sx={{color: "#FFFFFF"}} /> */}
                                 <Chip size="small" label={"Interes "+productoSeleccionado.ProTip+": "+interesPeriodo+"%"} variant="outlined" sx={{color: "#FFFFFF"}} />
@@ -597,122 +594,110 @@ function Plan() {
                         <Box sx={{textAlign: 'right'}}><Button onClick={()=>{set_ventanaContrato(true)}}>Ver contrato</Button></Box>
                         
 
-                        <Typography variant="h5" sx={{mt: 6}} >Plan de pagos</Typography>
-                        <Typography variant="body" sx={{}} >Tus fechas de pago son las siguientes:</Typography>
-                        <Divider sx={{mt: 2}} />
-                        {(listaPagos) && 
+                        {walletData?.amount_wallet_balance >= prestamoSeleccionado.debt ? (
+                        <div className="pago-completado">
+                            <Typography 
+                                variant="h5" 
+                                sx={{
+                                    mt: 6, 
+                                    textAlign: 'center', 
+                                    fontFamily: 'Roboto, sans-serif', 
+                                    backgroundColor: '#f4f4f4',  
+                                    padding: '20px', 
+                                    borderRadius: '12px',  
+                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',  
+                                    color: '#333',  
+                                    fontWeight: 'bold', 
+                                    fontSize: '1rem'  
+                                }}
+                            >
+                                Tu pago ha sido completado y está a la espera de ser cerrado
+                            </Typography>
+                        </div>
+                    
+                    
+                        ) : (
+                        <>
+                            <Typography variant="h5" sx={{mt: 6}}>Plan de pagos</Typography>
+                            <Typography variant="body" sx={{}}>Tus fechas de pago son las siguientes:</Typography>
+                            <Divider sx={{mt: 2}} />
+                            {(listaPagos) && 
                             <List sx={{mt: 2}}>
-                                {listaPagos.map((element, index)=>{
-                                    return(<ListItem key={element.schedule_date} disablePadding className={"listitempagostatus"+element.status}>
-                                        {/* <ListItemIcon>
-                                            <span className="material-symbols-outlined">payments</span>
-                                        </ListItemIcon> */}
-                                        {/* {console.log(element.status)} */}
-                                        
-
-                                        <ListItemText 
+                                {listaPagos.map((element, index) => {
+                                return (
+                                    <ListItem key={element.schedule_date} disablePadding className={"listitempagostatus" + element.status}>
+                                    <ListItemText 
                                         primaryTypographyProps={{component: 'div', fontSize: '1.5rem'}} 
                                         secondaryTypographyProps={{component: 'div'}} 
-                                        primary={"Pago " + (index+1) + "/" + listaPagos.length} 
+                                        primary={"Pago " + (index + 1) + "/" + listaPagos.length} 
                                         secondary={
-                                            <>
+                                        <>
                                             <Typography variant="body2">
-                                                Fecha de pago: {moment(element.schedule_date).format("LL")}
+                                            Fecha de pago: {moment(element.schedule_date).format("LL")}
                                             </Typography>
                                             <Typography variant="body2">
-                                                Estado: {(nombreEstadoPago[element.status] || element.status)}
+                                            Estado: {(nombreEstadoPago[element.status] || element.status)}
                                             </Typography>
-                                            <Typography variant="h6" >
-                                                <span>L. {numeral(element.charge-element.charge_covered+element.administrator_fee-element.administrator_fee_covered+element.amount-element.amount_covered+element.late_fee-element.cinterest_covered).format("0,0.[00]")}</span>
+                                            <Typography variant="h6">
+                                            <span>L. {numeral(element.charge - element.charge_covered + element.administrator_fee - element.administrator_fee_covered + element.amount - element.amount_covered + element.late_fee - element.cinterest_covered).format("0,0.[00]")}</span>
                                             </Typography>
 
                                             {(parseInt(element.status) !== 1 && parseInt(element.status) !== 6) && 
                                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
                                                 {/* Visualización estática de BAC */}
-                                                <Box 
-                                                    sx={{ 
-                                                        display: 'flex', 
-                                                        flexDirection: 'column', 
-                                                        alignItems: 'flex-start', 
-                                                        width: '100%', 
-                                                        border: '1px solid #ccc', 
-                                                        borderRadius: '8px',
-                                                        padding: '10px',
-                                                        backgroundColor: '#f5f5f5'
-                                                    }}
-                                                >
-                                                    <img 
-                                                        src={logobac} 
-                                                        alt="Logo BAC" 
-                                                        style={{ width: '50px', height: '50px', marginBottom: '5px' }} 
-                                                    />
-                                                    <span><strong>BAC</strong></span>
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', border: '1px solid #ccc', borderRadius: '8px', padding: '10px', backgroundColor: '#f5f5f5' }}>
+                                                <img src={logobac} alt="Logo BAC" style={{ width: '50px', height: '50px', marginBottom: '5px' }} />
+                                                <span><strong>BAC</strong></span>
                                                 </Box>
 
                                                 {/* Contenedor morado para el botón */}
-                                                <Box
-                                                    sx={{ 
-                                                        display: 'flex', 
-                                                        gap: '10px', 
-                                                        flexDirection: { xs: 'column', sm: 'row' }, 
-                                                        width: '100%',
-                                                        height: '150px',
+                                                <Box sx={{ display: 'flex', gap: '10px', flexDirection: { xs: 'column', sm: 'row' }, width: '100%', height: '150px' }}>
+                                                {/* Cuadro alrededor del botón de BAC */}
+                                                <Box sx={{ backgroundColor: '#ecf2fa', padding: '20px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
+                                                    <Button
+                                                    onClick={() => {
+                                                        set_pagoseleccionado(element); // Establece el elemento seleccionado para BAC
+                                                        handleOpenModal(); // Abre el modal correspondiente
                                                     }}
-                                                >
-                                                    {/* Cuadro alrededor del botón de BAC */}
-                                                    <Box
-                                                        sx={{
-                                                            backgroundColor: '#ecf2fa', 
-                                                            padding: '20px',
-                                                            borderRadius: '8px',
-                                                            display: 'flex',
-                                                            justifyContent: 'center',
-                                                            alignItems: 'center',
-                                                            flexDirection: 'column', 
-                                                            width: '100%' 
-                                                        }}
+                                                    variant="contained"
+                                                    sx={{
+                                                        backgroundColor: 'red',
+                                                        color: 'white',
+                                                        '&:hover': {
+                                                        backgroundColor: 'darkred',
+                                                        borderColor: 'darkred',
+                                                        },
+                                                    }}
+                                                    startIcon={<span className="material-symbols-outlined">attach_file</span>}
+                                                    disabled={!estaEnRango()} // Deshabilita el botón si no está en el rango
                                                     >
-                                                        <Button
-                                                            onClick={() => {
-                                                                set_pagoseleccionado(element); // Establece el elemento seleccionado para BAC
-                                                                handleOpenModal(); // Abre el modal correspondiente
-                                                            }}
-                                                            variant="contained"
-                                                            sx={{
-                                                                backgroundColor: 'red',
-                                                                color: 'white',
-                                                                '&:hover': {
-                                                                    backgroundColor: 'darkred',
-                                                                    borderColor: 'darkred',
-                                                                },
-                                                            }}
-                                                            startIcon={<span className="material-symbols-outlined">attach_file</span>}
-                                                            disabled={!estaEnRango()} // Deshabilita el botón si no está en el rango
-                                                        >
-                                                            Enviar comprobante BAC
-                                                        </Button>
+                                                    Enviar comprobante BAC
+                                                    </Button>
 
-                                                        {/* Mostrar mensaje si el botón está deshabilitado */}
-                                                        {!estaEnRango() && (
-                                                            <strong style={{ marginTop: '10px', color: 'black' }}>
-                                                                Fuera de horario operativo 😢
-                                                            </strong>
-                                                        )}
-                                                    </Box>
+                                                    {/* Mostrar mensaje si el botón está deshabilitado */}
+                                                    {!estaEnRango() && (
+                                                    <strong style={{ marginTop: '10px', color: 'black' }}>
+                                                        Fuera de horario operativo 😢
+                                                    </strong>
+                                                    )}
+                                                </Box>
                                                 </Box>
                                             </Box>
+                                            }
+                                        </>
                                         }
-
-                                            </>
-                                        }
-                                        />                        
-                                      </ListItem>)
+                                    />                        
+                                    </ListItem>
+                                );
                                 })}
                             </List>
-                        }
-                        {(!listaPagos) && 
+                            }
+                            {(!listaPagos) && 
                             <Typography variant="body2" sx={{m: '8rem 0', textAlign: 'center', color: 'silver'}} component={"div"} >No tienes lista de pagos</Typography>
-                        }
+                            }
+                        </>
+                        )}
+
                     </Box>}
                     <Dialog onClose={()=>{set_openSubirComprobantePago(false)}} open={openSubirComprobantePago}>
                     <DialogContent>
