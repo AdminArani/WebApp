@@ -129,6 +129,8 @@ function Main() {
                     "Puerto Cortés, Honduras",
                     "El Progreso, Honduras",
                     "Danlí, Honduras",
+                    "Danlì, Honduras",
+                    "Danli, Honduras",
                     "Choluteca,Honduras",
                     "Comayagua, Honduras",
                     "Siguatepeque, Honduras",

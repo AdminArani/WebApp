@@ -71,11 +71,19 @@ function Plan() {
                 const ubicacionesPermitidas = [
                     "Tegucigalpa, Honduras",
                     "Comayagüela, Honduras",
+                    "Valle de Angeles, Honduras",
                     "Choloma, Honduras",
-                    "La lima, Honduras",
+                    "La Lima, Honduras",
                     "Villanueva, Honduras",
                     "Progreso, Honduras",
                     "San Pedro Sula, Honduras",
+                    "Puerto Cortés, Honduras",
+                    "El Progreso, Honduras",
+                    "Danlí, Honduras",
+                    "Choluteca, Honduras",
+                    "Comayagua, Honduras",
+                    "Siguatepeque, Honduras",
+                    "La Ceiba, Honduras",
                 ];
     
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
@@ -452,6 +460,7 @@ function Plan() {
         formData.append('nombreCliente', nombreCompleto);
         formData.append('correoElectronico', clienteData.email);
         formData.append('celular', clienteData.mob_phone);
+        formData.append('fechaCuota', pagoseleccionado.schedule_date);
         formData.append('fechaPago', fechaHoyUTC6);
         formData.append('numReferencia', numReferencia);
         formData.append('cuota', parseFloat(montoPago).toFixed(2));
