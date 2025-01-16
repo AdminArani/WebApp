@@ -569,9 +569,9 @@ function Plan() {
 
                             <div className="bloqueprestamopdt-tit">
                                 <span>Total a pagar</span>
-                                <h4><span>L</span>{numeral(prestamoSeleccionado.debt).format('0,0.00')}</h4>
+                                <h4><span>Lps. </span>{numeral(prestamoSeleccionado.debt).format('0,0.00')}</h4>
                                 <Grid item xs={12} sm={6}>
-                                    <Typography sx={{verticalAlign: 'middle'}} >Deposito por aplicar: <strong>L {numeral(walletData?.amount_wallet_balance).format('0,0.00')}</strong></Typography>
+                                    <Typography sx={{verticalAlign: 'middle'}} >Deposito por aplicar: <strong>Lps. {numeral(walletData?.amount_wallet_balance).format('0,0.00')}</strong></Typography>
                                 </Grid>
                                 <br></br>
                             </div>
@@ -618,6 +618,15 @@ function Plan() {
                     
                         ) : (
                         <>
+                            <br/>
+                            <Typography 
+                                variant="h8" 
+                                sx={{ textAlign: 'justify', width: '100%' }}
+                            >
+                                Te recordamos que nuestro horario para recepción de comprobantes es de: <strong>8:00 am. -  8:00 pm.</strong> Cualquier pago recibido posterior a esas horas sera aplicado al día siguiente.
+                            </Typography>
+
+
                             <Typography variant="h5" sx={{mt: 6}}>Plan de pagos</Typography>
                             <Typography variant="body" sx={{}}>Tus fechas de pago son las siguientes:</Typography>
                             <Divider sx={{mt: 2}} />
@@ -639,7 +648,7 @@ function Plan() {
                                             Estado: {(nombreEstadoPago[element.status] || element.status)}
                                             </Typography>
                                             <Typography variant="h6">
-                                            <span>L. {numeral(element.charge - element.charge_covered + element.administrator_fee - element.administrator_fee_covered + element.amount - element.amount_covered + element.late_fee - element.cinterest_covered).format("0,0.[00]")}</span>
+                                            <span>Lps. {numeral(element.charge - element.charge_covered + element.administrator_fee - element.administrator_fee_covered + element.amount - element.amount_covered + element.late_fee - element.cinterest_covered).format("0,0.[00]")}</span>
                                             </Typography>
 
                                             {(parseInt(element.status) !== 1 && parseInt(element.status) !== 6) && 
