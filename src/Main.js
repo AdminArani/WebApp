@@ -178,8 +178,50 @@ function Main() {
         });
     }
     
+    useEffect(() => {
+        const capturarNavegadorYOS = () => {
+          const userAgent = navigator.userAgent;
+          let navegador = 'Desconocido';
+          let sistemaOperativo = 'Desconocido';
     
+          // Detectar navegador
+          if (userAgent.includes('Brave')) {
+            navegador = 'Brave Browser';
+          } else if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+            navegador = 'Google Chrome';
+          } else if (userAgent.includes('Firefox')) {
+            navegador = 'Mozilla Firefox';
+          } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+            navegador = 'Apple Safari';
+          } else if (userAgent.includes('Edg')) {
+            navegador = 'Microsoft Edge';
+          } else if (userAgent.includes('Opera') || userAgent.includes('OPR')) {
+            navegador = 'Opera';
+          } else if (userAgent.includes('MSIE') || userAgent.includes('Trident')) {
+            navegador = 'Internet Explorer';
+          }
     
+          // Detectar sistema operativo
+          if (userAgent.includes('Macintosh') || userAgent.includes('Mac OS X')) {
+            sistemaOperativo = 'MacOS';
+          } else if (userAgent.includes('Win')) {
+            sistemaOperativo = 'Windows';
+          } else if (userAgent.includes('Linux') || userAgent.includes('X11')) {
+            sistemaOperativo = 'Linux';
+          } else if (userAgent.includes('Android')) {
+            sistemaOperativo = 'Android';
+          } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+            sistemaOperativo = 'iOS';
+          }
+    
+          console.log(`Navegador: ${navegador}`);
+          console.log(`Sistema Operativo: ${sistemaOperativo}`);
+        };
+    
+        capturarNavegadorYOS(); // Ejecuta la función al montar el componente
+      }, []);
+
+
     // useEffect para llamar a la función validarPerfilEnCore al cargar el componente
     useEffect(() => {
         validarPerfilEnCore(() => {
@@ -229,13 +271,15 @@ function Main() {
     }, []);
 
     const mensajesErrores = {
-        0: "Tu perfil sigue en proceso de validación",
-        1: "No pudimos confirmar tu foto selfie en tu perfil",
-        2: "Tu recibo publico no es valido en tu perfil",
-        3: "No pudimos confirmar tus documentos en tu perfil",
-        4: "No pudimos confirmar tu DNI en tu perfil",
-        5: "Eres menor de edad y no aplicas en tu perfil",
+        0: "Tu perfil sigue en proceso de validación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        1: "No pudimos confirmar tu foto selfie en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        2: "Tu recibo público no es válido en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        3: "No pudimos confirmar tus documentos en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        4: "No pudimos confirmar tu DNI en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        5: "Eres menor de edad y no aplicas en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
     };
+    
+    
 
     const styles = {
         container: {
@@ -288,14 +332,14 @@ function Main() {
                     </p>
 
                     {usuarioDetalle.status === "0" && (
-                    <div style={styles.container}>
-                        <Typography style={styles.text}>
-                            Lo sentimos: {mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil}
-                        </Typography>
-                    </div>
+                        <div style={styles.container}>
+                            <Typography style={styles.text} 
+                                dangerouslySetInnerHTML={{ 
+                                    __html: mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil 
+                                }} 
+                            />
+                        </div>
                     )}
-
-
 
                     <div className="contetilebotonpri">
                         <Link to="/perfil" className="tilebotonpri">
