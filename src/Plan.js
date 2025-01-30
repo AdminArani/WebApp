@@ -451,17 +451,19 @@ function Plan() {
         const late_fee_covered = parseFloat(pagoseleccionado.late_fee_covered) || 0;
         const penalty = parseFloat(pagoseleccionado.penalty_fee) || 0;
         const penalty_covered = parseFloat(pagoseleccionado.penalty_covered) || 0;
-    
+        const pago_date = new Date(pagoseleccionado.schedule_date);
+        const schedule_date = pago_date.toISOString().split('T')[0];
+        const now = new Date();
+        const offset = 6 * 60 * 60 * 1000; // 6 horas en milisegundos
+        const HoraHoy = new Date(now.getTime() - offset).toISOString().split('T')[1].split('.')[0]; // Solo la hora en formato HH:MM:SS
+            
         const totalFee = charge - charge_covered + administratorFee - administrator_fee_covered + amount - amount_covered + lateFee - late_fee_covered + penalty - penalty_covered;
 
-        formData.append('identificadorPago', pagoseleccionado.schedule_position);
-        formData.append('identificadorPrestamo', pagoseleccionado.container_id);
         formData.append('idCliente', clienteData.customer_id);
+        formData.append('identidadCliente', clienteData.person_code);
         formData.append('nombreCliente', nombreCompleto);
         formData.append('correoElectronico', clienteData.email);
         formData.append('celular', clienteData.mob_phone);
-        formData.append('fechaCuota', pagoseleccionado.schedule_date);
-        formData.append('fechaPago', fechaHoyUTC6);
         formData.append('numReferencia', numReferencia);
         formData.append('cuota', parseFloat(montoPago).toFixed(2));
         formData.append('montoPago', totalFee);
@@ -470,8 +472,12 @@ function Plan() {
         formData.append('comentario', 'Sin comentarios');
         formData.append('enviarMensaje', '0');
         formData.append('usuarioValidador_id', '3');
-        formData.append('identidadCliente', clienteData.person_code);
+        formData.append('identificadorPago', pagoseleccionado.schedule_position);
+        formData.append('identificadorPrestamo', pagoseleccionado.container_id);
         formData.append('fotoComprobante', fotoComprobante);
+        formData.append('fechaPago', fechaHoyUTC6);
+        formData.append('fechaCuota', schedule_date);
+        formData.append('horaRegistro',HoraHoy);
     
         formData.forEach((value, key) => {
             console.log(`${key}: ${value}`);
