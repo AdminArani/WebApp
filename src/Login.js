@@ -213,7 +213,7 @@ function Login(){
                 </Box>
                 <Paper elevation={6} sx={{ p: 6 }}>
                     {/* <Typography sx={{textAlign: 'center', pb: 3}} variant="h5">Ingresar</Typography> */}
-                    <Typography sx={{textAlign: 'center'}} variant="body1" >Para ingresar rellena los campos con tus datos de ingreso y presiona ingresar.</Typography>
+                    <Typography sx={{textAlign: 'center'}} variant="body1" style={{color: '#4c74e9'}}> <h3>Arani Desarrollo</h3></Typography>
                     <Box component="form" autoComplete="off" onSubmit={handleSubmit} sx={{mt: 3}}>
                         <TextField margin="normal" required fullWidth id="email" label="Correo" name="email" autoComplete="email" value={inputUser} onChange={changeUser}/>
                         <TextField margin="normal" required fullWidth name="password" label="Contraseña" type="password" id="password" autoComplete="Contraseña actual" value={inputPass} onChange={changePass}/>

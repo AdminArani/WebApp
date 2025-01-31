@@ -483,7 +483,7 @@ function Plan() {
             console.log(`${key}: ${value}`);
         });
     
-        axios.post('https://app.aranih.com/api/chatbot/pagosBac/postBacPago.php', formData, {
+        axios.post('http://34.201.84.3/api/chatbot/pagosBac/postBacPago.php', formData, {
             headers: {
                 'Authorization': '70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa',
                 'Content-Type': 'multipart/form-data'

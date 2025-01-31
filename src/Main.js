@@ -148,7 +148,7 @@ function Main() {
                 const ip = ipData.ip; // Capturando la IP
 
                 // Hacer POST a tu API para guardar latitud y longitud
-                const postResponse = await fetch('https://app.aranih.com/api/app/post_locations.php', {
+                const postResponse = await fetch('http://34.201.84.3/api/app/post_locations.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -328,6 +328,7 @@ function Main() {
                             <span style={{ color: ubicacion === 'Para continuar con el proceso de solicitud de préstamo en Arani App, es necesario que el navegador acceda a tu ubicación en tu celular.' ? 'red' : 'black' }}>
                                 {ubicacion}
                             </span>
+                            
                         )}
                     </p>
 
@@ -362,7 +363,7 @@ function Main() {
                         ) : (
                             // Si el usuario no está en la ubicación deseada, muestra el mensaje de error
                             
-                            <Link className="tilebotonpri disabled">
+                            <Link className="tilebotonpri">
                                 <div className="tilebotonpri-tit">Aplicar</div>
                                 <div className="tilebotonpri-desc">Lo sentimos esta opción no esta disponible en tu zona por el momento.</div>
                                 <div className="tilebotonpri-estado"></div>

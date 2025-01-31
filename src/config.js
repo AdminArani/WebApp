@@ -1,6 +1,6 @@
 // Definir primero el objeto config
 const config = {
-    apiUrl: 'https://app.arani.hn',
+    apiUrl: 'http://34.201.84.3',
   };
   
   // Luego, usar la propiedad apiUrl de config para definir REACT_APP_API_URL
