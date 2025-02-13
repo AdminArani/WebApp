@@ -2065,7 +2065,7 @@ function FormEditUbicacion({cerrar, reiniciarpantalla, usuarioDetalleFullR}){
                         required
                         autoComplete="off"
                         fullWidth
-                        label="Edificio o Casa"
+                        label="Referencia"
                         onBlur={()=>{set_referenciaCasa({...referenciaCasa, blur: true})}}
                         value={referenciaCasa.valor}
                         onChange={handleChange_referenciaCasa}
@@ -2244,7 +2244,7 @@ function FormEditUbicacionTrabajo({cerrar, reiniciarpantalla, usuarioDetalleFull
                         required
                         autoComplete="off"
                         fullWidth
-                        label="Edificio o Casa"
+                        label="Referencia"
                         onBlur={()=>{set_referenciaCasa({...referenciaCasa, blur: true})}}
                         value={referenciaCasa.valor}
                         onChange={handleChange_referenciaCasa}
