@@ -364,10 +364,16 @@ function Main() {
                             
                             <Link className="tilebotonpri disabled">
                                 <div className="tilebotonpri-tit">Aplicar</div>
-                                <div className="tilebotonpri-desc">Lo sentimos esta opción no esta disponible en tu zona por el momento.</div>
+                                <div className="tilebotonpri-desc">
+                                    {ubicacion && ubicacion !== "Para continuar con el proceso de solicitud de préstamo en Arani App, es necesario que el navegador acceda a tu ubicación en tu celular."
+                                        ? `Lo sentimos, esta opción no está disponible en ${ubicacion}`
+                                        : "Lo sentimos es necesario que el navegador acceda a tu ubicación en tu celular."}
+                                </div>
                                 <div className="tilebotonpri-estado"></div>
                                 <div className="tilebotonpri-icon"><img alt="" src={tile_aplicar} /></div>
                             </Link>
+
+
                             
                         )}
 
