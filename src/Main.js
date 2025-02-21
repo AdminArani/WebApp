@@ -327,6 +327,11 @@ function Main() {
                         {loading ? 'Cargando...' : (
                             <span style={{ color: ubicacion === 'Para continuar con el proceso de solicitud de préstamo en Arani App, es necesario que el navegador acceda a tu ubicación en tu celular.' ? 'red' : 'black' }}>
                                 {ubicacion}
+                                {ubicacion === 'Para continuar con el proceso de solicitud de préstamo en Arani App, es necesario que el navegador acceda a tu ubicación en tu celular.' && (
+                                    <a href="https://www.arani.hn/erroresperfil.php#ubicacion" target="_blank" rel="noopener noreferrer" style={{ marginLeft: '8px', color: 'blue' }}>
+                                        Ver más
+                                    </a>
+                                )}
                             </span>
                         )}
                     </p>
