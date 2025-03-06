@@ -416,7 +416,7 @@ function Plan() {
     
     const estaEnRango = () => {
         const hora = obtenerHoraActualUTC6().getHours(); // Obtener solo la hora
-        return (hora >= 0 && hora < 20); // Habilita el botón si está entre 00:00 y 19:59
+        return (hora >= 0 && hora < 20 ); // Habilita el botón si está entre 00:00 y 19:59
     };
     
     // Restar 6 horas a la hora UTC
@@ -514,6 +514,7 @@ function Plan() {
         });
     };
     
+    
     // Manejar la apertura del modal:
     const handleOpenModal = () => {
         validarPerfilEnCore()
@@ -542,7 +543,40 @@ function Plan() {
         let file = e.target.files[0];
         set_fDOCComprobante(file);
     }
+    
+    function obtenerCalendarioPagos(containerId) {
+        const apiKey = 'YLbU8nVhlaXu9jxMNsEDPY1rNBsa0ykV';
+        const url = `https://aranih-com.creditonline.eu/api/v1.0/investment/borrower-repayment-schedule?apiKey=${apiKey}&containerId=${containerId}&preliminary=false`;
+    
+        axios.get(url)
+            .then(response => {
+                if (response.status === 200) {
+                    console.log('Datos del calendario de pagos:', response.data);
+                    // Aquí puedes manejar la respuesta y actualizar el estado según sea necesario
+                    set_listaPagos(response.data.data);
+                } else {
+                    console.error('Error al obtener el calendario de pagos:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error al realizar la solicitud:', error);
+            });
+    }
+    
+    function obtenerFechaMasLejana(listaPagos) {
+        if (!listaPagos || listaPagos.length === 0) return null;
+        return listaPagos.reduce((max, pago) => {
+            const fechaPago = moment(pago.schedule_date);
+            return fechaPago.isAfter(max) ? fechaPago : max;
+        }, moment(listaPagos[0].schedule_date));
+    }
 
+    useEffect(() => {
+        if (prestamoSeleccionado) {
+            obtenerCalendarioPagos(prestamoSeleccionado.container_id);
+        }
+    }, [prestamoSeleccionado]);
+        
     return (
         <Container disableGutters sx={{ minHeight: '100vh', display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"  }} component="main" maxWidth="md">
             {/* <Contrato /> */}
@@ -607,17 +641,20 @@ function Plan() {
                                 sx={{
                                     mt: 6, 
                                     textAlign: 'center', 
-                                    fontFamily: 'Roboto, sans-serif', 
-                                    backgroundColor: '#f4f4f4',  
+                                    fontFamily: 'Urbanist, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"', 
+            
+                                    backgroundColor: '#EB9180',  
                                     padding: '20px', 
                                     borderRadius: '12px',  
                                     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',  
-                                    color: '#333',  
+                                    color: 'white',  
                                     fontWeight: 'bold', 
                                     fontSize: '1rem'  
                                 }}
                             >
-                                Tu pago ha sido completado y está a la espera de ser cerrado
+                                Tu préstamo ha sido pagado en su totalidad y está a la espera de ser cerrado
+                                <br/>
+                                la fecha: {moment(obtenerFechaMasLejana(listaPagos)).format("LL")}
                             </Typography>
                         </div>
                     
@@ -630,6 +667,7 @@ function Plan() {
                                 sx={{ textAlign: 'justify', width: '100%' }}
                             >
                                 Te recordamos que nuestro horario para recepción de comprobantes es de: <strong>8:00 am. -  8:00 pm.</strong> Cualquier pago recibido posterior a esas horas sera aplicado al día siguiente.
+                                {moment(obtenerFechaMasLejana(listaPagos)).format("LL")}
                             </Typography>
 
 
