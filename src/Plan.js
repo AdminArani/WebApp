@@ -655,6 +655,11 @@ function Plan() {
                                 Tu préstamo ha sido pagado en su totalidad y está a la espera de ser cerrado
                                 <br/>
                                 la fecha: {moment(obtenerFechaMasLejana(listaPagos)).format("LL")}
+                                <br/>
+                                <br/>
+                                <a href="https://www.arani.hn/erroresperfil.php#pagosadelantados" target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'underline' }}>
+                                    Ver más detalles
+                                </a>
                             </Typography>
                         </div>
                     
