@@ -173,48 +173,52 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
 
     }, [inputPeriodo, inputCantidadDinero, inputAceptoContrato, inputAceptoBanco, inputAceptoPagare]);
     
-    useEffect(()=>{
-
-        if(params.pricelistData && params.productSelected){
-
-            
-            let texto = "Minimo L"+numeral(params.pricelistData.PriMntDes).format('0,0')+", máximo de L"+numeral(params.pricelistData.PriMntHas).format('0,0');
-            set_inputCantidadDinero({...inputCantidadDinero, textoAyuda: texto});
-
-
-            // Listado de periodos para seleccionar
-            // set_listadoPeriodos
+    useEffect(() => {
+        if (params.pricelistData && params.productSelected) {
+            let texto = "Minimo L" + numeral(params.pricelistData.PriMntDes).format('0,0') + ", máximo de L" + numeral(params.pricelistData.PriMntHas).format('0,0');
+            set_inputCantidadDinero({ ...inputCantidadDinero, textoAyuda: texto });
+    
             let tipo = params.productSelected.ProTip;
             let diasporper = 0;
             let cantidadperiodostxt = '';
-            if(tipo === 'semanal') diasporper = 7;
-            if(tipo === 'semanal') cantidadperiodostxt = 'semanas';
-            if(tipo === 'quincenal') diasporper = 15;
-            if(tipo === 'quincenal') cantidadperiodostxt = 'quincenas';
-            if(tipo === 'mensual') diasporper = 30;
-            if(tipo === 'mensual') cantidadperiodostxt = 'meses';
+            let minPeriodos = 0;
+            let maxPeriodos = 0;
+    
+            if (tipo === 'semanal') {
+                diasporper = 7;
+                cantidadperiodostxt = 'semanas';
+                minPeriodos = Math.ceil(params.pricelistData.PriTerDes / diasporper);
+                maxPeriodos = 4; // Limitar a 4 semanas
+            }
+            if (tipo === 'quincenal') {
+                diasporper = 15;
+                cantidadperiodostxt = 'quincenas';
+                minPeriodos = Math.ceil(params.pricelistData.PriTerDes / diasporper);
+                maxPeriodos = 2; // Limitar a 2 quincenas
+            }
+            if (tipo === 'mensual') {
+                diasporper = 30;
+                cantidadperiodostxt = 'meses';
+                minPeriodos = Math.ceil(params.pricelistData.PriTerDes / diasporper);
+                maxPeriodos = Math.ceil(params.pricelistData.PriTerHas / diasporper); // Usar el valor máximo permitido
+            }
+    
             set_diasPorPerSel(diasporper);
-            // let diasmin = params.pricelistData.PriTerDes;
-            let diasmax = params.pricelistData.PriTerHas;
-            let persmax = diasmax / diasporper;
             let arrayPersSelect = [];
-            for (let index = 1; index <= parseInt(persmax); index++) {
+            for (let index = minPeriodos; index <= maxPeriodos; index++) {
                 arrayPersSelect.push(
-                    <MenuItem key={index} value={(index*diasporper)}>{index} {cantidadperiodostxt}</MenuItem>
+                    <MenuItem key={index} value={(index * diasporper)}>{index} {cantidadperiodostxt}</MenuItem>
                 );
             }
             set_listadoPeriodos(arrayPersSelect);
-
-            // Sacamos el interes por periodo
+    
             var interesPeriodo = params.pricelistData.PriInt;
-            if(tipo === 'semanal') set_interesPeriodo((interesPeriodo/52.13).toFixed(2));
-            if(tipo === 'quincenal') set_interesPeriodo((interesPeriodo/26.07).toFixed(10));
-            if(tipo === 'mensual') set_interesPeriodo((interesPeriodo/12).toFixed(10));
-            //52.13, 26.07 y 12 
+            if (tipo === 'semanal') set_interesPeriodo((interesPeriodo / 52.13).toFixed(2));
+            if (tipo === 'quincenal') set_interesPeriodo((interesPeriodo / 26.07).toFixed(10));
+            if (tipo === 'mensual') set_interesPeriodo((interesPeriodo / 12).toFixed(10));
         }
-
-    // eslint-disable-next-line
-    },[params]);
+        // eslint-disable-next-line
+    }, [params]);
 
     //hola
     const [priCuo, setPriCuo] = useState(0);
