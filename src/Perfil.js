@@ -926,7 +926,7 @@ function Perfil() {
 
                             {/* Seccion de Referencias Personales */}
                             <Grid item xs={12} sm={12}>
-                                <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Referencias personales</Divider>
+                                <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Referencias Personales</Divider>
                                 <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}></Typography>
                             </Grid>
                             
@@ -1838,7 +1838,7 @@ function FormEditReferenciaTelefonoLaboral({ cerrar, reiniciarpantalla, usuarioD
     const gContext = useContext(AppContext);
     const [validado, set_validado] = useState(false);
     const [inputRefTelLab, set_inputRefTelLab] = useState({
-        valor: gContext.usuarioDetalle ? gContext.usuarioDetalle.ref_tel_lab : '',
+        valor: usuarioDetalle?.ref_tel_lab || '',
         validado: false,
         textoAyuda: "",
         blur: false
@@ -1850,7 +1850,8 @@ function FormEditReferenciaTelefonoLaboral({ cerrar, reiniciarpantalla, usuarioD
 
         // Permitir solo números y limitar a 8 caracteres
         if (/^[0-9]*$/.test(valor) && valor.length <= 8) {
-            const esDiferenteDeRefTelPer = valor !== (gContext.usuarioDetalle?.ref_tel_per || ""); // Validar que no sea igual a ref_tel_per
+            const refTelPer = usuarioDetalle?.ref_tel_per || ""; // Obtener el valor de ref_tel_per
+            const esDiferenteDeRefTelPer = valor !== refTelPer; // Validar que no sea igual a ref_tel_per
             const validado = valor.length === 8 && esDiferenteDeRefTelPer; // Validar que tenga exactamente 8 dígitos y sea diferente
             set_inputRefTelLab({
                 valor: valor,
@@ -1957,10 +1958,13 @@ function FormEditCorreoReferenciaLaboral({ cerrar, reiniciarpantalla, usuarioDet
 
     function handleChange_inputRefCorreoLab(event) {
         const valor = event.target.value.toLowerCase(); // Convertir siempre a minúsculas
-        const validado = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor); // Validar formato de correo electrónico
+        const refCorreoPer = usuarioDetalle?.ref_correo_per?.toLowerCase() || ""; // Obtener el correo de referencia personal
+        const esDiferenteDeRefCorreoPer = valor !== refCorreoPer; // Validar que no sea igual a ref_correo_per
+        const validado = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor) && esDiferenteDeRefCorreoPer; // Validar formato y que sea diferente
         set_inputRefCorreoLab({
             valor: valor,
             validado: validado,
+            textoAyuda: !esDiferenteDeRefCorreoPer ? "El correo no puede ser igual al de referencia personal." : "",
             blur: inputRefCorreoLab.blur,
         });
     }
@@ -2026,11 +2030,11 @@ function FormEditCorreoReferenciaLaboral({ cerrar, reiniciarpantalla, usuarioDet
                         onBlur={() => set_inputRefCorreoLab({ ...inputRefCorreoLab, blur: true })}
                         required
                         error={(!inputRefCorreoLab.validado && inputRefCorreoLab.blur)}
-                        helperText={(!inputRefCorreoLab.validado && inputRefCorreoLab.blur) ? "Debe ser un correo válido con @dominio" : ""}
+                        helperText={(!inputRefCorreoLab.validado && inputRefCorreoLab.blur) ? inputRefCorreoLab.textoAyuda || "Debe ser un correo válido con @dominio" : ""}
                     />
                 </Grid>
                 <Grid item xs={12} sm={12}>
-                    <Button disabled={(validado && !enviandoForm) ? false : true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
+                    <Button disabled={!validado || enviandoForm} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
                         {(enviandoForm) ? "Enviando...." : "Guardar cambios"}
                     </Button>
                     <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
