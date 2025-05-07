@@ -512,7 +512,7 @@ function Perfil() {
                             </Grid>
                             <Grid item xs={12} sm={12}>
                                 <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Campos Obligatorios</Divider>
-                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}>Para poder solicitar préstamos, primero debes llenar todos los cambpos obligatorios, despues se hara una revisión y se aprobara tu cuenta para poder hacer esa solicitud.</Typography>
+                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}>Para poder solicitar préstamos, primero debes llenar todos los campos obligatorios, despues se hara una revisión y se aprobara tu cuenta para poder hacer esa solicitud.</Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
@@ -921,14 +921,210 @@ function Perfil() {
                                     />
                                 </ListItemButton>
                             </List>
-
                             </Grid>
 
+
+                            {/* Seccion de Referencias Personales */}
+                            <Grid item xs={12} sm={12}>
+                                <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Referencias personales</Divider>
+                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}></Typography>
+                            </Grid>
+                            
+                            {/* Referencia personal */}
+                            <Grid item xs={12} sm={6}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('referenciapersonal');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">person</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={usuarioDetalle.ref_nom_per || "----"} 
+                                        secondary="* Referencia personal" 
+                                    />
+                                </ListItemButton>
+                            </List>
+                            </Grid>
+
+                            {/* Numero telefono referencia personal */}
+                            <Grid item xs={12} sm={6}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('celularreferenciapersonal');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">phone</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={usuarioDetalle.ref_tel_per || "----"} 
+                                        secondary="* Celular referencia personal" 
+                                    />
+                                </ListItemButton>
+                            </List>
+                            </Grid>
+
+                            {/* Correo referencia personal */}
+                            <Grid item xs={12} sm={6}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('correoreferenciapersonal');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">mail</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'none'}} 
+                                        primary={usuarioDetalle.ref_correo_per || "----"} 
+                                        secondary="* Correo referencia personal" 
+                                    />
+                                </ListItemButton>
+                            </List>
+                            </Grid>
+
+
+                            {/* Seccion de Referencias Laborales  */}
+                            <Grid item xs={12} sm={12}>
+                                <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Referencias Laborales</Divider>
+                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}></Typography>
+                            </Grid>
+
+                            {/* Referencia laboral nombre */}
+                            <Grid item xs={12} sm={6}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('referencialaboral');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">person</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={usuarioDetalle.ref_nom_lab || "----"} 
+                                        secondary="* Referencia laboral" 
+                                    />
+                                </ListItemButton>
+                            </List>
+                            </Grid>
+
+                            {/* Numero telefono referencia laboral */}
+                            <Grid item xs={12} sm={6}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('celularreferencialaboral');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">phone</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={usuarioDetalle.ref_tel_lab || "----"} 
+                                        secondary="* Celular referencia laboral" 
+                                    />
+                                </ListItemButton>
+                            </List>
+                            </Grid>
+
+                            {/* Correo referencia laboral */}
+                            <Grid item xs={12} sm={6}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('correoreferencialaboral');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">mail</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'none'}} 
+                                        primary={usuarioDetalle.ref_correo_lab || "----"} 
+                                        secondary="* Correo referencia laboral" 
+                                    />
+                                </ListItemButton>
+                            </List>
+                            </Grid>
+
+
+                            {/* Seccion de Documentos  */}
+                            <Grid item xs={12} sm={12}>
+                                <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Documentos</Divider>
+                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}></Typography>
+                            </Grid>
 
                             
-                            <Grid item xs={12} sm={12}>
-                                <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}></Divider>
-                            </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
                                 <ListItemButton 
@@ -1066,6 +1262,13 @@ function Perfil() {
                         {(moduloEditarActivo === 'dependendeti') && <FormEditDependeti cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'gradoeducativo') && <FormEditGradoEducativo cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'antiguedadlaboral') && <FormEditAntiguedadLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'referenciapersonal') && <FormEditReferenciaPersonal cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'celularreferenciapersonal') && <FormEditReferenciaTelefono cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'correoreferenciapersonal') && <FormEditCorreoReferenciaPersonal cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'referencialaboral') && <FormEditReferenciaLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'celularreferencialaboral') && <FormEditReferenciaTelefonoLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'correoreferencialaboral') && <FormEditCorreoReferenciaLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        
                         {/* {(moduloEditarActivo === 'documentos') && <FormEditDocumentos cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />} */}
                         {(moduloEditarActivo === 'cambiarpass') && <FormCambiarClave cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
                         {(moduloEditarActivo === 'banco') && <FormCambiarBanco cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} usuarioDetalle={usuarioDetalle}/>}
@@ -1233,3 +1436,606 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
             </Grid>
         </Box>
     )}
+
+
+    
+//Editar referencia personal 
+function FormEditReferenciaPersonal({ cerrar, reiniciarpantalla, usuarioDetalle }) {
+    const gContext = useContext(AppContext);
+    const [validado, set_validado] = useState(false);
+    const [inputRefNomPer, set_inputRefNomPer] = useState({
+        valor: gContext.usuarioDetalle ? gContext.usuarioDetalle.ref_nom_per : '',
+        validado: false,
+        textoAyuda: "",
+        blur: false
+    });
+    const [enviandoForm, set_enviandoForm] = useState(false);
+
+    function handleChange_inputRefNomPer(event) {
+        const valor = event.target.value;
+        const validado = valor.trim().length > 0;
+        set_inputRefNomPer({
+            valor: valor,
+            validado: validado,
+            blur: inputRefNomPer.blur,
+        });
+    }
+
+    useEffect(() => {
+        set_validado(inputRefNomPer.validado);
+    }, [inputRefNomPer]);
+
+    function guardarDatos() {
+        if (!validado) {
+            console.log('Datos no válidos, no se puede enviar el formulario');
+            return;
+        }
+
+        set_enviandoForm(true);
+        console.log('Enviando datos:', {
+            sid: gContext.logeado?.token,
+            array: {
+                ref_nom_per: inputRefNomPer.valor
+            }
+        });
+
+        axios.request({
+            url: `${config.apiUrl}/api/app/putProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    ref_nom_per: inputRefNomPer.valor
+                },
+            },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            console.log('Respuesta de la API:', res.data);
+            if (res.data.status === "ER") {
+                console.log('Error en la API:', res.data);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            }
+            if (res.data.status === "OK") {
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            set_enviandoForm(false);
+            console.log('Error en la petición:', err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5">Editar</Typography>
+            <Typography variant="body" sx={{ mb: '1rem' }}>Ingresa el nombre de referencia personal.</Typography>
+            <Grid sx={{ mt: 1, mb: 1 }} container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        fullWidth
+                        label="Referencia personal"
+                        value={inputRefNomPer.valor}
+                        onChange={handleChange_inputRefNomPer}
+                        onBlur={() => set_inputRefNomPer({ ...inputRefNomPer, blur: true })}
+                        required
+                        error={(!inputRefNomPer.validado && inputRefNomPer.blur)}
+                        helperText={(!inputRefNomPer.validado && inputRefNomPer.blur) ? "Este campo es obligatorio" : ""}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={(validado && !enviandoForm) ? false : true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
+                        {(enviandoForm) ? "Enviando...." : "Guardar cambios"}
+                    </Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+}
+
+
+// Editar celular referencia personal 
+function FormEditReferenciaTelefono({ cerrar, reiniciarpantalla, usuarioDetalle }) {
+    const gContext = useContext(AppContext);
+    const [validado, set_validado] = useState(false);
+    const [inputRefTelPer, set_inputRefTelPer] = useState({
+        valor: gContext.usuarioDetalle ? gContext.usuarioDetalle.ref_tel_per : '',
+        validado: false,
+        textoAyuda: "",
+        blur: false
+    });
+    const [enviandoForm, set_enviandoForm] = useState(false);
+
+    function handleChange_inputRefTelPer(event) {
+        const valor = event.target.value;
+
+        // Permitir solo números y limitar a 8 caracteres
+        if (/^[0-9]*$/.test(valor) && valor.length <= 8) {
+            const validado = valor.length === 8; // Validar que tenga exactamente 8 dígitos
+            set_inputRefTelPer({
+                valor: valor,
+                validado: validado,
+                blur: inputRefTelPer.blur,
+            });
+        }
+    }
+
+    useEffect(() => {
+        set_validado(inputRefTelPer.validado);
+    }, [inputRefTelPer]);
+
+    function guardarDatos() {
+        if (!validado) {
+            console.log('Datos no válidos, no se puede enviar el formulario');
+            return;
+        }
+
+        set_enviandoForm(true);
+        console.log('Enviando datos:', {
+            sid: gContext.logeado?.token,
+            array: {
+                ref_tel_per: inputRefTelPer.valor
+            }
+        });
+
+        axios.request({
+            url: `${config.apiUrl}/api/app/putProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    ref_tel_per: inputRefTelPer.valor
+                },
+            },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            console.log('Respuesta de la API:', res.data);
+            if (res.data.status === "ER") {
+                console.log('Error en la API:', res.data);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            }
+            if (res.data.status === "OK") {
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            set_enviandoForm(false);
+            console.log('Error en la petición:', err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5">Editar</Typography>
+            <Typography variant="body" sx={{ mb: '1rem' }}>Ingresa el teléfono de referencia personal.</Typography>
+            <Grid sx={{ mt: 1, mb: 1 }} container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        fullWidth
+                        label="Teléfono referencia personal"
+                        value={inputRefTelPer.valor}
+                        onChange={handleChange_inputRefTelPer}
+                        onBlur={() => set_inputRefTelPer({ ...inputRefTelPer, blur: true })}
+                        required
+                        error={(!inputRefTelPer.validado && inputRefTelPer.blur)}
+                        helperText={(!inputRefTelPer.validado && inputRefTelPer.blur) ? "Debe ser un número de 8 dígitos" : ""}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={(validado && !enviandoForm) ? false : true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
+                        {(enviandoForm) ? "Enviando...." : "Guardar cambios"}
+                    </Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+}
+
+//Editar Correo referencia personal
+function FormEditCorreoReferenciaPersonal({ cerrar, reiniciarpantalla, usuarioDetalle }) {
+    const gContext = useContext(AppContext);
+    const [validado, set_validado] = useState(false);
+    const [inputRefCorreoPer, set_inputRefCorreoPer] = useState({
+        valor: gContext.usuarioDetalle ? gContext.usuarioDetalle.ref_correo_per.toLowerCase() : '',
+        validado: false,
+        textoAyuda: "",
+        blur: false
+    });
+    const [enviandoForm, set_enviandoForm] = useState(false);
+
+    function handleChange_inputRefCorreoPer(event) {
+        const valor = event.target.value.toLowerCase(); // Convertir siempre a minúsculas
+        const validado = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor); // Validar formato de correo electrónico
+        set_inputRefCorreoPer({
+            valor: valor,
+            validado: validado,
+            blur: inputRefCorreoPer.blur,
+        });
+    }
+
+    useEffect(() => {
+        set_validado(inputRefCorreoPer.validado);
+    }, [inputRefCorreoPer]);
+
+    function guardarDatos() {
+        if (!validado) {
+            console.log('Datos no válidos, no se puede enviar el formulario');
+            return;
+        }
+
+        set_enviandoForm(true);
+        console.log('Enviando datos:', {
+            sid: gContext.logeado?.token,
+            array: {
+                ref_correo_per: inputRefCorreoPer.valor
+            }
+        });
+
+        axios.request({
+            url: `${config.apiUrl}/api/app/putProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    ref_correo_per: inputRefCorreoPer.valor
+                },
+            },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            console.log('Respuesta de la API:', res.data);
+            if (res.data.status === "ER") {
+                console.log('Error en la API:', res.data);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            }
+            if (res.data.status === "OK") {
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            set_enviandoForm(false);
+            console.log('Error en la petición:', err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5">Editar</Typography>
+            <Typography variant="body" sx={{ mb: '1rem' }}>Ingresa el correo de referencia personal.</Typography>
+            <Grid sx={{ mt: 1, mb: 1 }} container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        fullWidth
+                        label="Correo referencia personal"
+                        value={inputRefCorreoPer.valor}
+                        onChange={handleChange_inputRefCorreoPer}
+                        onBlur={() => set_inputRefCorreoPer({ ...inputRefCorreoPer, blur: true })}
+                        required
+                        error={(!inputRefCorreoPer.validado && inputRefCorreoPer.blur)}
+                        helperText={(!inputRefCorreoPer.validado && inputRefCorreoPer.blur) ? "Debe ser un correo válido con @dominio" : ""}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={(validado && !enviandoForm) ? false : true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
+                        {(enviandoForm) ? "Enviando...." : "Guardar cambios"}
+                    </Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+}
+
+
+//Edit Referencia laboral
+function FormEditReferenciaLaboral({ cerrar, reiniciarpantalla, usuarioDetalle }) {
+    const gContext = useContext(AppContext);
+    const [validado, set_validado] = useState(false);
+    const [inputRefNomLab, set_inputRefNomLab] = useState({
+        valor: gContext.usuarioDetalle ? gContext.usuarioDetalle.ref_nom_lab : '',
+        validado: false,
+        textoAyuda: "",
+        blur: false
+    });
+    const [enviandoForm, set_enviandoForm] = useState(false);
+
+    function handleChange_inputRefNomLab(event) {
+        const valor = event.target.value;
+        const validado = valor.trim().length > 0;
+        set_inputRefNomLab({
+            valor: valor,
+            validado: validado,
+            blur: inputRefNomLab.blur,
+        });
+    }
+
+    useEffect(() => {
+        set_validado(inputRefNomLab.validado);
+    }, [inputRefNomLab]);
+
+    function guardarDatos() {
+        if (!validado) {
+            console.log('Datos no válidos, no se puede enviar el formulario');
+            return;
+        }
+
+        set_enviandoForm(true);
+        console.log('Enviando datos:', {
+            sid: gContext.logeado?.token,
+            array: {
+                ref_nom_lab: inputRefNomLab.valor
+            }
+        });
+
+        axios.request({
+            url: `${config.apiUrl}/api/app/putProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    ref_nom_lab: inputRefNomLab.valor
+                },
+            },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            console.log('Respuesta de la API:', res.data);
+            if (res.data.status === "ER") {
+                console.log('Error en la API:', res.data);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            }
+            if (res.data.status === "OK") {
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            set_enviandoForm(false);
+            console.log('Error en la petición:', err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5">Editar</Typography>
+            <Typography variant="body" sx={{ mb: '1rem' }}>Ingresa el nombre de referencia laboral.</Typography>
+            <Grid sx={{ mt: 1, mb: 1 }} container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        fullWidth
+                        label="Referencia laboral"
+                        value={inputRefNomLab.valor}
+                        onChange={handleChange_inputRefNomLab}
+                        onBlur={() => set_inputRefNomLab({ ...inputRefNomLab, blur: true })}
+                        required
+                        error={(!inputRefNomLab.validado && inputRefNomLab.blur)}
+                        helperText={(!inputRefNomLab.validado && inputRefNomLab.blur) ? "Este campo es obligatorio" : ""}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={(validado && !enviandoForm) ? false : true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
+                        {(enviandoForm) ? "Enviando...." : "Guardar cambios"}
+                    </Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+}
+
+// Editar celular referencia laboral
+function FormEditReferenciaTelefonoLaboral({ cerrar, reiniciarpantalla, usuarioDetalle }) {
+    const gContext = useContext(AppContext);
+    const [validado, set_validado] = useState(false);
+    const [inputRefTelLab, set_inputRefTelLab] = useState({
+        valor: gContext.usuarioDetalle ? gContext.usuarioDetalle.ref_tel_lab : '',
+        validado: false,
+        textoAyuda: "",
+        blur: false
+    });
+    const [enviandoForm, set_enviandoForm] = useState(false);
+
+    function handleChange_inputRefTelLab(event) {
+        const valor = event.target.value;
+
+        // Permitir solo números y limitar a 8 caracteres
+        if (/^[0-9]*$/.test(valor) && valor.length <= 8) {
+            const esDiferenteDeRefTelPer = valor !== (gContext.usuarioDetalle?.ref_tel_per || ""); // Validar que no sea igual a ref_tel_per
+            const validado = valor.length === 8 && esDiferenteDeRefTelPer; // Validar que tenga exactamente 8 dígitos y sea diferente
+            set_inputRefTelLab({
+                valor: valor,
+                validado: validado,
+                textoAyuda: !esDiferenteDeRefTelPer ? "El número no puede ser igual al de referencia personal." : "",
+                blur: inputRefTelLab.blur,
+            });
+        } else {
+            set_inputRefTelLab({
+                ...inputRefTelLab,
+                valor: valor,
+                validado: false,
+                textoAyuda: "Debe ser un número de 8 dígitos.",
+            });
+        }
+    }
+
+    useEffect(() => {
+        set_validado(inputRefTelLab.validado);
+    }, [inputRefTelLab]);
+
+    function guardarDatos() {
+        if (!validado) {
+            console.log('Datos no válidos, no se puede enviar el formulario');
+            return;
+        }
+
+        set_enviandoForm(true);
+        console.log('Enviando datos:', {
+            sid: gContext.logeado?.token,
+            array: {
+                ref_tel_lab: inputRefTelLab.valor
+            }
+        });
+
+        axios.request({
+            url: `${config.apiUrl}/api/app/putProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    ref_tel_lab: inputRefTelLab.valor
+                },
+            },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            console.log('Respuesta de la API:', res.data);
+            if (res.data.status === "ER") {
+                console.log('Error en la API:', res.data);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            }
+            if (res.data.status === "OK") {
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            set_enviandoForm(false);
+            console.log('Error en la petición:', err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5">Editar</Typography>
+            <Typography variant="body" sx={{ mb: '1rem' }}>Ingresa el teléfono de referencia laboral.</Typography>
+            <Grid sx={{ mt: 1, mb: 1 }} container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        fullWidth
+                        label="Teléfono referencia laboral"
+                        value={inputRefTelLab.valor}
+                        onChange={handleChange_inputRefTelLab}
+                        onBlur={() => set_inputRefTelLab({ ...inputRefTelLab, blur: true })}
+                        required
+                        error={(!inputRefTelLab.validado && inputRefTelLab.blur)}
+                        helperText={(!inputRefTelLab.validado && inputRefTelLab.blur) ? inputRefTelLab.textoAyuda : ""}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={!validado || enviandoForm} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
+                        {(enviandoForm) ? "Enviando...." : "Guardar cambios"}
+                    </Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+}
+
+//Edit Correo referencia laboral
+function FormEditCorreoReferenciaLaboral({ cerrar, reiniciarpantalla, usuarioDetalle }) {
+    const gContext = useContext(AppContext);
+    const [validado, set_validado] = useState(false);
+    const [inputRefCorreoLab, set_inputRefCorreoLab] = useState({
+        valor: gContext.usuarioDetalle ? gContext.usuarioDetalle.ref_correo_lab.toLowerCase() : '',
+        validado: false,
+        textoAyuda: "",
+        blur: false
+    });
+    const [enviandoForm, set_enviandoForm] = useState(false);
+
+    function handleChange_inputRefCorreoLab(event) {
+        const valor = event.target.value.toLowerCase(); // Convertir siempre a minúsculas
+        const validado = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor); // Validar formato de correo electrónico
+        set_inputRefCorreoLab({
+            valor: valor,
+            validado: validado,
+            blur: inputRefCorreoLab.blur,
+        });
+    }
+
+    useEffect(() => {
+        set_validado(inputRefCorreoLab.validado);
+    }, [inputRefCorreoLab]);
+
+    function guardarDatos() {
+        if (!validado) {
+            console.log('Datos no válidos, no se puede enviar el formulario');
+            return;
+        }
+
+        set_enviandoForm(true);
+        console.log('Enviando datos:', {
+            sid: gContext.logeado?.token,
+            array: {
+                ref_correo_lab: inputRefCorreoLab.valor
+            }
+        });
+
+        axios.request({
+            url: `${config.apiUrl}/api/app/putProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    ref_correo_lab: inputRefCorreoLab.valor
+                },
+            },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            console.log('Respuesta de la API:', res.data);
+            if (res.data.status === "ER") {
+                console.log('Error en la API:', res.data);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            }
+            if (res.data.status === "OK") {
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            set_enviandoForm(false);
+            console.log('Error en la petición:', err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5">Editar</Typography>
+            <Typography variant="body" sx={{ mb: '1rem' }}>Ingresa el correo de referencia laboral.</Typography>
+            <Grid sx={{ mt: 1, mb: 1 }} container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        fullWidth
+                        label="Correo referencia laboral"
+                        value={inputRefCorreoLab.valor}
+                        onChange={handleChange_inputRefCorreoLab}
+                        onBlur={() => set_inputRefCorreoLab({ ...inputRefCorreoLab, blur: true })}
+                        required
+                        error={(!inputRefCorreoLab.validado && inputRefCorreoLab.blur)}
+                        helperText={(!inputRefCorreoLab.validado && inputRefCorreoLab.blur) ? "Debe ser un correo válido con @dominio" : ""}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={(validado && !enviandoForm) ? false : true} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
+                        {(enviandoForm) ? "Enviando...." : "Guardar cambios"}
+                    </Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+}
