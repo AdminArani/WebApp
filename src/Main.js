@@ -109,21 +109,19 @@ function Main() {
         });
     }
     
-    async function guardarUbicacion(customerId, personCode) {
+    async function guardarUbicacion(customerId) {
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
             const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
-    
+            
             try {
-                // Hacer la petición al API de OpenStreetMap
                 const response = await fetch(apiUrl);
                 const data = await response.json();
-                console.log(data);
     
                 const ciudad = data.address.city || data.address.town || data.address.village || '';
                 const pais = data.address.country || '';
                 setUbicacion(`${ciudad}, ${pais}`);
-    
+        
                 // Lista de ubicaciones permitidas
                 const ubicacionesPermitidas = [
                     "Tegucigalpa, Honduras",
@@ -147,18 +145,51 @@ function Main() {
                     "Santa Rosa de Copán, Honduras",
                     "Gracias Lempira, Honduras"
                 ];
-    
+        
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
                 if (ubicacionesPermitidas.includes(`${ciudad}, ${pais}`)) {
                     setShowAplicarLink(true);
                 }
-    
+        
                 // Obtener la dirección IP del dispositivo
                 const ipResponse = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipResponse.json();
                 const ip = ipData.ip; // Capturando la IP
-
-                // Hacer POST a tu API para guardar latitud y longitud
+        
+                // Obtener el navegador y sistema operativo
+                const userAgent = navigator.userAgent;
+                let navegador = 'Desconocido';
+                let sistemaOperativo = 'Desconocido';
+        
+                if (userAgent.includes('Brave')) {
+                    navegador = 'Brave Browser';
+                } else if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+                    navegador = 'Google Chrome';
+                } else if (userAgent.includes('Firefox')) {
+                    navegador = 'Mozilla Firefox';
+                } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+                    navegador = 'Apple Safari';
+                } else if (userAgent.includes('Edg')) {
+                    navegador = 'Microsoft Edge';
+                } else if (userAgent.includes('Opera') || userAgent.includes('OPR')) {
+                    navegador = 'Opera';
+                } else if (userAgent.includes('MSIE') || userAgent.includes('Trident')) {
+                    navegador = 'Internet Explorer';
+                }
+    
+                if (userAgent.includes('Macintosh') || userAgent.includes('Mac OS X')) {
+                    sistemaOperativo = 'MacOS';
+                } else if (userAgent.includes('Win')) {
+                    sistemaOperativo = 'Windows';
+                } else if (userAgent.includes('Linux') || userAgent.includes('X11')) {
+                    sistemaOperativo = 'Linux';
+                } else if (userAgent.includes('Android')) {
+                    sistemaOperativo = 'Android';
+                } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+                    sistemaOperativo = 'iOS';
+                }
+        
+                // Hacer POST a tu API para guardar latitud, longitud, navegador y sistema operativo
                 const postResponse = await fetch('https://app.aranih.com/api/app/post_locations.php', {
                     method: 'POST',
                     headers: {
@@ -166,71 +197,31 @@ function Main() {
                     },
                     body: JSON.stringify({
                         idClient: customerId,
-                        dni: ip, // Enviar la IP en lugar del DNI
+                        ip: ip, // Enviar la IP en lugar del DNI
                         latitude: latitude,
                         longitude: longitude,
+                        navegador: navegador,
+                        sistema_operativo: sistemaOperativo,
                     }),
                 });
-    
+        
                 // Verificar el estado de la respuesta
                 if (!postResponse.ok) {
                     const errorMessage = await postResponse.text(); // Obtener el cuerpo de la respuesta como texto
                     console.error('Error en la respuesta del API:', errorMessage);
                     throw new Error(`HTTP error! status: ${postResponse.status}`);
                 }
-    
+        
                 // Intentar analizar la respuesta como JSON
                 const postData = await postResponse.json();
                 console.log(postData); // Manejo de la respuesta
-    
+        
             } catch (error) {
-                console.error('Error al obtener la ubicación o hacer el POST:', error);
+                console.error('Bienvenido:', error);
             }
         });
     }
     
-    useEffect(() => {
-        const capturarNavegadorYOS = () => {
-          const userAgent = navigator.userAgent;
-          let navegador = 'Desconocido';
-          let sistemaOperativo = 'Desconocido';
-    
-          // Detectar navegador
-          if (userAgent.includes('Brave')) {
-            navegador = 'Brave Browser';
-          } else if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
-            navegador = 'Google Chrome';
-          } else if (userAgent.includes('Firefox')) {
-            navegador = 'Mozilla Firefox';
-          } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
-            navegador = 'Apple Safari';
-          } else if (userAgent.includes('Edg')) {
-            navegador = 'Microsoft Edge';
-          } else if (userAgent.includes('Opera') || userAgent.includes('OPR')) {
-            navegador = 'Opera';
-          } else if (userAgent.includes('MSIE') || userAgent.includes('Trident')) {
-            navegador = 'Internet Explorer';
-          }
-    
-          // Detectar sistema operativo
-          if (userAgent.includes('Macintosh') || userAgent.includes('Mac OS X')) {
-            sistemaOperativo = 'MacOS';
-          } else if (userAgent.includes('Win')) {
-            sistemaOperativo = 'Windows';
-          } else if (userAgent.includes('Linux') || userAgent.includes('X11')) {
-            sistemaOperativo = 'Linux';
-          } else if (userAgent.includes('Android')) {
-            sistemaOperativo = 'Android';
-          } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
-            sistemaOperativo = 'iOS';
-          }
-    
-          console.log(`Navegador: ${navegador}`);
-          console.log(`Sistema Operativo: ${sistemaOperativo}`);
-        };
-    
-        capturarNavegadorYOS(); // Ejecuta la función al montar el componente
-      }, []);
 
 
     // useEffect para llamar a la función validarPerfilEnCore al cargar el componente
