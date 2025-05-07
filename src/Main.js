@@ -143,7 +143,9 @@ function Main() {
                     "Comayagua, Honduras",
                     "Siguatepeque, Honduras",
                     "La Ceiba, Honduras",
-                    "La Paz, Honduras"
+                    "La Paz, Honduras",
+                    "Santa Rosa de Copán, Honduras",
+                    "Gracias Lempira, Honduras"
                 ];
     
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
