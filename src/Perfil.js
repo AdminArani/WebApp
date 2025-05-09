@@ -38,6 +38,7 @@ import FormEditFile2 from './componentes/editFile2.js';
 import FormEditFile3 from './componentes/editFile3.js';
 import FormEditFile4 from './componentes/editFile4.js';
 import React from 'react';
+import MenuItem from "@mui/material/MenuItem";
 
 function Perfil() {
     const gContext = useContext(AppContext);
@@ -929,7 +930,37 @@ function Perfil() {
                             {/* Seccion de Referencias Personales */}
                             <Grid item xs={12} sm={12}>
                                 <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Referencias Personales</Divider>
-                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}></Typography>
+                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}>Comparte el contacto de un amigo, familiar, vecino o conocido.</Typography>
+                            </Grid>
+
+                            {/* Tipo Referencia personal */}
+                            <Grid item xs={12} sm={6}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('tiporeferenciapersonal');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">home</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={usuarioDetalle.ref_tipo_per || "----"} 
+                                        secondary="* Tipo referencia personal" 
+                                    />
+                                </ListItemButton>
+                            </List>
                             </Grid>
                             
                             {/* Referencia personal */}
@@ -956,7 +987,7 @@ function Perfil() {
                                     <ListItemText 
                                         primaryTypographyProps={{textTransform: 'capitalize'}} 
                                         primary={usuarioDetalle.ref_nom_per || "----"} 
-                                        secondary="* Referencia personal" 
+                                        secondary="* Nombre referencia personal" 
                                     />
                                 </ListItemButton>
                             </List>
@@ -1026,7 +1057,37 @@ function Perfil() {
                             {/* Seccion de Referencias Laborales  */}
                             <Grid item xs={12} sm={12}>
                                 <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Referencias Laborales</Divider>
-                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}></Typography>
+                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}>Comparte el contacto de un compañero de trabajo, jefe o cliente.</Typography>
+                            </Grid>
+
+                            {/* Tipo Referencia laboral */}
+                            <Grid item xs={12} sm={6}>
+                            <List>
+                                <ListItemButton 
+                                    onClick={() => {
+                                        if (usuarioDetalle.status === "0") {
+                                            set_moduloEditarActivo('tiporeferencialaboral');
+                                            set_openEditarCampos(true);
+                                        } else {
+                                            alert("Esta opción está deshabilitada.");
+                                        }
+                                    }}
+                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    style={{
+                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                    }}
+                                >
+                                    <ListItemIcon>
+                                        <span className="material-symbols-outlined">work</span>
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primaryTypographyProps={{textTransform: 'capitalize'}} 
+                                        primary={usuarioDetalle.ref_tipo_lab || "----"} 
+                                        secondary="* Tipo referencia laboral" 
+                                    />
+                                </ListItemButton>
+                            </List>
                             </Grid>
 
                             {/* Referencia laboral nombre */}
@@ -1053,7 +1114,7 @@ function Perfil() {
                                     <ListItemText 
                                         primaryTypographyProps={{textTransform: 'capitalize'}} 
                                         primary={usuarioDetalle.ref_nom_lab || "----"} 
-                                        secondary="* Referencia laboral" 
+                                        secondary="* Nombre referencia laboral" 
                                     />
                                 </ListItemButton>
                             </List>
@@ -1264,9 +1325,11 @@ function Perfil() {
                         {(moduloEditarActivo === 'dependendeti') && <FormEditDependeti cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'gradoeducativo') && <FormEditGradoEducativo cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'antiguedadlaboral') && <FormEditAntiguedadLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'tiporeferenciapersonal') && <FormEditTipoReferenciaPersonal cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'referenciapersonal') && <FormEditReferenciaPersonal cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'celularreferenciapersonal') && <FormEditReferenciaTelefono cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'correoreferenciapersonal') && <FormEditCorreoReferenciaPersonal cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
+                        {(moduloEditarActivo === 'tiporeferencialaboral') && <FormEditTipoReferenciaLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'referencialaboral') && <FormEditReferenciaLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'celularreferencialaboral') && <FormEditReferenciaTelefonoLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
                         {(moduloEditarActivo === 'correoreferencialaboral') && <FormEditCorreoReferenciaLaboral cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalle={usuarioDetalle}/>}
@@ -1439,7 +1502,113 @@ function FormEditAntiguedadLaboral({cerrar, reiniciarpantalla, usuarioDetalle}){
         </Box>
     )}
 
+//Editar Tipo Referencia Laboral
+function FormEditTipoReferenciaPersonal({ cerrar, reiniciarpantalla, usuarioDetalle }) {
+    const gContext = useContext(AppContext);
+    const [validado, set_validado] = useState(false);
+    const [inputRefTipoPer, set_inputRefTipoPer] = useState({
+        valor: usuarioDetalle?.ref_tipo_per || '',
+        validado: false,
+        textoAyuda: "",
+        blur: false
+    });
+    const [enviandoForm, set_enviandoForm] = useState(false);
 
+    function handleChange_inputRefTipoPer(event) {
+        const valor = event.target.value;
+        const validado = valor.length > 0; // Validar que no esté vacío
+        set_inputRefTipoPer({
+            valor: valor,
+            validado: validado,
+            textoAyuda: validado ? "" : "Este campo es obligatorio.",
+            blur: inputRefTipoPer.blur,
+        });
+    }
+
+    useEffect(() => {
+        set_validado(inputRefTipoPer.validado);
+    }, [inputRefTipoPer]);
+
+    function guardarDatos() {
+        if (!validado) {
+            console.log('Datos no válidos, no se puede enviar el formulario');
+            return;
+        }
+
+        set_enviandoForm(true);
+        console.log('Enviando datos:', {
+            sid: gContext.logeado?.token,
+            array: {
+                ref_tipo_per: inputRefTipoPer.valor
+            }
+        });
+
+        axios.request({
+            url: `${config.apiUrl}/api/app/putProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    ref_tipo_per: inputRefTipoPer.valor
+                },
+            },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            console.log('Respuesta de la API:', res.data);
+            if (res.data.status === "ER") {
+                console.log('Error en la API:', res.data);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            }
+            if (res.data.status === "OK") {
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            set_enviandoForm(false);
+            console.log('Error en la petición:', err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5">Editar</Typography>
+            <Typography variant="body" sx={{ mb: '1rem' }}>Selecciona el tipo de referencia personal.</Typography>
+            <Grid sx={{ mt: 1, mb: 1 }} container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        select
+                        fullWidth
+                        label="Tipo referencia personal"
+                        value={inputRefTipoPer.valor}
+                        onChange={handleChange_inputRefTipoPer}
+                        onBlur={() => set_inputRefTipoPer({ ...inputRefTipoPer, blur: true })}
+                        required
+                        error={(!inputRefTipoPer.validado && inputRefTipoPer.blur)}
+                        helperText={(!inputRefTipoPer.validado && inputRefTipoPer.blur) ? inputRefTipoPer.textoAyuda : ""}
+                    >
+                        <MenuItem value="">Seleccione una opción</MenuItem>
+                        <MenuItem value="amigo">Amigo/a</MenuItem>
+                        <MenuItem value="vecino">Vecino/a</MenuItem>
+                        <MenuItem value="conocido">Conocido/a</MenuItem>
+                        <MenuItem value="esposo">Esposo/a</MenuItem>
+                        <MenuItem value="hijo">Hijo/a</MenuItem>
+                        <MenuItem value="hermano">Hermano/a</MenuItem>
+                        <MenuItem value="papa_mama">Papá/Mamá</MenuItem>
+                    </TextField>
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={!validado || enviandoForm} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
+                        {(enviandoForm) ? "Enviando...." : "Guardar cambios"}
+                    </Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+}
     
 //Editar referencia personal 
 function FormEditReferenciaPersonal({ cerrar, reiniciarpantalla, usuarioDetalle }) {
@@ -1737,6 +1906,109 @@ function FormEditCorreoReferenciaPersonal({ cerrar, reiniciarpantalla, usuarioDe
     );
 }
 
+//Edit Referencia tipo laboral
+function FormEditTipoReferenciaLaboral({ cerrar, reiniciarpantalla, usuarioDetalle }) {
+    const gContext = useContext(AppContext);
+    const [validado, set_validado] = useState(false);
+    const [inputRefTipoLab, set_inputRefTipoLab] = useState({
+        valor: usuarioDetalle?.ref_tipo_lab || '',
+        validado: false,
+        textoAyuda: "",
+        blur: false
+    });
+    const [enviandoForm, set_enviandoForm] = useState(false);
+
+    function handleChange_inputRefTipoLab(event) {
+        const valor = event.target.value;
+        const validado = valor.length > 0; // Validar que no esté vacío
+        set_inputRefTipoLab({
+            valor: valor,
+            validado: validado,
+            textoAyuda: validado ? "" : "Este campo es obligatorio.",
+            blur: inputRefTipoLab.blur,
+        });
+    }
+
+    useEffect(() => {
+        set_validado(inputRefTipoLab.validado);
+    }, [inputRefTipoLab]);
+
+    function guardarDatos() {
+        if (!validado) {
+            console.log('Datos no válidos, no se puede enviar el formulario');
+            return;
+        }
+
+        set_enviandoForm(true);
+        console.log('Enviando datos:', {
+            sid: gContext.logeado?.token,
+            array: {
+                ref_tipo_lab: inputRefTipoLab.valor
+            }
+        });
+
+        axios.request({
+            url: `${config.apiUrl}/api/app/putProfile.php`,
+            method: "post",
+            data: {
+                sid: gContext.logeado?.token,
+                array: {
+                    ref_tipo_lab: inputRefTipoLab.valor
+                },
+            },
+        })
+        .then((res) => {
+            set_enviandoForm(false);
+            console.log('Respuesta de la API:', res.data);
+            if (res.data.status === "ER") {
+                console.log('Error en la API:', res.data);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem('arani_session_id');
+                gContext.set_logeado({ estado: false, token: '' });
+            }
+            if (res.data.status === "OK") {
+                reiniciarpantalla();
+            }
+        }).catch(err => {
+            set_enviandoForm(false);
+            console.log('Error en la petición:', err.message);
+        });
+    }
+
+    return (
+        <Box>
+            <Typography variant="h5">Editar</Typography>
+            <Typography variant="body" sx={{ mb: '1rem' }}>Selecciona el tipo de referencia laboral.</Typography>
+            <Grid sx={{ mt: 1, mb: 1 }} container spacing={2}>
+                <Grid item xs={12} sm={12}>
+                    <TextField
+                        select
+                        fullWidth
+                        label="Tipo referencia laboral"
+                        value={inputRefTipoLab.valor}
+                        onChange={handleChange_inputRefTipoLab}
+                        onBlur={() => set_inputRefTipoLab({ ...inputRefTipoLab, blur: true })}
+                        required
+                        error={(!inputRefTipoLab.validado && inputRefTipoLab.blur)}
+                        helperText={(!inputRefTipoLab.validado && inputRefTipoLab.blur) ? inputRefTipoLab.textoAyuda : ""}
+                    >
+                        <MenuItem value="">Seleccione una opción</MenuItem>
+                        <MenuItem value="jefe">Jefe/a</MenuItem>
+                        <MenuItem value="compañero">Compañero/a</MenuItem>
+                        <MenuItem value="cliente">Cliente/a</MenuItem>
+                    </TextField>
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                    <Button disabled={!validado || enviandoForm} variant="contained" onClick={guardarDatos} sx={{ mt: 1, mr: 1 }}>
+                        {(enviandoForm) ? "Enviando...." : "Guardar cambios"}
+                    </Button>
+                    <Button onClick={cerrar} sx={{ mt: 1, mr: 1 }}>Cerrar</Button>
+                </Grid>
+            </Grid>
+        </Box>
+    );
+}
 
 //Edit Referencia laboral
 function FormEditReferenciaLaboral({ cerrar, reiniciarpantalla, usuarioDetalle }) {
