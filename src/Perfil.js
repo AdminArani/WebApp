@@ -2143,6 +2143,13 @@ function FormEditReferenciaTelefonoLaboral({ cerrar, reiniciarpantalla, usuarioD
         }
     }
 
+    function handleKeyPress(event) {
+        // Permitir solo números
+        if (!/[0-9]/.test(event.key)) {
+            event.preventDefault();
+        }
+    }
+
     useEffect(() => {
         set_validado(inputRefTelLab.validado);
     }, [inputRefTelLab]);
@@ -2201,10 +2208,12 @@ function FormEditReferenciaTelefonoLaboral({ cerrar, reiniciarpantalla, usuarioD
                         label="Teléfono referencia laboral"
                         value={inputRefTelLab.valor}
                         onChange={handleChange_inputRefTelLab}
+                        onKeyPress={handleKeyPress} // Restringir entrada a números
                         onBlur={() => set_inputRefTelLab({ ...inputRefTelLab, blur: true })}
                         required
                         error={(!inputRefTelLab.validado && inputRefTelLab.blur)}
                         helperText={(!inputRefTelLab.validado && inputRefTelLab.blur) ? inputRefTelLab.textoAyuda : ""}
+                        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} // Restringir a números
                     />
                 </Grid>
                 <Grid item xs={12} sm={12}>
