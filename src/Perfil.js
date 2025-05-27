@@ -97,7 +97,7 @@ function Perfil() {
                     "La Ceiba, Honduras",
                     "La Paz, Honduras",
                     "Santa Rosa de Copán, Honduras",
-                    "Gracias Lempira, Honduras"
+                    "Gracias, Honduras"
                 ];
     
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
@@ -323,6 +323,12 @@ function Perfil() {
             usuarioDetalle.work_region &&
             usuarioDetalle.work_county &&
             usuarioDetalle.work_experience &&
+            usuarioDetalle.ref_tipo_per &&
+            usuarioDetalle.ref_nom_per &&
+            usuarioDetalle.ref_tel_per &&
+            usuarioDetalle.ref_tipo_lab &&
+            usuarioDetalle.ref_nom_lab &&
+            usuarioDetalle.ref_tel_lab &&
             usuarioDetalle.file1 &&
             usuarioDetalle.file2 &&
             usuarioDetalle.file3 &&
@@ -396,11 +402,11 @@ function Perfil() {
                         {usuarioAprobadoManual && 
                             <Box>
                                 <Typography variant="body2" sx={{color: '#64d164'}}>Tu cuenta esta habilitada para solicitar préstamos.</Typography>
-                                {showAplicarLink ? (
+                                {/* {showAplicarLink ? (
                                     <Button component={Link} to="/aplicar" variant="contained" sx={{ mt: 1, mr: 1 }}>Solicitar préstamo</Button>
                                 ) : (
                                     <p style={{ color: 'red' }}>{errorMessage}</p>
-                                )}
+                                )} */}
                             </Box>
                         }
                         <Grid container>

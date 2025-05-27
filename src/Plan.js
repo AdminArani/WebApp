@@ -871,13 +871,13 @@ function Plan() {
                             );
                         }
 
-                        return showAplicarLink ? (
-                            <Button component={Link} to="/aplicar" variant="contained" sx={{ mr: 1 }}>
-                                Aplicar
-                            </Button>
-                        ) : (
-                            <p style={{ color: 'red' }}>{errorMessage}</p>
-                        );
+                        // return showAplicarLink ? (
+                        //     <Button component={Link} to="/aplicar" variant="contained" sx={{ mr: 1 }}>
+                        //         Aplicar
+                        //     </Button>
+                        // ) : (
+                        //     <p style={{ color: 'red' }}>{errorMessage}</p>
+                        // );
                     })()}
                         <Button component={Link} to="/historial" variant="contained">Historial</Button>
                     </Box>}

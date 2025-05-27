@@ -13,6 +13,7 @@ import tile_referir from "./images/tile_referir.svg";
 import tile_historial from "./images/tile_historial.svg";
 import { Link } from "react-router-dom";
 import BarraApp from "./componentes/BarraApp.js";
+import ModalDatosFaltantes from "./componentes/ModalDatosFaltantes";
 import axios from "axios";
 
 function Main() {
@@ -130,7 +131,7 @@ function Main() {
                     "Choloma, Honduras",
                     "La Lima, Honduras",
                     "Villanueva, Honduras",
-                    "Progreso, Honduras",
+                    "El Progreso, Honduras",
                     "San Pedro Sula, Honduras",
                     "Puerto Cortés, Honduras",
                     "El Progreso, Honduras",
@@ -143,7 +144,8 @@ function Main() {
                     "La Ceiba, Honduras",
                     "La Paz, Honduras",
                     "Santa Rosa de Copán, Honduras",
-                    "Gracias Lempira, Honduras"
+                    "Gracias, Honduras",
+                    "Roatán, Honduras",
                 ];
         
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
@@ -301,6 +303,14 @@ function Main() {
           lineHeight: '1.5',
         },
     };
+
+    const [showModal, setShowModal] = useState(false);
+
+    const handleSaveDatosFaltantes = (formData) => {
+        // Aquí puedes enviar los datos al backend o actualizar el estado
+        console.log("Datos guardados:", formData);
+        setShowModal(false);
+    };
       
 
     return (   
@@ -415,7 +425,25 @@ function Main() {
                             }
 
                             return showAplicarLink ? (
-                                <Link to="/aplicar" className="tilebotonpri">
+                                <Link
+                                    to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per || !usuarioDetalle.ref_correo_per) ? "#" : "/aplicar"}
+                                    className="tilebotonpri"
+                                    onClick={(e) => {
+                                        if (
+                                            !usuarioDetalle.ref_tipo_per ||
+                                            !usuarioDetalle.ref_nom_per ||
+                                            !usuarioDetalle.ref_tel_per ||
+                                            !usuarioDetalle.ref_correo_per ||
+                                            !usuarioDetalle.ref_tipo_lab ||
+                                            !usuarioDetalle.ref_nom_lab ||
+                                            !usuarioDetalle.ref_tel_lab ||
+                                            !usuarioDetalle.ref_correo_lab 
+                                        ) {
+                                            e.preventDefault(); // Evitar la redirección
+                                            setShowModal(true); // Mostrar el modal
+                                        }
+                                    }}
+                                >
                                     <div className="tilebotonpri-tit">Aplicar</div>
                                     <div className="tilebotonpri-desc">Formulario para solicitar préstamos.</div>
                                     <div className="tilebotonpri-estado"></div>
@@ -470,6 +498,12 @@ function Main() {
                 <BarraFinal />
             </Box>
               )}
+
+            <ModalDatosFaltantes
+                open={showModal}
+                onClose={() => setShowModal(false)}
+                onSave={handleSaveDatosFaltantes}
+            />
         </Container>
     );
 }
