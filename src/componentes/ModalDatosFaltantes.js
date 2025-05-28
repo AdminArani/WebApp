@@ -252,10 +252,8 @@ const ModalDatosFaltantes = ({ open, onClose, onSave, usuarioDetalle }) => {
             fontSize: "18px",
           }}
         >
-          Hola, <br /><br />
-          gracias por confiar nuevamente en nosotros. <br />
-          Antes de continuar, necesitamos un pequeño paso adicional. <br />
-          Solo nos falta un detalle: <br />¿Nos puedes compartir 1 referencia personal y 1 laboral? <br /><br />
+          Antes de continuar, necesitamos un pequeño paso adicional. <br /><br />
+          
           Esto nos ayudará a procesar tu nuevo préstamo más rápido.
         </Typography>
         <Box sx={{ height: 24 }} />

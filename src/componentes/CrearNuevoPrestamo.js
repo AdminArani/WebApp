@@ -972,6 +972,23 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                 },
                                 }}
                             >
+
+                                <label style={{ display: 'flex', alignItems: 'center', margin: '10px auto', width: '80%' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={inputAceptoBanco}
+                                    onChange={() => set_inputAceptoBanco(!inputAceptoBanco)}
+                                    style={{
+                                        width: '20px',
+                                        height: '20px',
+                                        marginRight: '10px',
+                                        accentColor: '#647cf8', // Cambia el color del checkbox (depende del navegador)
+                                    }}
+                                />
+                                <span style={{ fontSize: '12px', color: inputAceptoBanco ? 'black' : 'black' }}>
+                                    {inputAceptoBanco ? ' Confirmo que mi información bancaria es correcta' : 'Confirmo que mi información bancaria es correcta'}
+                                </span>
+                                </label>
                                 <Button
                                 onClick={() => {
                                     set_openEditarBanco(true);
@@ -998,24 +1015,9 @@ function Formulario({cerrarVentana, params, todobiencallback}) {
                                     textTransform: 'none',
                                 }}
                                 >
-                                No, Quiero actualizar mi cuenta bancaria
+                                Quiero cambiar mi cuenta bancaria
                                 </Button>
-                            <label style={{ display: 'flex', alignItems: 'center', margin: '10px auto', width: '80%' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={inputAceptoBanco}
-                                    onChange={() => set_inputAceptoBanco(!inputAceptoBanco)}
-                                    style={{
-                                        width: '20px',
-                                        height: '20px',
-                                        marginRight: '10px',
-                                        accentColor: '#647cf8', // Cambia el color del checkbox (depende del navegador)
-                                    }}
-                                />
-                                <span style={{ fontSize: '12px', color: inputAceptoBanco ? 'black' : 'black' }}>
-                                    {inputAceptoBanco ? ' Si, mi información bancaria es correcta' : 'Si, mi información bancaria es correcta'}
-                                </span>
-                            </label>
+                            
 
 
                                 
