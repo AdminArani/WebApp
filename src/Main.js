@@ -347,6 +347,13 @@ function Main() {
                             </span>
                         )}
                     </p>
+                    {usuarioDetalle.status === "1" &&
+                    !showAplicarLink &&
+                    ubicacion !== "Para continuar con el proceso de solicitud de préstamo en Arani App, es necesario que el navegador acceda a tu ubicación en tu celular." && (
+                        <div style={{ color: "#e74c3c", fontWeight: "bold", marginBottom: 16 }}>
+                            Lo sentimos, actualmente esta función no está permitida en tu ubicación.
+                        </div>
+                    )}
 
                     {usuarioDetalle.status === "0" && (
                         <div style={styles.container}>
@@ -424,6 +431,38 @@ function Main() {
                                 );
                             }
 
+                            // Si el status es "0", mostrar el botón pero deshabilitado
+                            if (usuarioDetalle.status === "0" || usuarioDetalle.status === 0) {
+                                return (
+                                    <Link className="tilebotonpri disabled" to="#" onClick={e => e.preventDefault()}>
+                                        <div className="tilebotonpri-tit">Aplicar</div>
+                                        <div className="tilebotonpri-desc">
+                                            Tu perfil sigue en proceso de validación. No puedes aplicar aún.
+                                        </div>
+                                        <div className="tilebotonpri-estado"></div>
+                                        <div className="tilebotonpri-icon"><img alt="" src={tile_aplicar} /></div>
+                                    </Link>
+                                );
+                            }
+
+                            // Si el usuario está validado pero fuera de ubicación permitida
+                            if (
+                                (usuarioDetalle.status === "1" || usuarioDetalle.status === 1) &&
+                                !showAplicarLink
+                            ) {
+                                return (
+                                    <Link className="tilebotonpri disabled">
+                                        <div className="tilebotonpri-tit">Aplicar</div>
+                                        <div className="tilebotonpri-desc">
+                                            Lo sentimos, actualmente esta función no está permitida en tu ubicación.
+                                        </div>
+                                        <div className="tilebotonpri-estado"></div>
+                                        <div className="tilebotonpri-icon"><img alt="" src={tile_aplicar} /></div>
+                                    </Link>
+                                );
+                            }
+
+                            // Caso normal
                             return showAplicarLink ? (
                                 <Link
                                     to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per || !usuarioDetalle.ref_correo_per) ? "#" : "/aplicar"}
@@ -439,8 +478,8 @@ function Main() {
                                             !usuarioDetalle.ref_tel_lab ||
                                             !usuarioDetalle.ref_correo_lab 
                                         ) {
-                                            e.preventDefault(); // Evitar la redirección
-                                            setShowModal(true); // Mostrar el modal
+                                            e.preventDefault();
+                                            setShowModal(true);
                                         }
                                     }}
                                 >
