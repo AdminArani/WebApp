@@ -465,18 +465,16 @@ function Main() {
                             // Caso normal
                             return showAplicarLink ? (
                                 <Link
-                                    to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per || !usuarioDetalle.ref_correo_per) ? "#" : "/aplicar"}
+                                    to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per ) ? "#" : "/aplicar"}
                                     className="tilebotonpri"
                                     onClick={(e) => {
                                         if (
                                             !usuarioDetalle.ref_tipo_per ||
                                             !usuarioDetalle.ref_nom_per ||
                                             !usuarioDetalle.ref_tel_per ||
-                                            !usuarioDetalle.ref_correo_per ||
                                             !usuarioDetalle.ref_tipo_lab ||
                                             !usuarioDetalle.ref_nom_lab ||
-                                            !usuarioDetalle.ref_tel_lab ||
-                                            !usuarioDetalle.ref_correo_lab 
+                                            !usuarioDetalle.ref_tel_lab 
                                         ) {
                                             e.preventDefault();
                                             setShowModal(true);
