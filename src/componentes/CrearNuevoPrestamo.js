@@ -1766,6 +1766,37 @@ function FormCambiarBanco({setOpen}){
         });
     }
 
+    const [cuentaDuplicada, setCuentaDuplicada] = useState(false);
+
+    useEffect(() => {
+        // Solo validar si el campo tiene un valor y es numérico
+        if (inputCuentaBanco.valor && inputCuentaBanco.valor.match(/^[0-9]+$/)) {
+            const controller = new AbortController();
+            const validarCuenta = async () => {
+                try {
+                    const response = await fetch('https://app.aranih.com/api/app/validarcuentabancaria.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ account_number: inputCuentaBanco.valor }),
+                        signal: controller.signal
+                    });
+                    const data = await response.json();
+                    setCuentaDuplicada(data.exists === true);
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        setCuentaDuplicada(false);
+                    }
+                }
+            };
+            validarCuenta();
+            return () => controller.abort();
+        } else {
+            setCuentaDuplicada(false);
+        }
+    }, [inputCuentaBanco.valor]);
+
     return (
         <Box>
             
@@ -1805,37 +1836,41 @@ function FormCambiarBanco({setOpen}){
             </Grid>
                 <Grid item xs={12} sm={6}>
                 <TextField 
-                        helperText={inputCuentaBanco.textoAyuda} 
-                        required 
-                        value={inputCuentaBanco.valor} 
-                        onBlur={() => set_inputCuentaBanco({ ...inputCuentaBanco, blur: true })}
-                        onChange={handleChange_inputCuentaBanco} 
-                        error={!inputCuentaBanco.validado && inputCuentaBanco.blur} 
-                        autoComplete="off" 
-                        fullWidth 
-                        label={"# de cuenta" }
-                        InputProps={{
-                            style: {
-                                fontSize: '12px',
-                                borderRadius: '20px',
-                                overflow: 'hidden',
-                                height: '30px',
-                            }
-                        }}
-                        inputProps={{
-                            style: {
-                                fontSize: '12px',
-                            },
-                            onInput: (e) => {
-                                e.target.value = e.target.value.replace(/-/g, ""); // Elimina los guiones directamente
-                            },
-                        }}
-                        InputLabelProps={{
-                            style: {
-                                fontSize: '12px',
-                            }
-                        }}
-                    />
+    helperText={
+        cuentaDuplicada 
+            ? "La cuenta ya existe en nuestro sistema." 
+            : inputCuentaBanco.textoAyuda
+    }
+    required 
+    value={inputCuentaBanco.valor} 
+    onBlur={() => set_inputCuentaBanco({ ...inputCuentaBanco, blur: true })}
+    onChange={handleChange_inputCuentaBanco} 
+    error={cuentaDuplicada || (!inputCuentaBanco.validado && inputCuentaBanco.blur)} 
+    autoComplete="off" 
+    fullWidth 
+    label={"# de cuenta" }
+    InputProps={{
+        style: {
+            fontSize: '12px',
+            borderRadius: '20px',
+            overflow: 'hidden',
+            height: '30px',
+        }
+    }}
+    inputProps={{
+        style: {
+            fontSize: '12px',
+        },
+        onInput: (e) => {
+            e.target.value = e.target.value.replace(/-/g, ""); // Elimina los guiones directamente
+        },
+    }}
+    InputLabelProps={{
+        style: {
+            fontSize: '12px',
+        }
+    }}
+/>
 
                     </Grid>
                     <Grid item xs={12} sm={12}>
@@ -1881,10 +1916,19 @@ function FormCambiarBanco({setOpen}){
             }
 
             {(usuarioDetalle && apiCamposConstructor && terminoEditar) && 
-            <Box sx={{textAlign: 'center'}}>
-                <Typography sx={{p: '2rem 0', color: 'green', textAlign: 'center', maxWidth: '15rem'}}>Información guardada correctamente.</Typography>
-                <Button variant="contained" onClick={()=>{setOpen(false)}} sx={{ mt: 1, mr: 1 }} >Aceptar</Button>
-            </Box>
+                <Box sx={{textAlign: 'center'}}>
+                    <Typography sx={{p: '2rem 0', color: 'green', textAlign: 'center', maxWidth: '15rem'}}>Información guardada correctamente.</Typography>
+                    <Button 
+                        variant="contained" 
+                        onClick={() => {
+                            setOpen(false);
+                            window.location.reload(); // Recarga la pantalla
+                        }} 
+                        sx={{ mt: 1, mr: 1 }} 
+                    >
+                        Aceptar
+                    </Button>
+                </Box>
             }
 
             {(!apiCamposConstructor || !usuarioDetalle) &&
