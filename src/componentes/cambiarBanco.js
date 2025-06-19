@@ -42,10 +42,12 @@ function FormCambiarBanco({cerrar, reiniciarpantalla, apiCamposConstructor, usua
     }, [usuarioDetalle]);
 
     const handleChange_inputCuentaBanco = (event) => {
+        // Eliminar todo lo que no sea número
+        const soloNumeros = event.target.value.replace(/[^0-9]/g, "");
         set_inputCuentaBanco({
             ...inputCuentaBanco,
-            valor: event.target.value,
-            validado: true
+            valor: soloNumeros,
+            validado: soloNumeros.length > 0 // O tu lógica de validación
         });
     }
 
