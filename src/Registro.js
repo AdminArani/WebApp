@@ -169,31 +169,39 @@ function VerticalLinearStepper2(){
 
 
     function handleChange_inputNombre1(event) {
-    let valor = event.target.value.toUpperCase(); // Convertir a mayúsculas
-    let validado = false;
-    let textoAyuda = "Solo letras sin espacios";
+        // Eliminar acentos y convertir a mayúsculas
+        let valor = event.target.value
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toUpperCase();
 
-    if (valor.length >= 1 && /^[A-ZÀ-Ÿ]+$/.test(valor)) { // Validar solo letras en mayúsculas
-        if (datosCenso && datosCenso.DES_PRIMER_NOMBRE) {
-            const nombreCenso = datosCenso.DES_PRIMER_NOMBRE.toUpperCase();
+        let validado = false;
+        let textoAyuda = "Solo letras sin espacios";
 
-            if (valor === nombreCenso) {
-                validado = true;
-                textoAyuda = "";
+        if (valor.length >= 1 && /^[A-Z]+$/.test(valor)) { // Validar solo letras en mayúsculas sin acentos
+            if (datosCenso && datosCenso.DES_PRIMER_NOMBRE) {
+                const nombreCenso = datosCenso.DES_PRIMER_NOMBRE
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toUpperCase();
+
+                if (valor === nombreCenso) {
+                    validado = true;
+                    textoAyuda = "";
+                } else {
+                    textoAyuda = "Este nombre no coincide con el DNI ingresado.";
+                }
             } else {
-                textoAyuda = "Este nombre no coincide con el DNI ingresado.";
+                textoAyuda = "Debe ingresar primero un número de identidad válido.";
             }
-        } else {
-            textoAyuda = "Debe ingresar primero un número de identidad válido.";
         }
-    }
 
-    set_inputNombre1({
-        valor: valor,
-        validado: validado,
-        textoAyuda: textoAyuda,
-        blur: inputNombre1.blur,
-    });
+        set_inputNombre1({
+            valor: valor,
+            validado: validado,
+            textoAyuda: textoAyuda,
+            blur: inputNombre1.blur,
+        });
     }
 
 
@@ -236,41 +244,57 @@ function VerticalLinearStepper2(){
         });
     }
 
-    function handleChange_inputNombre2(event){
-        set_inputNombre2(event.target.value.toUpperCase());
+    function handleChange_inputNombre2(event) {
+        // Eliminar acentos y convertir a mayúsculas
+        const valorSinAcentos = event.target.value
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toUpperCase();
+        set_inputNombre2(valorSinAcentos);
     }
 
     function handleChange_inputNombre3(event) {
-    let valor = event.target.value.toUpperCase(); // Convertir a mayúsculas
-    let validado = false;
-    let textoAyuda = "Campo obligatorio";
+        // Eliminar acentos y convertir a mayúsculas
+        let valor = event.target.value
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toUpperCase();
+        let validado = false;
+        let textoAyuda = "Campo obligatorio";
 
-    if (valor.length >= 1 && /^[A-ZÀ-Ÿ]+$/.test(valor)) { // Validar solo letras en mayúsculas
-        if (datosCenso && datosCenso.DES_PRIMER_APELLIDO) {
-            const apellidoCenso = datosCenso.DES_PRIMER_APELLIDO.toUpperCase();
+        if (valor.length >= 1 && /^[A-Z]+$/.test(valor)) { // Solo letras mayúsculas sin acentos
+            if (datosCenso && datosCenso.DES_PRIMER_APELLIDO) {
+                const apellidoCenso = datosCenso.DES_PRIMER_APELLIDO
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toUpperCase();
 
-            if (valor === apellidoCenso) {
-                validado = true;
-                textoAyuda = "";
+                if (valor === apellidoCenso) {
+                    validado = true;
+                    textoAyuda = "";
+                } else {
+                    textoAyuda = "Este apellido no coincide con el DNI ingresado.";
+                }
             } else {
-                textoAyuda = "Este apellido no coincide con el DNI ingresado.";
+                textoAyuda = "Debe ingresar primero un número de identidad válido.";
             }
-        } else {
-            textoAyuda = "Debe ingresar primero un número de identidad válido.";
         }
+
+        set_inputNombre3({
+            valor: valor,
+            validado: validado,
+            textoAyuda: textoAyuda,
+            blur: inputNombre3.blur,
+        });
     }
-
-    set_inputNombre3({
-        valor: valor,
-        validado: validado,
-        textoAyuda: textoAyuda,
-        blur: inputNombre3.blur,
-    });
-    }
-
-
+    
     function handleChange_inputNombre4(event) {
-        set_inputNombre4(event.target.value.toUpperCase()); // Convertir a mayúsculas
+        // Eliminar acentos y convertir a mayúsculas
+        const valorSinAcentos = event.target.value
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toUpperCase();
+        set_inputNombre4(valorSinAcentos);
     }
 
     function handleChange_inputGenero(event){
