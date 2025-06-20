@@ -440,8 +440,8 @@ function Plan() {
         formData.append('correoElectronico', clienteData.email);
         formData.append('celular', clienteData.mob_phone);
         formData.append('numReferencia', numReferencia);
-        formData.append('cuota', parseFloat(montoPago).toFixed(2));
-        formData.append('montoPago', totalFee);
+        formData.append('cuota', totalFee);
+        formData.append('montoPago', parseFloat(montoPago).toFixed(2));
         formData.append('validado', 'pendiente');
         formData.append('descripcion', 'Pago_Bac');
         formData.append('comentario', 'Sin comentarios');
@@ -652,7 +652,7 @@ function Plan() {
 
 
                             <Typography variant="h5" sx={{mt: 6}}>Plan de pagos</Typography>
-                            <Typography variant="body" sx={{}}>Tus fechas de pago son las siguientes:</Typography>
+                            {/* <Typography variant="body" sx={{}}>Tus fechas de pago son las siguientes:</Typography> */}
                             <Divider sx={{mt: 2}} />
                             {(listaPagos) && 
                             <List sx={{mt: 2}}>
