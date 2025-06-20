@@ -1608,11 +1608,12 @@ function FormCambiarBanco({setOpen}){
         });
     }
 
-    function handleChange_inputCuentaBanco(event){
-        let valor = event.target.value;
+    function handleChange_inputCuentaBanco(event) {
+        // Eliminar todo lo que no sea número
+        let valor = event.target.value.replace(/[^0-9]/g, "");
         let validado = false;
         let texto = "Solo números.";
-        if(valor.match(/^[0-9]+$/)){
+        if (valor.match(/^[0-9]+$/) && valor.length > 0) {
             validado = true;
             texto = "";
         }
@@ -1836,41 +1837,41 @@ function FormCambiarBanco({setOpen}){
             </Grid>
                 <Grid item xs={12} sm={6}>
                 <TextField 
-    helperText={
-        cuentaDuplicada 
-            ? "La cuenta ya existe en nuestro sistema." 
-            : inputCuentaBanco.textoAyuda
-    }
-    required 
-    value={inputCuentaBanco.valor} 
-    onBlur={() => set_inputCuentaBanco({ ...inputCuentaBanco, blur: true })}
-    onChange={handleChange_inputCuentaBanco} 
-    error={cuentaDuplicada || (!inputCuentaBanco.validado && inputCuentaBanco.blur)} 
-    autoComplete="off" 
-    fullWidth 
-    label={"# de cuenta" }
-    InputProps={{
-        style: {
-            fontSize: '12px',
-            borderRadius: '20px',
-            overflow: 'hidden',
-            height: '30px',
-        }
-    }}
-    inputProps={{
-        style: {
-            fontSize: '12px',
-        },
-        onInput: (e) => {
-            e.target.value = e.target.value.replace(/-/g, ""); // Elimina los guiones directamente
-        },
-    }}
-    InputLabelProps={{
-        style: {
-            fontSize: '12px',
-        }
-    }}
-/>
+                    helperText={
+                        cuentaDuplicada 
+                            ? "La cuenta ya existe en nuestro sistema." 
+                            : inputCuentaBanco.textoAyuda
+                    }
+                    required 
+                    value={inputCuentaBanco.valor} 
+                    onBlur={() => set_inputCuentaBanco({ ...inputCuentaBanco, blur: true })}
+                    onChange={handleChange_inputCuentaBanco} 
+                    error={cuentaDuplicada || (!inputCuentaBanco.validado && inputCuentaBanco.blur)} 
+                    autoComplete="off" 
+                    fullWidth 
+                    label={"# de cuenta" }
+                    InputProps={{
+                        style: {
+                            fontSize: '12px',
+                            borderRadius: '20px',
+                            overflow: 'hidden',
+                            height: '30px',
+                        }
+                    }}
+                    inputProps={{
+                        style: {
+                            fontSize: '12px',
+                        },
+                        onInput: (e) => {
+                            e.target.value = e.target.value.replace(/-/g, ""); // Elimina los guiones directamente
+                        },
+                    }}
+                    InputLabelProps={{
+                        style: {
+                            fontSize: '12px',
+                        }
+                    }}
+                />
 
                     </Grid>
                     <Grid item xs={12} sm={12}>
