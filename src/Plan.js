@@ -345,7 +345,7 @@ function Plan() {
             const resultado = await response.text();
 
             if (resultado === '"existe"') {
-                setEstadoReferencia('El comprobante con este número de referencia ya ha sido cargado');
+                setEstadoReferencia('El comprobante con este número de referencia ya ha sido cargado, se actualizara tu foto de comprobante si se reenvia');
             } else {
                 setEstadoReferencia('');
             }
