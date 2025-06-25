@@ -322,8 +322,36 @@ function Plan() {
         setMontoPago(event.target.value); // Actualiza el estado cuando cambia el input
     };
 
-    const handleNumReferenciaChange = (event) => {
-        setNumReferencia(event.target.value);
+    const [estadoReferencia, setEstadoReferencia] = useState('');
+
+
+    const handleNumReferenciaChange = async (event) => {
+        // Elimina todos los espacios en blanco
+        const valorSinEspacios = event.target.value.replace(/\s/g, '');
+        setNumReferencia(valorSinEspacios);
+
+        if (!valorSinEspacios) {
+            setEstadoReferencia('');
+            return;
+        }
+
+        const params = new URLSearchParams({
+            codigo: 'F1A672ACF37354D0EEAAB4F6574729AF',
+            referencia: valorSinEspacios
+        });
+
+        try {
+            const response = await fetch(`https://app.aranih.com/api/app/getPagosReference.php?${params}`);
+            const resultado = await response.text();
+
+            if (resultado === '"existe"') {
+                setEstadoReferencia('El comprobante con este número de referencia ya ha sido cargado');
+            } else {
+                setEstadoReferencia('');
+            }
+        } catch (error) {
+            setEstadoReferencia('Error validando');
+        }
     };
 
     const [opcionSeleccionada, setOpcionSeleccionada] = useState('bac');
@@ -651,80 +679,91 @@ function Plan() {
                             </Typography>
 
 
-                            <Typography variant="h5" sx={{mt: 6}}>Plan de pagos</Typography>
-                            {/* <Typography variant="body" sx={{}}>Tus fechas de pago son las siguientes:</Typography> */}
-                            <Divider sx={{mt: 2}} />
-                            {(listaPagos) && 
-                            <List sx={{mt: 2}}>
-                                {listaPagos.map((element, index) => {
-                                return (
-                                    <ListItem key={element.schedule_date} disablePadding className={"listitempagostatus" + element.status}>
-                                    <ListItemText 
-                                        primaryTypographyProps={{component: 'div', fontSize: '1.5rem'}} 
-                                        secondaryTypographyProps={{component: 'div'}} 
-                                        primary={"Pago " + (index + 1) + "/" + listaPagos.length} 
-                                        secondary={
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 6 }}>
+                            {/* Texto alineado a la izquierda */}
+                            <Typography variant="h5">Plan de pagos</Typography>
+
+                            {/* Botón alineado a la derecha */}
+                            {listaPagos?.length > 0 && (
+                                <Box
+                                sx={{
+                                    backgroundColor: '#ecf2fa',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    flexDirection: 'column',
+                                }}
+                                >
+                                <Button
+                                    onClick={() => {
+                                    const primerPagoPendiente = listaPagos.find(p => parseInt(p.status) !== 1 && parseInt(p.status) !== 6);
+                                    if (primerPagoPendiente) {
+                                        set_pagoseleccionado(primerPagoPendiente);
+                                        handleOpenModal();
+                                    }
+                                }}
+                                variant="contained"
+                                sx={{
+                                    backgroundColor: 'red',
+                                    color: 'white',
+                                    fontSize: { xs: '0.75rem', sm: '1rem' }, // más pequeño en mobile
+                                    padding: { xs: '4px 10px', sm: '8px 16px' }, // menos padding en mobile
+                                    minWidth: { xs: '120px', sm: '180px' }, // ancho mínimo menor en mobile
+                                    '&:hover': {
+                                        backgroundColor: 'darkred',
+                                        borderColor: 'darkred',
+                                    },
+                                }}
+                                
+                                disabled={!estaEnRango()}
+                                >
+                                    Enviar comprobante BAC
+                                </Button>
+                                {!estaEnRango() && (
+                                    <strong style={{ marginTop: '10px', color: 'black' }}>
+                                    Fuera de horario operativo 😢
+                                    </strong>
+                                )}
+                                </Box>
+                            )}
+                            </Box>
+
+                            <Divider sx={{ mt: 2 }} />
+
+                            {listaPagos && (
+                            <>
+                                {listaPagos.map((element, index) => (
+                                <ListItem key={element.schedule_date} disablePadding className={"listitempagostatus" + element.status}>
+                                    <ListItemText
+                                    primaryTypographyProps={{ component: 'div', fontSize: '1.5rem' }}
+                                    secondaryTypographyProps={{ component: 'div' }}
+                                    primary={`Pago ${index + 1}/${listaPagos.length}`}
+                                    secondary={
                                         <>
-                                            <Typography variant="body2">
+                                        <Typography variant="body2">
                                             Fecha de pago: {moment(element.schedule_date).format("LL")}
-                                            </Typography>
-                                            <Typography variant="body2">
+                                        </Typography>
+                                        <Typography variant="body2">
                                             Estado: {(nombreEstadoPago[element.status] || element.status)}
-                                            </Typography>
-                                            <Typography variant="h6">
-                                            <span>Lps. {numeral(element.charge - element.charge_covered + element.administrator_fee - element.administrator_fee_covered + element.amount - element.amount_covered + element.late_fee - element.cinterest_covered).format("0,0.[00]")}</span>
-                                            </Typography>
-
-                                            {(parseInt(element.status) !== 1 && parseInt(element.status) !== 6) && 
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-                                                {/* Visualización estática de BAC */}
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', border: '1px solid #ccc', borderRadius: '8px', padding: '10px', backgroundColor: '#f5f5f5' }}>
-                                                <img src={logobac} alt="Logo BAC" style={{ width: '50px', height: '50px', marginBottom: '5px' }} />
-                                                <span><strong>BAC</strong></span>
-                                                </Box>
-
-                                                {/* Contenedor morado para el botón */}
-                                                <Box sx={{ display: 'flex', gap: '10px', flexDirection: { xs: 'column', sm: 'row' }, width: '100%', height: '150px' }}>
-                                                {/* Cuadro alrededor del botón de BAC */}
-                                                <Box sx={{ backgroundColor: '#ecf2fa', padding: '20px', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
-                                                    <Button
-                                                    onClick={() => {
-                                                        set_pagoseleccionado(element); // Establece el elemento seleccionado para BAC
-                                                        handleOpenModal(); // Abre el modal correspondiente
-                                                    }}
-                                                    variant="contained"
-                                                    sx={{
-                                                        backgroundColor: 'red',
-                                                        color: 'white',
-                                                        '&:hover': {
-                                                        backgroundColor: 'darkred',
-                                                        borderColor: 'darkred',
-                                                        },
-                                                    }}
-                                                    startIcon={<span className="material-symbols-outlined">attach_file</span>}
-                                                    disabled={!estaEnRango()} // Deshabilita el botón si no está en el rango
-                                                    >
-                                                    Enviar comprobante BAC
-                                                    </Button>
-
-                                                    {/* Mostrar mensaje si el botón está deshabilitado */}
-                                                    {!estaEnRango() && (
-                                                    <strong style={{ marginTop: '10px', color: 'black' }}>
-                                                        Fuera de horario operativo 😢
-                                                    </strong>
-                                                    )}
-                                                </Box>
-                                                </Box>
-                                            </Box>
-                                            }
+                                        </Typography>
+                                        <Typography variant="h6">
+                                            <span>
+                                            Lps. {numeral(
+                                                element.charge - element.charge_covered +
+                                                element.administrator_fee - element.administrator_fee_covered +
+                                                element.amount - element.amount_covered +
+                                                element.late_fee - element.cinterest_covered
+                                            ).format("0,0.[00]")}
+                                            </span>
+                                        </Typography>
                                         </>
-                                        }
-                                    />                        
-                                    </ListItem>
-                                );
-                                })}
-                            </List>
-                            }
+                                    }
+                                    />
+                                </ListItem>
+                                ))}
+                            </>
+                            )}
                             {(!listaPagos) && 
                             <Typography variant="body2" sx={{m: '8rem 0', textAlign: 'center', color: 'silver'}} component={"div"} >No tienes lista de pagos</Typography>
                             }
@@ -767,20 +806,23 @@ function Plan() {
                     />
 
                     <TextField
-                                label="Número de Referencia"
-                                value={numReferencia}
-                                onChange={handleNumReferenciaChange}
-                                type="text"
-                                fullWidth
-                                sx={{ mt: 2 }}
+                        label="Número de Referencia"
+                        value={numReferencia}
+                        onChange={handleNumReferenciaChange}
+                        type="text"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                        error={!!estadoReferencia}
+                        helperText={estadoReferencia}
                     />
-                    
+
                     <Button 
                         fullWidth 
                         variant="contained" 
                         component="label" 
                         startIcon={<span className="material-symbols-outlined">cloud_upload</span>} 
                         sx={{ mt: 2 }}
+                        disabled={!numReferencia}
                     >
                         Adjuntar documento
                         <input type="file" onChange={handleFileChange} accept="image/*" hidden multiple />
