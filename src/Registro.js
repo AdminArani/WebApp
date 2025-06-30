@@ -169,16 +169,19 @@ function VerticalLinearStepper2(){
 
 
     function handleChange_inputNombre1(event) {
-        // Eliminar acentos y convertir a mayúsculas
+        // Eliminar acentos, espacios y convertir a mayúsculas
         let valor = event.target.value
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, "") // Elimina todos los espacios
             .toUpperCase();
 
         let validado = false;
         let textoAyuda = "Solo letras sin espacios";
 
-        if (valor.length >= 1 && /^[A-Z]+$/.test(valor)) { // Validar solo letras en mayúsculas sin acentos
+        if (event.target.value.includes(" ")) {
+            textoAyuda = "No se permiten espacios";
+        } else if (valor.length >= 1 && /^[A-Z]+$/.test(valor)) { // Validar solo letras en mayúsculas sin acentos
             if (datosCenso && datosCenso.DES_PRIMER_NOMBRE) {
                 const nombreCenso = datosCenso.DES_PRIMER_NOMBRE
                     .normalize("NFD")
@@ -254,15 +257,18 @@ function VerticalLinearStepper2(){
     }
 
     function handleChange_inputNombre3(event) {
-        // Eliminar acentos y convertir a mayúsculas
+        // Eliminar acentos, espacios y convertir a mayúsculas
         let valor = event.target.value
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, "") // Elimina todos los espacios
             .toUpperCase();
         let validado = false;
-        let textoAyuda = "Campo obligatorio";
+        let textoAyuda = "Solo letras sin espacios";
 
-        if (valor.length >= 1 && /^[A-Z]+$/.test(valor)) { // Solo letras mayúsculas sin acentos
+        if (event.target.value.includes(" ")) {
+            textoAyuda = "No se permiten espacios";
+        } else if (valor.length >= 1 && /^[A-Z]+$/.test(valor)) { // Solo letras mayúsculas sin acentos
             if (datosCenso && datosCenso.DES_PRIMER_APELLIDO) {
                 const apellidoCenso = datosCenso.DES_PRIMER_APELLIDO
                     .normalize("NFD")
@@ -287,7 +293,7 @@ function VerticalLinearStepper2(){
             blur: inputNombre3.blur,
         });
     }
-    
+        
     function handleChange_inputNombre4(event) {
         // Eliminar acentos y convertir a mayúsculas
         const valorSinAcentos = event.target.value

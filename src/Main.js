@@ -138,7 +138,7 @@ function Main() {
                     "Danlí, Honduras",
                     "Danlì, Honduras",
                     "Danli, Honduras",
-                    "Choluteca,Honduras",
+                    "Choluteca, Honduras",
                     "Comayagua, Honduras",
                     "Siguatepeque, Honduras",
                     "La Ceiba, Honduras",
