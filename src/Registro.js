@@ -985,12 +985,12 @@ function VerticalLinearStepper2(){
                                     label="Teléfono móvil"
                                     required 
                                     onBlur={()=>{set_inputTelefono({...inputTelefono, blur: true})}}
-                                    disabled={(telefonoValidadoPorSMS || smsEnEspera)} 
+                                    disabled={!inputFechaNac.validado || telefonoValidadoPorSMS || smsEnEspera} // <-- Aquí el cambio
                                     value={inputTelefono.valor} 
                                     onChange={handleChange_inputTelefono} 
                                     error={(!inputTelefono.validado && inputTelefono.blur)} 
                                     helperText={inputTelefono.textoAyuda} 
-                                    />
+                                />
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <Tooltip placement="top" title="Te enviaremos un mensaje de texto a tu teléfono celular con un código para que valides que realmente eres tú el dueño de ese teléfono. Ingresa ese código en el siguiente campo de texto llamado 'Código SMS'.">
