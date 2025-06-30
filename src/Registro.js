@@ -872,6 +872,11 @@ function VerticalLinearStepper2(){
                                         error={!inputNombre1.validado && inputNombre1.blur}
                                         helperText={inputNombre1.textoAyuda}
                                         style={{ textTransform: "uppercase" }} // Forzar mayúsculas en la visualización
+                                        onKeyDown={(e) => {
+                                            if (e.key === " ") {
+                                                e.preventDefault();
+                                            }
+                                        }}
                                     />
                                     {mensajeErrorNombre1 && (
                                         <p style={{ color: 'red', marginTop: '5px' }}>{mensajeErrorIdentidad}</p>
@@ -900,6 +905,11 @@ function VerticalLinearStepper2(){
                                         error={(!inputNombre3.validado && inputNombre3.blur)}
                                         helperText={inputNombre3.textoAyuda}
                                         style={{ textTransform: "uppercase" }} // Forzar mayúsculas en la visualización
+                                        onKeyDown={(e) => {
+                                            if (e.key === " ") {
+                                                e.preventDefault();
+                                            }
+                                        }}
                                     />
                                     {mensajeErrorNombre3 && (
                                         <p style={{ color: 'red', marginTop: '5px' }}>{mensajeErrorNombre3}</p>
