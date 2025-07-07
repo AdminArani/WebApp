@@ -324,54 +324,6 @@ function Plan() {
 
     const [estadoReferencia, setEstadoReferencia] = useState('');
 
-
-    const handleNumReferenciaChange = async (event) => {
-        // Elimina todos los espacios en blanco
-        const valorSinEspacios = event.target.value.replace(/\s/g, '');
-        setNumReferencia(valorSinEspacios);
-
-        if (!valorSinEspacios) {
-            setEstadoReferencia('');
-            return;
-        }
-
-        const params = new URLSearchParams({
-            codigo: 'F1A672ACF37354D0EEAAB4F6574729AF',
-            referencia: valorSinEspacios
-        });
-
-        try {
-            const response = await fetch(`https://app.aranih.com/api/app/getPagosReference.php?${params}`);
-            const resultado = await response.text();
-
-            if (resultado === '"existe"') {
-                setEstadoReferencia('El comprobante con este número de referencia ya ha sido cargado, se actualizara tu foto de comprobante si se reenvia');
-            } else {
-                setEstadoReferencia('');
-            }
-        } catch (error) {
-            setEstadoReferencia('Error validando');
-        }
-    };
-
-    const [opcionSeleccionada, setOpcionSeleccionada] = useState('bac');
-    const [element, setElement] = useState(null);
-
-    const handleChange = (event) => {
-        setOpcionSeleccionada(event.target.value);
-    };
-
-    const handleClick = () => {
-        if (opcionSeleccionada === 'tigo') {
-            set_openSubirComprobantePago(true);
-            set_pagoseleccionado(element);
-            set_fDOCComprobante(false);
-        } else if (opcionSeleccionada === 'bac') {
-            set_pagoseleccionado(element);
-            handleOpenModal();
-        }
-    };
-
     const [clienteData, setClienteData] = useState(null);
 
     {/* Validar perfil en core  */}
@@ -432,6 +384,60 @@ function Plan() {
     const [cargandoEnvio, setCargandoEnvio] = useState(false);
     const [exitoEnvio, setExitoEnvio] = useState(false);
     
+
+    const handleNumReferenciaChange = async (event) => {
+        // 1. Guardar solo lo que escribe el cliente, sin espacios
+        const valorSinEspacios = event.target.value.replace(/\s/g, '');
+        setNumReferencia(valorSinEspacios);
+
+        if (!valorSinEspacios) {
+            setEstadoReferencia('');
+            return;
+        }
+
+        // 2. Concatenar con los datos del cliente y préstamo
+        const referenciaConcatenada = `${clienteData?.customer_id}_${pagoseleccionado?.container_id}_${valorSinEspacios}`;
+        console.log('Referencia concatenada:', referenciaConcatenada);
+
+        // 3. Usar la referencia concatenada para validar en el API
+        const params = new URLSearchParams({
+            codigo: 'F1A672ACF37354D0EEAAB4F6574729AF',
+            referencia: referenciaConcatenada
+        });
+
+        try {
+            const response = await fetch(`https://app.aranih.com/api/app/getPagosReference.php?${params}`);
+            const resultado = await response.text();
+
+            if (resultado === '"existe"') {
+                setEstadoReferencia('El comprobante con este número de referencia ya ha sido cargado, se actualizará tu foto de comprobante si se reenvía');
+            } else {
+                setEstadoReferencia('');
+            }
+        } catch (error) {
+            setEstadoReferencia('Error validando');
+        }
+    };
+
+
+    const [opcionSeleccionada, setOpcionSeleccionada] = useState('bac');
+    const [element, setElement] = useState(null);
+
+    const handleChange = (event) => {
+        setOpcionSeleccionada(event.target.value);
+    };
+
+    const handleClick = () => {
+        if (opcionSeleccionada === 'tigo') {
+            set_openSubirComprobantePago(true);
+            set_pagoseleccionado(element);
+            set_fDOCComprobante(false);
+        } else if (opcionSeleccionada === 'bac') {
+            set_pagoseleccionado(element);
+            handleOpenModal();
+        }
+    };
+
     const enviarComprobante = (clienteData) => {
         setCargandoEnvio(true);
         setExitoEnvio(false);
