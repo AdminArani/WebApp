@@ -146,6 +146,7 @@ function Main() {
                     "Santa Rosa de Copán, Honduras",
                     "Gracias, Honduras",
                     "Roatán, Honduras",
+                    "Santa Rosa, Honduras",
                 ];
         
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
