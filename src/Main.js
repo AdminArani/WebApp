@@ -357,26 +357,42 @@ function Main() {
                     )}
 
                     {usuarioDetalle.status === "0" && (
-                        <div style={styles.container}>
-                            {usuarioDetalle.errores_perfil ? (
-                                <Typography
-                                    style={styles.text}
-                                    dangerouslySetInnerHTML={{
-                                        __html: mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil,
-                                    }}
-                                />
-                            ) : (
-                                <>
-                                    <Typography style={styles.text}>
-                                        Finaliza de llenar tu perfil para poder acceder a las opciones.
-                                    </Typography>
-                                    <Typography style={{ ...styles.text, marginTop: '8px' }}>
-                                        <a href="https://app.arani.hn/#/perfil" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db', textDecoration: 'none' }}>
-                                            Ir a mi perfil
-                                        </a>
-                                    </Typography>
-                                </>
-                            )}
+                            <div style={styles.container}>
+                                {(() => {
+                                    // Verifica si existe errores_perfil y si la fecha modified es un día antes al actual
+                                    if (usuarioDetalle.errores_perfil && usuarioDetalle.modified) {
+                                        const modifiedDate = new Date(usuarioDetalle.modified);
+                                        const today = new Date();
+                                        // Normaliza ambas fechas a medianoche
+                                        modifiedDate.setHours(0,0,0,0);
+                                        today.setHours(0,0,0,0);
+                                        // Calcula la diferencia en días
+                                        const diffDays = (today - modifiedDate) / (1000 * 60 * 60 * 24);
+                                        if (diffDays === 1) {
+                                            return (
+                                                <Typography
+                                                    style={styles.text}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil,
+                                                    }}
+                                                />
+                                            );
+                                        }
+                                    }
+                                    // Si no hay error o la fecha no es un día antes, muestra el mensaje normal
+                                    return (
+                                        <>
+                                            <Typography style={styles.text}>
+                                                Estamos validando tus datos en un lapso de 24 horas.
+                                            </Typography>
+                                            <Typography style={{ ...styles.text, marginTop: '8px' }}>
+                                                <a href="https://app.arani.hn/#/perfil" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db', textDecoration: 'none' }}>
+                                                    Ir a mi perfil
+                                                </a>
+                                            </Typography>
+                                        </>
+                                    );
+                                })()}
                         </div>
                     )}
 

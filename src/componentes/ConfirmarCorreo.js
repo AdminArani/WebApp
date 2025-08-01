@@ -60,7 +60,18 @@ function ConfirmarCorreo({estadoMail, nombreMail}){
         </DialogContent>
         <DialogActions>
             <Button onClick={btnYaLoValide} variant='contained' color="primary">Ya lo valide</Button>
-            <Button onClick={reenviarCorreo} disabled={correoReenviado || enviadno} variant='outlined' color="primary">Reenviar Correo</Button>
+            <Button
+                onClick={() => {
+                    reenviarCorreo();
+                    setCorreoReenviado(true);
+                    setTimeout(() => setCorreoReenviado(false), 60000);
+                }}
+                disabled={correoReenviado || enviadno}
+                variant='outlined'
+                color="primary"
+            >
+                {correoReenviado ? "Reenviar Correo (60s)" : "Reenviar Correo"}
+            </Button>
         </DialogActions>
         </Dialog>
     );
