@@ -383,7 +383,7 @@ function Main() {
                                     return (
                                         <>
                                             <Typography style={styles.text}>
-                                                Estamos validando tus datos en un lapso de 24 horas.
+                                                Hemos recibido los cambios y estamos validando tus datos. Te estaremos respondiendo dentro de 24 horas hábiles, gracias por tu paciencia!
                                             </Typography>
                                             <Typography style={{ ...styles.text, marginTop: '8px' }}>
                                                 <a href="https://app.arani.hn/#/perfil" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db', textDecoration: 'none' }}>
