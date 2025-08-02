@@ -99,6 +99,7 @@ function Perfil() {
                     "Santa Rosa de Copán, Honduras",
                     "Gracias, Honduras",
                     "Roatán, Honduras",
+                    "French Harbour, Honduras",
                     "Santa Rosa, Honduras",
                 ];
     
