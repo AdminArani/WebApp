@@ -82,27 +82,32 @@ function Login(){
         // });
     };
 
-    const enviarSMSLogin = (sid)=>{
+    // 1️⃣ Estado para guardar el teléfono enmascarado
+    const [telefonoEnmascarado, setTelefonoEnmascarado] = useState("");
+
+    // 2️⃣ Función que hace la petición y actualiza el estado
+    const enviarSMSLogin = (sid) => {
         axios.request({
             url: `${config.apiUrl}/api/app/otp_login.php`,
             method: "post",
-            data: {
-                sid: sid,
-            },
+            data: { sid: sid },
         })
         .then((res) => {
-            // console.log(res);
-            if(res.data.status === "ER"){
-                
+            if (res.data.status === "OK") {
+                const telefono = res.data.payload.telefono;
+                const ultimos2 = telefono.slice(-2);
+                const enmascarado = "*".repeat(telefono.length - 2) + ultimos2;
+
+                // Guardar en estado
+                setTelefonoEnmascarado(enmascarado);
             }
-            if(res.data.status === "OK"){
-                
-            }
-        }).catch(err => {
-            // console.log(err);
-            
+        })
+        .catch(err => {
+            console.error("Error en la petición:", err);
         });
-    }
+    };
+
+
 
     function reenviarSMS(){
         enviarSMSLogin(sidTemp);
@@ -233,13 +238,45 @@ function Login(){
                     </Box>
                 </Paper>
                 <Dialog open={openVentanaSMS}>
-                    <DialogContent sx={{maxWidth: '20rem'}}>
-                        <Typography sx={{}} variant="h5" >Confirmación</Typography>
-                        <Typography sx={{}} variant="body2" >Se envió un código a su número de teléfono, por favor ingreselo en el campo siguiente:.</Typography>
-                        <TextField autoFocus={true} margin="normal" fullWidth label="Código de acceso" value={SMSLoginCode} helperText={errorMessageSMS} error={(errorMessageSMS)?true:false} onChange={handleChange_SMSLoginCode} />
-                        <Button fullWidth disabled={showContador} sx={{mt: 2, mr: 2}} variant="contained" onClick={reenviarSMS}>Reenviar SMS {showContador && <Contador/>}</Button>
-                        <Button fullWidth sx={{mt: 2}} variant="contained" disabled={showContador} onClick={enviarCodigoEmail}>Enviar al correo {showContador && <Contador/>}</Button>
+                    <DialogContent sx={{ maxWidth: '20rem' }}>
+                        <Typography variant="h5">Confirmación</Typography>
+                        <Typography variant="body2">
+                            Se envió un código a su número de teléfono  <strong>{telefonoEnmascarado}</strong>, 
+                            por favor ingréselo en el campo siguiente:
+                        </Typography>
+
+                        <TextField 
+                            autoFocus 
+                            margin="normal" 
+                            fullWidth 
+                            label="Código de acceso" 
+                            value={SMSLoginCode} 
+                            helperText={errorMessageSMS} 
+                            error={!!errorMessageSMS} 
+                            onChange={handleChange_SMSLoginCode} 
+                        />
+
+                        <Button 
+                            fullWidth 
+                            disabled={showContador} 
+                            sx={{ mt: 2, mr: 2 }} 
+                            variant="contained" 
+                            onClick={reenviarSMS}
+                        >
+                            Reenviar SMS {showContador && <Contador/>}
+                        </Button>
+
+                        <Button 
+                            fullWidth 
+                            sx={{ mt: 2 }} 
+                            variant="contained" 
+                            disabled={showContador} 
+                            onClick={enviarCodigoEmail}
+                        >
+                            Enviar al correo {showContador && <Contador/>}
+                        </Button>
                     </DialogContent>
+
                 </Dialog>
                 <BarraFinal />
             </Box>
