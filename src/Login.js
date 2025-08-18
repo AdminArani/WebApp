@@ -95,7 +95,7 @@ function Login(){
         .then((res) => {
             if (res.data.status === "OK") {
                 const telefono = res.data.payload.telefono;
-                const ultimos2 = telefono.slice(-2);
+                const ultimos2 = telefono.slice(-4);
                 const enmascarado = "*".repeat(telefono.length - 2) + ultimos2;
 
                 // Guardar en estado
