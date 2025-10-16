@@ -147,7 +147,7 @@ function Main() {
                     "Gracias, Honduras",
                     "Roatán, Honduras",
                     "French Harbour, Honduras",
-                    "Santa Rosa, Honduras",
+                    "Santa Rosa, Honduras"
                 ];
         
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
@@ -398,23 +398,31 @@ function Main() {
                     )}
 
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
+                    {(() => {
+                        const fechaActual = new Date();
+                        const inicioFeriado = new Date('2025-10-18T12:00:00'); // Inicio del feriado
+                        const finFeriado = new Date('2025-10-19T23:59:59'); // Fin del feriado
 
-                    {/* {usuarioDetalle.status === "1" && (
-                        <div style={styles.container}>
-                            <Typography style={styles.text}>
-                                Por feriado de Semana Santa, no realizaremos desembolsos de préstamos desde el miércoles 16 de abril a las 12:00 p.m. hasta el domingo 20 de abril.
-                            </Typography>
-                            <Typography style={{ ...styles.text, marginTop: '8px' }}>
-                                Volvemos con normalidad el lunes 21 de abril.
-                            </Typography>
-                            <Typography style={{ ...styles.text, marginTop: '8px' }}>
-                                ✅ Tus pagos se seguirán recibiendo con normalidad.
-                            </Typography>
-                            <Typography style={{ ...styles.text, marginTop: '8px' }}>
-                                Gracias por tu comprensión 💛
-                            </Typography>
-                        </div>
-                    )} */}
+                        if (usuarioDetalle.status === "1" && fechaActual >= inicioFeriado && fechaActual <= finFeriado) {
+                            return (
+                                <div style={styles.container}>
+                                    <Typography style={styles.text}>
+                                        Queremos recordarte que los días sábado y domingo no se procesan solicitudes
+                                    </Typography>
+                                    <Typography style={{ ...styles.text, marginTop: '8px' }}>
+                                        ni desembolsos de préstamos. 
+                                    </Typography>
+                                    <Typography style={{ ...styles.text, marginTop: '8px' }}>
+                                        ! De lunes a viernes estaremos encantados de ayudarte !
+                                    </Typography>
+                                    <Typography style={{ ...styles.text, marginTop: '8px' }}>
+                                        Gracias por tu comprensión 💛
+                                    </Typography>
+                                </div>
+                            );
+                        }
+                        return null; // No mostrar nada si no está dentro del rango de fechas
+                    })()}
     
 
                     <div className="contetilebotonpri">
@@ -433,19 +441,22 @@ function Main() {
                             const dia = fechaUTC6.getDate();
 
                             // Verificar si estamos en los días de feriado
-                            const diasFeriado = [16,17, 18, 19];
-                            const esFeriado = mes === 4 && diasFeriado.includes(dia);
+                            const diasFeriado = [18,19];
+                            const esFeriado = mes === 10 && diasFeriado.includes(dia);
 
                             if (esFeriado) {
                                 return (
-                                    <Link className="tilebotonpri disabled">
-                                        <div className="tilebotonpri-tit">Aplicar</div>
-                                        <div className="tilebotonpri-desc">
-                                            Actualmente nos encontramos fuera de servicio por feriado de Semana Santa.
+                                    <Link className="tilebotonpri disabled" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', textAlign: 'left', overflow: 'hidden', whiteSpace: 'normal', wordWrap: 'break-word' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <div className="tilebotonpri-tit" style={{ textAlign: 'left' }}>Aplicar</div>
+                                        <div className="tilebotonpri-desc" style={{ textAlign: 'left' }}>
+                                            Te recordamos que los fines de semana no se realizan solicitudes ni desembolsos de préstamos.
                                         </div>
-                                        <div className="tilebotonpri-estado"></div>
-                                        <div className="tilebotonpri-icon"><img alt="" src={tile_aplicar} /></div>
-                                    </Link>
+                                    </div>
+                                    <div className="tilebotonpri-icon" style={{ marginLeft: '8px' }}>
+                                        <img alt="" src={tile_aplicar} />
+                                    </div>
+                                </Link>
                                 );
                             }
 
