@@ -494,19 +494,41 @@ function Main() {
                             // Caso normal
                             return showAplicarLink ? (
                                 <Link
-                                    to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per ) ? "#" : "/aplicar"}
+                                    to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per) ? "#" : "/aplicar"}
                                     className="tilebotonpri"
-                                    onClick={(e) => {
+                                    onClick={async (e) => {
                                         if (
                                             !usuarioDetalle.ref_tipo_per ||
                                             !usuarioDetalle.ref_nom_per ||
                                             !usuarioDetalle.ref_tel_per ||
                                             !usuarioDetalle.ref_tipo_lab ||
                                             !usuarioDetalle.ref_nom_lab ||
-                                            !usuarioDetalle.ref_tel_lab 
+                                            !usuarioDetalle.ref_tel_lab
                                         ) {
                                             e.preventDefault();
                                             setShowModal(true);
+                                        } else {
+                                            try {
+                                                // Enviar datos a la API
+                                                const response = await fetch('https://app.aranih.com/api/app/modeloClienteExistente.php', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                    },
+                                                    body: JSON.stringify({
+                                                        codigo: "f7a6d3b4-5c29-4e7f-92a4-28e5d39c3a8e",
+                                                        clientId: usuarioDetalle.customer_id, // Usar el clientId del usuario
+                                                    }),
+                                                });
+
+                                                if (!response.ok) {
+                                                    console.error('Error al enviar datos a la API:', await response.text());
+                                                } else {
+                                                    console.log('Datos enviados correctamente a la API');
+                                                }
+                                            } catch (error) {
+                                                console.error('Error al realizar la solicitud:', error);
+                                            }
                                         }
                                     }}
                                 >
