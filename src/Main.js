@@ -384,7 +384,7 @@ function Main() {
                                     return (
                                         <>
                                             <Typography style={styles.text}>
-                                                Hemos recibido los cambios y estamos validando tus datos. Te estaremos respondiendo dentro de 24 horas hábiles, gracias por tu paciencia!
+                                                Hemos recibido los cambios y estamos validando tus datos. Te estaremos respondiendo dentro de 48 horas hábiles, gracias por tu paciencia!
                                             </Typography>
                                             <Typography style={{ ...styles.text, marginTop: '8px' }}>
                                                 <a href="https://app.arani.hn/#/perfil" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db', textDecoration: 'none' }}>
@@ -400,8 +400,8 @@ function Main() {
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
                     {(() => {
                         const fechaActual = new Date();
-                        const inicioFeriado = new Date('2025-10-18T12:00:00'); // Inicio del feriado
-                        const finFeriado = new Date('2025-10-19T23:59:59'); // Fin del feriado
+                        const inicioFeriado = new Date('2025-11-15'); // Inicio del feriado
+                        const finFeriado = new Date('2025-11-16'); // Fin del feriado
 
                         if (usuarioDetalle.status === "1" && fechaActual >= inicioFeriado && fechaActual <= finFeriado) {
                             return (
@@ -422,7 +422,8 @@ function Main() {
                             );
                         }
                         return null; // No mostrar nada si no está dentro del rango de fechas
-                    })()}
+                    }
+                    )()}
     
 
                     <div className="contetilebotonpri">
@@ -441,8 +442,8 @@ function Main() {
                             const dia = fechaUTC6.getDate();
 
                             // Verificar si estamos en los días de feriado
-                            const diasFeriado = [18,19];
-                            const esFeriado = mes === 10 && diasFeriado.includes(dia);
+                            const diasFeriado = [15,16];
+                            const esFeriado = mes === 11 && diasFeriado.includes(dia);
 
                             if (esFeriado) {
                                 return (
