@@ -400,8 +400,8 @@ function Main() {
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
                     {(() => {
                         const fechaActual = new Date();
-                        const inicioFeriado = new Date('2025-11-15'); // Inicio del feriado
-                        const finFeriado = new Date('2025-11-16'); // Fin del feriado
+                        const inicioFeriado = new Date('2025-12-20'); // Inicio del feriado
+                        const finFeriado = new Date('2025-12-21'); // Fin del feriado
 
                         if (usuarioDetalle.status === "1" && fechaActual >= inicioFeriado && fechaActual <= finFeriado) {
                             return (
@@ -442,8 +442,8 @@ function Main() {
                             const dia = fechaUTC6.getDate();
 
                             // Verificar si estamos en los días de feriado
-                            const diasFeriado = [15,16];
-                            const esFeriado = mes === 11 && diasFeriado.includes(dia);
+                            const diasFeriado = [20,21];
+                            const esFeriado = mes === 12 && diasFeriado.includes(dia);
 
                             if (esFeriado) {
                                 return (
