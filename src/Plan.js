@@ -756,7 +756,7 @@ function Plan() {
                                 </Button>
 
                                 {!estaEnRango() && (
-                                    <strong style={{ marginTop: '10px', color: 'black' }}>
+                                    <strong style={{ marginTop: '10px', color: 'blue' }}>
                                     Fuera de horario operativo 😢
                                     </strong>
                                 )}
