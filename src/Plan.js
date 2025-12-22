@@ -739,7 +739,7 @@ function Plan() {
                                 }}
                                 variant="contained"
                                 sx={{
-                                    backgroundColor: "black",
+                                    backgroundColor: "blue",
                                     color: 'white',
                                     fontSize: { xs: '0.75rem', sm: '1rem' }, // más pequeño en mobile
                                     padding: { xs: '4px 10px', sm: '8px 16px' }, // menos padding en mobile
