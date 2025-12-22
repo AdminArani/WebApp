@@ -713,6 +713,7 @@ function Plan() {
                                 }}
                                 variant="contained"
                                 sx={{
+                                    width: { xs: '220px', sm: '260px' },
                                     backgroundColor: 'red',
                                     color: 'white',
                                     fontSize: { xs: '0.75rem', sm: '1rem' }, // más pequeño en mobile
@@ -740,6 +741,7 @@ function Plan() {
                                 }}
                                 variant="contained"
                                 sx={{
+                                    width: { xs: '220px', sm: '260px' },
                                     backgroundColor: 'black',
                                     color: 'white',
                                     fontSize: { xs: '0.75rem', sm: '1rem' }, // más pequeño en mobile
