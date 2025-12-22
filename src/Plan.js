@@ -728,31 +728,7 @@ function Plan() {
                                 </Button>
 
                                 {/* BOTON DE NICO */}
-                                <Button
-                                    onClick={() => {
-                                    const primerPagoPendiente = listaPagos.find(p => parseInt(p.status) !== 1 && parseInt(p.status) !== 6);
-                                    if (primerPagoPendiente) {
-                                        set_pagoseleccionado(primerPagoPendiente);
-                                        handleOpenModal();
-                                    }
-                                }}
-                                variant="contained"
-                                sx={{
-                                    backgroundColor: 'blue',
-                                    color: 'white',
-                                    fontSize: { xs: '0.75rem', sm: '1rem' }, // más pequeño en mobile
-                                    padding: { xs: '4px 10px', sm: '8px 16px' }, // menos padding en mobile
-                                    minWidth: { xs: '120px', sm: '180px' }, // ancho mínimo menor en mobile
-                                    '&:hover': {
-                                        backgroundColor: 'darkred',
-                                        borderColor: 'darkred',
-                                    },
-                                }}
                                 
-                                disabled={!estaEnRango()}
-                                >
-                                    Link de pago N1co
-                                </Button>
 
                                 {!estaEnRango() && (
                                     <strong style={{ marginTop: '10px', color: 'blue' }}>
