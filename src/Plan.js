@@ -699,6 +699,8 @@ function Plan() {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     flexDirection: 'column',
+                                    gap: '12px',    
+                                    p: '12px', 
                                 }}
                                 >
                                 <Button
@@ -738,14 +740,14 @@ function Plan() {
                                 }}
                                 variant="contained"
                                 sx={{
-                                    backgroundColor: 'blue',
+                                    backgroundColor: 'black',
                                     color: 'white',
                                     fontSize: { xs: '0.75rem', sm: '1rem' }, // más pequeño en mobile
                                     padding: { xs: '4px 10px', sm: '8px 16px' }, // menos padding en mobile
                                     minWidth: { xs: '120px', sm: '180px' }, // ancho mínimo menor en mobile
                                     '&:hover': {
-                                        backgroundColor: 'darkred',
-                                        borderColor: 'darkred',
+                                        backgroundColor: '#808080',
+                                        borderColor: '#808080',
                                     },
                                 }}
                                 
@@ -755,7 +757,7 @@ function Plan() {
                                 </Button>
 
                                 {!estaEnRango() && (
-                                    <strong style={{ marginTop: '10px', color: 'blue' }}>
+                                    <strong style={{ marginTop: '10px', color: 'black' }}>
                                     Fuera de horario operativo 😢
                                     </strong>
                                 )}
