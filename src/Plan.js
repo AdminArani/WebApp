@@ -40,6 +40,15 @@ function Plan() {
     const [openModalBAC, setOpenModalBAC] = useState(false);
     const [ setFDOCComprobante] = useState(null);
     const [setCargandoEnviandoComprobante] = useState(false);
+    // --- N1co Payment Link ---
+    const [openModalN1co, setOpenModalN1co] = useState(false);
+    const [cargandoLinkN1co, setCargandoLinkN1co] = useState(false);
+    const [errorLinkN1co, setErrorLinkN1co] = useState('');
+    const [n1coLink, setN1coLink] = useState('');
+    const [n1coAmount, setN1coAmount] = useState('');
+    const [n1coPagoLabel, setN1coPagoLabel] = useState('');
+
+
 
 
     useEffect(() => {
@@ -547,6 +556,77 @@ function Plan() {
         }
     }, [exitoEnvio]);
     
+    const handleOpenModalN1co = () => {
+        const primerPagoPendiente = listaPagos?.find(
+            (p) => parseInt(p.status) !== 1 && parseInt(p.status) !== 6
+        );
+
+        if (!primerPagoPendiente) return;
+
+        set_pagoseleccionado(primerPagoPendiente);
+
+        // Índice del pago
+        const idx = listaPagos.findIndex(
+            (p) => p.id === primerPagoPendiente.id
+        );
+
+        // ✅ Label tipo: Pago 1 de 2
+        const pagoLabel = `Pago ${idx + 1} de ${listaPagos.length}`;
+        setN1coPagoLabel(pagoLabel);
+
+        // Monto usando el mismo cálculo que ya usas
+        const monto =
+            (Number(primerPagoPendiente.charge) - Number(primerPagoPendiente.charge_covered)) +
+            (Number(primerPagoPendiente.administrator_fee) - Number(primerPagoPendiente.administrator_fee_covered)) +
+            (Number(primerPagoPendiente.amount) - Number(primerPagoPendiente.amount_covered)) +
+            (Number(primerPagoPendiente.late_fee) - Number(primerPagoPendiente.cinterest_covered));
+
+        const montoSeguro = isNaN(monto) ? 0 : monto;
+
+        setN1coAmount(montoSeguro.toFixed(2));
+        setN1coLink('');
+        setErrorLinkN1co('');
+        setOpenModalN1co(true);
+        };
+
+
+    const generarLinkN1co = async () => {
+        try {
+            setCargandoLinkN1co(true);
+            setErrorLinkN1co('');
+            setN1coLink('');
+
+            const payload = {
+            name: "Pago ARANI",
+            description: n1coPagoLabel, // ✅ reutiliza el label mostrado en UI
+            amount: Number(n1coAmount),
+            expirationDateTime: ""
+            };
+
+            const res = await axios.post(
+            "https://api-pay-sandbox.n1co.shop/api/paymentlink/checkout",
+            payload,
+            { headers: { "Content-Type": "application/json" } }
+            );
+
+            const url = res.data?.paymentLinkUrl;
+
+            if (!url) throw new Error("No vino paymentLinkUrl en la respuesta");
+
+            setN1coLink(url);
+
+            // abre el link automáticamente
+            window.open(url, "_blank", "noopener,noreferrer");
+
+        } catch (err) {
+            console.error(err);
+            setErrorLinkN1co("No se pudo generar el link de pago N1co.");
+        } finally {
+            setCargandoLinkN1co(false);
+        }
+        };
+
+
 
     function changefileComprobante(e){
         let file = e.target.files[0];
@@ -732,13 +812,7 @@ function Plan() {
 
                                 {/* BOTON DE NICO */}
                                 <Button
-                                    onClick={() => {
-                                    const primerPagoPendiente = listaPagos.find(p => parseInt(p.status) !== 1 && parseInt(p.status) !== 6);
-                                    if (primerPagoPendiente) {
-                                        set_pagoseleccionado(primerPagoPendiente);
-                                        handleOpenModal();
-                                    }
-                                }}
+                                    onClick={handleOpenModalN1co}
                                 variant="contained"
                                 sx={{
                                     width: { xs: '220px', sm: '260px' },
@@ -822,6 +896,72 @@ function Plan() {
                         <Button disabled={Boolean(!fDOCComprobante) || cargandoEnviandoComprobante} onClick={guardarAdjuntarComprobante} variant="contained">{(cargandoEnviandoComprobante)?"Subiendo....":"Enviar comprobante"}</Button>
                     </DialogContent>
                 </Dialog>
+
+
+                {/* Modal para N1co */}
+                <Dialog
+                open={openModalN1co}
+                onClose={() => {
+                    setOpenModalN1co(false);
+                    setErrorLinkN1co('');
+                    setN1coLink('');
+                }}
+                >
+                <DialogContent>
+                    <Typography variant="h5">Pago con N1co</Typography>
+
+                    {/* ✅ Muestra qué pago se está realizando */}
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mt: 1 }}>
+                    {n1coPagoLabel}
+                    </Typography>
+
+                    <Typography variant="body2" sx={{ mb: 2, mt: 1 }}>
+                    Genera tu link de pago para este pago pendiente.
+                    </Typography>
+
+                    {/* ✅ Monto fijo (no editable) */}
+                    <TextField
+                    label="Monto a pagar"
+                    value={`L. ${n1coAmount}`}
+                    fullWidth
+                    InputProps={{ readOnly: true }}
+                    sx={{
+                        mt: 1,
+                        backgroundColor: '#f5f5f5',
+                    }}
+                    />
+
+                    {errorLinkN1co && (
+                    <Typography sx={{ mt: 2, color: 'red' }}>
+                        {errorLinkN1co}
+                    </Typography>
+                    )}
+
+                    {n1coLink && (
+                    <Typography sx={{ mt: 2, wordBreak: 'break-all' }}>
+                        Link generado: {n1coLink}
+                    </Typography>
+                    )}
+
+                    <Divider sx={{ my: 2 }} />
+
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                        variant="contained"
+                        onClick={generarLinkN1co}
+                        disabled={cargandoLinkN1co || !n1coAmount}
+                    >
+                        {cargandoLinkN1co ? 'Generando...' : 'Generar link'}
+                    </Button>
+
+                    <Button variant="outlined" onClick={() => setOpenModalN1co(false)}>
+                        Cerrar
+                    </Button>
+                    </Box>
+                </DialogContent>
+                </Dialog>
+
+
 
 
 
