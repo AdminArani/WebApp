@@ -590,37 +590,43 @@ function Plan() {
         };
 
 
-    const generarLinkN1co = async () => {
+        const generarLinkN1co = async () => {
         try {
             setCargandoLinkN1co(true);
             setErrorLinkN1co('');
             setN1coLink('');
 
-            const payload = {
-            name: "Pago ARANI",
-            description: n1coPagoLabel, // ✅ reutiliza el label mostrado en UI
-            amount: Number(n1coAmount),
-            expirationDateTime: ""
+            const body = {
+            token: "V3cFeaOiRmP4t2d8wrZMYxch5t4sdEIJeg6JXUeOFpiJ9ZIlcEM0f3YwlUXh0Sqs",
+            nombre: "Pago ARANI",
+            monto: Number(n1coAmount),
+            descripcion: n1coPagoLabel
             };
 
-            const res = await axios.post(
-            "https://api-pay-sandbox.n1co.shop/api/paymentlink/checkout",
-            payload,
-            { headers: { "Content-Type": "application/json" } }
-            );
+            const res = await fetch("http://localhost:8000/api/nico/GetUrl.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+            });
 
-            const url = res.data?.paymentLinkUrl;
+            const data = await res.json();
 
-            if (!url) throw new Error("No vino paymentLinkUrl en la respuesta");
+            if (!res.ok) {
+            throw new Error(data?.error || "Error generando link de pago");
+            }
 
-            setN1coLink(url);
+            const link = data?.paymentLinkUrl || data;
 
-            // abre el link automáticamente
-            window.open(url, "_blank", "noopener,noreferrer");
+            if (!link) throw new Error("No se recibió el link de pago");
+
+            setN1coLink(link);
+
+            // ✅ redirección automática
+            window.location.href = link;
 
         } catch (err) {
             console.error(err);
-            setErrorLinkN1co("No se pudo generar el link de pago N1co.");
+            setErrorLinkN1co(err.message || "No se pudo generar el link de pago N1co.");
         } finally {
             setCargandoLinkN1co(false);
         }
@@ -829,7 +835,7 @@ function Plan() {
                                 
                                 disabled={!estaEnRango()}
                                 >
-                                    Link de pago N1co
+                                    Pagar con Tarjeta 
                                 </Button>
 
                                 {!estaEnRango() && (
@@ -951,7 +957,7 @@ function Plan() {
                         onClick={generarLinkN1co}
                         disabled={cargandoLinkN1co || !n1coAmount}
                     >
-                        {cargandoLinkN1co ? 'Generando...' : 'Generar link'}
+                        {cargandoLinkN1co ? 'Redirigiendo...' : 'Pagar'}
                     </Button>
 
                     <Button variant="outlined" onClick={() => setOpenModalN1co(false)}>
