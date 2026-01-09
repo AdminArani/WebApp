@@ -1353,7 +1353,7 @@ function Perfil() {
 
                                                 // POST real al endpoint
                                                 const response = await axios.post(
-                                                    "http://localhost:8000/api/DecisionRules/sendRule.php",
+                                                    `${config.apiUrl}/api/DecisionRules/sendRule.php`,
                                                     requestBody,
                                                     {
                                                         headers: {
@@ -1500,7 +1500,7 @@ function Perfil() {
 
                                                 // Navegar a la página principal
                                                 setSuccessDialogOpen(false);
-                                                navigate("/main");
+                                                navigate("/");
                                             } catch (error) {
                                                 console.error("Error en la solicitud:", error.message);
                                             }
