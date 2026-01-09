@@ -1339,7 +1339,7 @@ function Perfil() {
                                                     education: usuarioDetalle.education,
                                                     workType: usuarioDetalle.income_status,
                                                     documentsUploaded: (usuarioDetalle.file1 && usuarioDetalle.file2 && usuarioDetalle.file3 && usuarioDetalle.file4) ? 1 : 0,
-                                                    selfieValidationPassed: 1,
+                                                    selfieValidationPassed: usuarioDetalle.file4 ? 1 : 0,
                                                     rpValidationPassed: 1,
                                                     rpTime: 1,
                                                     referralsUploaded: 1,
