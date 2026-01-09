@@ -283,6 +283,19 @@ function Main() {
         3: "No pudimos confirmar tus documentos en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         4: "No pudimos confirmar tu DNI en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         5: "Eres menor de edad y no aplicas en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        7: "Eres menor de edad y no aplicas en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        8: "Tipo de usuario no elegible. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        9: "Ingresos por debajo del minimo requerido. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        10: "Experiencia laboral insuficiente. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        11: "Educación invalida. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        12: "Tipo de trabajo fallido. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        13: "Faltan documentos requeridos. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        14: "Validación de fotografía selfie fallida. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        15: "Recibo público no es válido. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        16: "Recibo público mayor al tiempo permitido. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        17: "Referencias no son validas. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        18: "No pudimos validar tu identidad. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        19: "Cuenta de banco no es valida, Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>."
     };
     
     
@@ -369,7 +382,7 @@ function Main() {
                                         today.setHours(0,0,0,0);
                                         // Calcula la diferencia en días
                                         const diffDays = (today - modifiedDate) / (1000 * 60 * 60 * 24);
-                                        if (diffDays === 1) {
+                                        if (diffDays === 0 && usuarioDetalle.errores_perfil !== "20") {
                                             return (
                                                 <Typography
                                                     style={styles.text}

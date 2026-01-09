@@ -302,6 +302,13 @@ function Perfil() {
 
     const [open, setOpen] = React.useState(false);
 
+    // Estados iniciales
+    const [openConfirmModal, setOpenConfirmModal] = useState(false);
+
+    // Modal de éxito
+    const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+
+
     const handleClickOpen = () => {
         setOpen(true);
       };
@@ -618,17 +625,17 @@ function Perfil() {
                             <List>
                                 <ListItemButton 
                                     onClick={() => {
-                                        if (usuarioDetalle.status === "0") {
+                                        if (usuarioDetalle.status === "0" && (!usuarioDetalle.income || parseInt(usuarioDetalle.income) <= 0)) {
                                             set_moduloEditarActivo('income');
                                             set_openEditarCampos(true);
                                         } else {
-                                            alert("Esta opción está deshabilitada.");
+                                            alert("Este campo ya está lleno y no se puede editar.");
                                         }
                                     }}
-                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si status es "1"
+                                    disabled={usuarioDetalle.status === "1" || (usuarioDetalle.income && parseInt(usuarioDetalle.income) > 0)} // Deshabilita si income ya está lleno
                                     style={{
-                                        cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
-                                        opacity: usuarioDetalle.status === "1" ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
+                                        cursor: usuarioDetalle.status === "1" || (usuarioDetalle.income && parseInt(usuarioDetalle.income) > 0) ? "not-allowed" : "pointer", // Cambia el cursor cuando está deshabilitado
+                                        opacity: usuarioDetalle.status === "1" || (usuarioDetalle.income && parseInt(usuarioDetalle.income) > 0) ? 0.5 : 1 // Hace que el botón se vea deshabilitado con menor opacidad
                                     }}
                                 >
                                     <ListItemIcon>
@@ -1300,9 +1307,209 @@ function Perfil() {
                             <Grid item xs={12} sm={12}>
                                 <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}></Divider>
                             </Grid>
-                            <Grid item xs={12} sm={12}>
-                                {(!usuarioAprobadoManual && !tieneTodosCamposObligatoriosHechos()) && <Typography variant="body2" sx={{color: '#ff3e3e'}}>Antes de empezar y poder solicitar préstamos es necesario que completes los campos obligatorios de tu perfil.</Typography>}
-                                {(!usuarioAprobadoManual && tieneTodosCamposObligatoriosHechos()) && <Typography variant="body2" sx={{color: '#ff8100'}}>Tus datos se revisarán pronto, una vez hecho tu cuenta sera aprobada y podras solicitar préstamos.</Typography>}
+
+                           {/* // Modifica el botón existente y agrega el modal justo después */}
+                            <Grid item xs={12} sm={12} sx={{ textAlign: 'center', mt: 2 }}>
+                                <Button 
+                                    variant="contained" 
+                                    sx={{ backgroundColor: '#4caf50', color: '#fff', '&:hover': { backgroundColor: '#45a049' } }}
+                                    onClick={() => setOpenConfirmModal(true)} // Abre el modal al hacer clic
+                                >
+                                    Validar mis datos
+                                </Button>
+
+                                {/* Modal de confirmación */}
+                                 <Dialog open={openConfirmModal} onClose={() => setOpenConfirmModal(false)}>
+                                <DialogTitle>Confirmación</DialogTitle>
+                                <DialogContent>
+                                    <Typography>
+                                        ¿Estás seguro que deseas enviar tus datos a validar?
+                                    </Typography>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button 
+                                        onClick={async () => {
+                                            // Datos reales que se van a enviar
+                                            const requestBody = {
+                                                data: {
+                                                    age: usuarioDetalle.age,
+                                                    userType: "cliente",
+                                                    income: usuarioDetalle.income,
+                                                    workExperienceMonths: moment().diff(moment(usuarioDetalle.work_experience, "YYYY-MM-DD"), 'months'),
+                                                    education: usuarioDetalle.education,
+                                                    workType: usuarioDetalle.income_status,
+                                                    documentsUploaded: (usuarioDetalle.file1 && usuarioDetalle.file2 && usuarioDetalle.file3 && usuarioDetalle.file4) ? 1 : 0,
+                                                    selfieValidationPassed: 1,
+                                                    rpValidationPassed: 1,
+                                                    rpTime: 1,
+                                                    referralsUploaded: 1,
+                                                    identityValidationPassed: 1,
+                                                    bankAccountValid: 1
+                                                }
+                                            };
+
+                                            try {
+                                                console.log("Enviando datos al endpoint DecisionRules:", requestBody);
+
+                                                // POST real al endpoint
+                                                const response = await axios.post(
+                                                    "http://localhost:8000/api/DecisionRules/sendRule.php",
+                                                    requestBody,
+                                                    {
+                                                        headers: {
+                                                            Authorization: "XQRajfkf11HO01h1JhaYLeMLuZ3qkQLaGAUrowEidQqcgEFhYv4V4rk7Xsi5Q9bh",
+                                                            "Content-Type": "application/json"
+                                                        }
+                                                    }
+                                                );
+
+                                                // Imprimir la respuesta completa para inspección
+                                                console.log("Respuesta completa del servidor DecisionRules:", JSON.stringify(response.data, null, 2));
+
+                                                // Verificar si response.data es un string o un objeto
+                                                let resultado = null;
+                                                if (typeof response.data === "string") {
+                                                    resultado = response.data; // Usar directamente el string
+                                                } else if (typeof response.data === "object" && response.data !== null) {
+                                                    resultado = response.data.message || response.data.result || response.data.status || response.data.error || response.data[0];
+                                                }
+
+                                                console.log("Resultado recibido:", resultado);
+
+                                                let errorCode = null;
+
+                                                if (resultado === "Age Requirement Not Met") {
+                                                    errorCode = 7; 
+                                                } else if (resultado === "User Type not Eligible") {
+                                                    errorCode = 8;
+                                                } else if (resultado === "Income Below Minimum Requirement") {
+                                                    errorCode = 9;
+                                                } else if (resultado === "Insufficient Work Experience") {
+                                                    errorCode = 10;
+                                                } else if (resultado === "Education Invalid") {
+                                                    errorCode = 11;
+                                                } else if (resultado === "Work Type Failed") {
+                                                    errorCode = 12;
+                                                } else if (resultado === "Missing Required Documents") {
+                                                    errorCode = 13;
+                                                } else if (resultado === "Selfie Validation Failed") {
+                                                    errorCode = 14;
+                                                } else if (resultado === "RP Validation Failed") {
+                                                    errorCode = 15;
+                                                } else if (resultado === "RP Time Failed") {
+                                                    errorCode = 16;
+                                                } else if (resultado === "Referrals Failed") {
+                                                    errorCode = 17;
+                                                } else if (resultado === "Identity Validation Failed") {
+                                                    errorCode = 18;
+                                                } else if (resultado === "Invalid Bank Account") {
+                                                    errorCode = 19;
+                                                } else if (resultado === "Approve") {
+                                                    errorCode = 20;
+                                                }
+
+                                                console.log("Código de error determinado:", errorCode);
+
+                                                if (errorCode !== null) {
+                                                    // Actualizar errores_perfil
+                                                    try {
+                                                        const updateResponse = await axios.request({
+                                                            url: `${config.apiUrl}/api/app/putProfile.php`,
+                                                            method: "post",
+                                                            data: {
+                                                                sid: gContext.logeado?.token,
+                                                                array: {
+                                                                    errores_perfil: errorCode
+                                                                },
+                                                            },
+                                                        });
+
+                                                        console.log("Respuesta del servidor putProfile:", updateResponse.data);
+                                                        console.log("Campo errores_perfil actualizado con éxito:", errorCode);
+                                                    } catch (updateError) {
+                                                        console.error("Error al actualizar errores_perfil:", updateError);
+                                                    }
+                                                } else {
+                                                    console.warn("No se determinó un código de error válido.");
+                                                }
+
+                                                // Cerrar confirmación
+                                                setOpenConfirmModal(false);
+
+                                                // Abrir modal de éxito
+                                                setSuccessDialogOpen(true);
+
+                                            } catch (error) {
+                                                console.error("Error al enviar los datos al endpoint DecisionRules:", error);
+                                            }
+                                        }} 
+                                        variant="contained" 
+                                        color="primary"
+                                    >
+                                        Confirmo
+                                    </Button>
+
+                                    <Button 
+                                        onClick={() => setOpenConfirmModal(false)} 
+                                        variant="contained" 
+                                        color="warning"
+                                    >
+                                        Cancelar
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+
+                            {/* MODAL ÉXITO – debe estar FUERA del confirmación */}
+                            <Dialog
+                                open={successDialogOpen}
+                                onClose={() => {}}
+                                disableEscapeKeyDown
+                            >
+                                <DialogTitle>¡Éxito!</DialogTitle>
+                                <DialogContent>
+                                    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" mt={2}>
+                                        <span className="material-symbols-outlined" style={{ fontSize: "4rem", color: "#4caf50" }}>
+                                            check_circle
+                                        </span>
+                                        <Typography mt={2}>
+                                            Datos enviados con éxito.
+                                        </Typography>
+                                    </Box>
+                                </DialogContent>
+
+                               <DialogActions>
+                                    <Button
+                                        variant="contained"
+                                        onClick={async () => {
+                                            try {
+                                                // Llamada a send_confirmdata.php
+                                                const response = await axios.request({
+                                                    url: `${config.apiUrl}/api/app/send_confirmdata.php`,
+                                                    method: "post",
+                                                    data: {
+                                                        sid: gContext.logeado.token,
+                                                    },
+                                                });
+
+                                                if (response.data.status === "OK") {
+                                                    console.log("Datos enviados con éxito.");
+                                                    set_datosEnviadosArevision(true);
+                                                } else {
+                                                    console.error("Error al enviar los datos:", response.data);
+                                                }
+
+                                                // Navegar a la página principal
+                                                setSuccessDialogOpen(false);
+                                                navigate("/main");
+                                            } catch (error) {
+                                                console.error("Error en la solicitud:", error.message);
+                                            }
+                                        }}
+                                    >
+                                        Continuar
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
                             </Grid>
                             {/* <Grid item xs={12} sm={6}>
                                 <List>
@@ -1354,15 +1561,7 @@ function Perfil() {
                         {(moduloEditarActivo === 'ubicaciontrabajo') && <FormEditUbicacionTrabajo cerrar={()=>{set_openEditarCampos(false)}} reiniciarpantalla={reiniciarpantalla} usuarioDetalleFullR={usuarioDetalleFullR}/>}
                         </DialogContent>
                 </Dialog>
-                <Dialog onClose={()=>{set_openEditarCampos(false)}} open={(!usuarioAprobadoManual && tieneTodosCamposObligatoriosHechos() && !datosEnviadosArevision)}>
-                    <DialogContent>
-                        <Box>
-                            <Typography variant="h4" sx={{}}>Confirmación</Typography>
-                            <Typography variant="body2" sx={{}}>Confirma que terminaste de llenar los datos para poder pasar al proceso de revisión, una vez revisada y validada podras solicitar préstamos.</Typography>
-                            <Button onClick={enviarARev} variant="contained" sx={{ mt: 5, mr: 1 }} >Mis datos son correctos</Button>
-                        </Box>
-                    </DialogContent>
-                </Dialog>
+                
 
                 {/* Modal */}
                 <Dialog
