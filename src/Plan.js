@@ -634,96 +634,83 @@ function Plan() {
 
 
         const generarLinkN1co = async () => {
+        try {
+            setCargandoLinkN1co(true);
+            setErrorLinkN1co('');
+            setN1coLink('');
+            setN1coOrderCode('');
+            setN1coOrderStatus('');
+            setN1coPaso('idle');
+
+            const body = {
+            token: "V3cFeaOiRmP4t2d8wrZMYxch5t4sdEIJeg6JXUeOFpiJ9ZIlcEM0f3YwlUXh0Sqs",
+            nombre: "Pago ARANI",
+            monto: Number(n1coAmount),
+            descripcion: n1coPagoLabel
+            };
+
+            const res = await fetch("http://localhost:8000/api/nico/GetUrl.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || "Error generando link de pago");
+
+            const link = data?.paymentLinkUrl || data;
+            if (!link) throw new Error("No se recibió el link de pago");
+
+            setN1coLink(link);
+
+            // ✅ abrir solo el link (sin about:blank)
+            popupRef.current = window.open(link, "_blank", "noopener,noreferrer");
+
+            // ✅ cambia modal a esperando
+            const orderCode = extraerOrderCode(link);
+            setN1coOrderCode(orderCode);
+            setN1coPaso('esperando');
+
+            // ✅ 1er check inmediato
+            const first = await consultarStatusN1co(orderCode);
+            const st1 = first?.orderStatus || '';
+            setN1coOrderStatus(st1);
+
+            if (st1 && st1 !== "PENDING") {
+            setN1coPaso('pagado');
+            setTimeout(() => cerrarModalN1co(), 1500);
+            return;
+            }
+
+            // ✅ polling cada 30 segundos
+            if (pollingRef.current) clearInterval(pollingRef.current);
+
+            pollingRef.current = setInterval(async () => {
             try {
-                setCargandoLinkN1co(true);
-                setErrorLinkN1co('');
-                setN1coLink('');
-                setN1coOrderCode('');
-                setN1coOrderStatus('');
-                setN1coPaso('idle');
+                const r = await consultarStatusN1co(orderCode);
+                const st = r?.orderStatus || '';
+                setN1coOrderStatus(st);
 
-                // ✅ abre pestaña en blanco para evitar bloqueo de popups
-                popupRef.current = window.open("about:blank", "_blank", "noopener,noreferrer");
+                if (st && st !== "PENDING") {
+                clearInterval(pollingRef.current);
+                pollingRef.current = null;
 
-                const body = {
-                token: "V3cFeaOiRmP4t2d8wrZMYxch5t4sdEIJeg6JXUeOFpiJ9ZIlcEM0f3YwlUXh0Sqs",
-                nombre: "Pago ARANI",
-                monto: Number(n1coAmount),
-                descripcion: n1coPagoLabel
-                };
-
-                const res = await fetch("http://localhost:8000/api/nico/GetUrl.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) throw new Error(data?.error || "Error generando link de pago");
-
-                const link = data?.paymentLinkUrl || data;
-                if (!link) throw new Error("No se recibió el link de pago");
-
-                setN1coLink(link);
-
-                // ✅ manda el link a la pestaña ya abierta
-                if (popupRef.current) {
-                popupRef.current.location.href = link;
-                } else {
-                window.open(link, "_blank", "noopener,noreferrer");
-                }
-
-                // ✅ cambia modal a esperando
-                const orderCode = extraerOrderCode(link);
-                setN1coOrderCode(orderCode);
-                setN1coPaso('esperando');
-
-                // ✅ 1er check inmediato
-                const first = await consultarStatusN1co(orderCode);
-                const st1 = first?.orderStatus || '';
-                setN1coOrderStatus(st1);
-
-                if (st1 && st1 !== "PENDING") {
                 setN1coPaso('pagado');
                 setTimeout(() => cerrarModalN1co(), 1500);
-                return;
                 }
-
-                // ✅ polling cada 30 segundos
-                if (pollingRef.current) clearInterval(pollingRef.current);
-
-                pollingRef.current = setInterval(async () => {
-                try {
-                    const r = await consultarStatusN1co(orderCode);
-                    const st = r?.orderStatus || '';
-                    setN1coOrderStatus(st);
-
-                    if (st && st !== "PENDING") {
-                    clearInterval(pollingRef.current);
-                    pollingRef.current = null;
-
-                    setN1coPaso('pagado');
-                    setTimeout(() => cerrarModalN1co(), 1500);
-                    }
-                } catch (e) {
-                    setErrorLinkN1co(e.message || "Error consultando status");
-                }
-                }, 30000);
-
-            } catch (err) {
-                console.error(err);
-                setN1coPaso('error');
-                setErrorLinkN1co(err.message || "No se pudo generar el link de pago N1co.");
-
-                // si se abrió pestaña en blanco y falló, ciérrala
-                if (popupRef.current && !popupRef.current.closed) {
-                popupRef.current.close();
-                }
-            } finally {
-                setCargandoLinkN1co(false);
+            } catch (e) {
+                setErrorLinkN1co(e.message || "Error consultando status");
             }
-            };
+            }, 30000);
+
+        } catch (err) {
+            console.error(err);
+            setN1coPaso('error');
+            setErrorLinkN1co(err.message || "No se pudo generar el link de pago N1co.");
+        } finally {
+            setCargandoLinkN1co(false);
+        }
+        };
 
 
 
