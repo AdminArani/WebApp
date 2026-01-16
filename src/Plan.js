@@ -682,7 +682,7 @@ function Plan() {
             return;
             }
 
-            // ✅ polling cada 30 segundos
+            // ✅ polling cada 15 segundos
             if (pollingRef.current) clearInterval(pollingRef.current);
 
             pollingRef.current = setInterval(async () => {
@@ -701,7 +701,7 @@ function Plan() {
             } catch (e) {
                 setErrorLinkN1co(e.message || "Error consultando status");
             }
-            }, 30000);
+            }, 15000);
 
         } catch (err) {
             console.error(err);
