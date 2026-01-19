@@ -1200,7 +1200,7 @@ function Perfil() {
                             {/* Seccion de Documentos  */}
                             <Grid item xs={12} sm={12}>
                                 <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Documentos</Divider>
-                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}></Typography>
+                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}>Comparte el comprobante digital de los documentos solicitados</Typography>
                             </Grid>
 
                             
@@ -1304,8 +1304,11 @@ function Perfil() {
                             </List>
 
                             </Grid>
+                            
+
                             <Grid item xs={12} sm={12}>
-                                <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}></Divider>
+                                <Divider textAlign="left" sx={{m: '2rem 0 1rem 0'}}>Validación de datos</Divider>
+                                <Typography variant="body2" sx={{m: '0 0 2rem 0', color: 'silver'}}>Una vez finalices de completar tus datos, podrás enviarlos para su validación.</Typography>
                             </Grid>
 
                            {/* // Modifica el botón existente y agrega el modal justo después */}
@@ -1315,7 +1318,7 @@ function Perfil() {
                                     sx={{ backgroundColor: '#4caf50', color: '#fff', '&:hover': { backgroundColor: '#45a049' } }}
                                     onClick={() => setOpenConfirmModal(true)} // Abre el modal al hacer clic
                                 >
-                                    Validar mis datos
+                                    Enviar a validar mis datos
                                 </Button>
 
                                 {/* Modal de confirmación */}

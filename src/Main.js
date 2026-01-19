@@ -413,8 +413,8 @@ function Main() {
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
                     {(() => {
                         const fechaActual = new Date();
-                        const inicioFeriado = new Date('2026-1-3'); // Inicio del feriado
-                        const finFeriado = new Date('2026-1-4'); // Fin del feriado
+                        const inicioFeriado = new Date('2026-1-17'); // Inicio del feriado
+                        const finFeriado = new Date('2026-1-18'); // Fin del feriado
 
                         if (usuarioDetalle.status === "1" && fechaActual >= inicioFeriado && fechaActual <= finFeriado) {
                             return (
@@ -455,7 +455,7 @@ function Main() {
                             const dia = fechaUTC6.getDate();
 
                             // Verificar si estamos en los días de feriado
-                            const diasFeriado = [3,4];
+                            const diasFeriado = [17,18];
                             const esFeriado = mes === 1 && diasFeriado.includes(dia);
 
                             if (esFeriado) {
