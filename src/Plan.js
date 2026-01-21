@@ -683,12 +683,33 @@ function Plan() {
 
             // ✅ 1er check inmediato
             const first = await consultarStatusN1co(orderCode);
-            const st1 = first?.orderStatus || '';
+            const st1 = String(first?.orderStatus || "").trim().toUpperCase();
             setN1coOrderStatus(st1);
 
+            // Si ya no está pendiente, no cierres sin insertar
             if (st1 && st1 !== "PENDING") {
-            setN1coPaso('pagado');
-            setTimeout(() => cerrarModalN1co(), 1500);
+            const esFinalOK1 = st1 === "FINALIZED" || st1 === "FINISHED";
+
+            if (esFinalOK1) {
+                try {
+                await enviarPostNicoPago({
+                    orderCode,
+                    orderStatus: st1,
+                    paymentLinkUrl: link, // IMPORTANTE: usa la variable link, no el state
+                });
+
+                setN1coPaso("pagado");
+                setTimeout(() => cerrarModalN1co(), 1500);
+                } catch (e) {
+                setN1coPaso("error");
+                setErrorLinkN1co(e?.message || "Error insertando pago N1co");
+                }
+                return;
+            }
+
+            // Si cambió pero no fue exitoso
+            setN1coPaso("error");
+            setErrorLinkN1co(`El pago no se completó. Estado: ${st1}`);
             return;
             }
 
@@ -699,45 +720,43 @@ function Plan() {
             }
 
             pollingRef.current = setInterval(async () => {
-            try {
-                const r = await consultarStatusN1co(orderCode);
-                const st = String(r?.orderStatus || "").toUpperCase();
-                setN1coOrderStatus(st);
-
-                // Sigue pendiente: no hacemos nada
-                if (!st || st === "PENDING") return;
-
-                // Ya cambió: detenemos polling
-                clearInterval(pollingRef.current);
-                pollingRef.current = null;
-
-                // Si terminó bien: insertamos y cerramos
-                if (st === "FINALIZED") {
                 try {
-                    await enviarPostNicoPago({
-                    orderCode,
-                    orderStatus: st,
-                    paymentLinkUrl: n1coLink, // usa el state que ya guardaste
-                    });
+                    const r = await consultarStatusN1co(orderCode);
+                    const st = String(r?.orderStatus || "").trim().toUpperCase();
+                    setN1coOrderStatus(st);
 
-                    setN1coPaso("pagado");
-                    setTimeout(() => cerrarModalN1co(), 1500);
+                    if (!st || st === "PENDING") return;
+
+                    clearInterval(pollingRef.current);
+                    pollingRef.current = null;
+
+                    const esFinalOK = st === "FINALIZED" || st === "FINISHED";
+
+                    if (esFinalOK) {
+                    try {
+                        await enviarPostNicoPago({
+                        orderCode,
+                        orderStatus: st,
+                        paymentLinkUrl: n1coLink,
+                        });
+
+                        setN1coPaso("pagado");
+                        setTimeout(() => cerrarModalN1co(), 1500);
+                    } catch (e) {
+                        setN1coPaso("error");
+                        setErrorLinkN1co(e?.message || "Error insertando pago N1co");
+                    }
+                    return;
+                    }
+
+                    setN1coPaso("error");
+                    setErrorLinkN1co(`El pago no se completó. Estado: ${st}`);
                 } catch (e) {
                     setN1coPaso("error");
-                    setErrorLinkN1co(e?.message || "Error insertando pago N1co");
+                    setErrorLinkN1co(e?.message || "Error consultando status");
                 }
-                return;
-                }
+                }, 15000);
 
-                // Otro estado final (CANCELLED/EXPIRED/etc)
-                setN1coPaso("error");
-                setErrorLinkN1co(`El pago no se completó. Estado: ${st}`);
-
-            } catch (e) {
-                setN1coPaso("error");
-                setErrorLinkN1co(e?.message || "Error consultando status");
-            }
-            }, 15000);
 
 
         } catch (err) {
