@@ -719,6 +719,71 @@ function Plan() {
         }
         };
 
+        const enviarPostNicoPago = async ({ orderCode, orderStatus, paymentLinkUrl }) => {
+            if (n1coInsertado) return;
+
+            if (!clienteData?.customer_id) {
+                throw new Error("No hay clienteData (perfil) cargado.");
+            }
+
+            const cuotaCalc =
+                (Number(pagoseleccionado?.charge) - Number(pagoseleccionado?.charge_covered)) +
+                (Number(pagoseleccionado?.administrator_fee) - Number(pagoseleccionado?.administrator_fee_covered)) +
+                (Number(pagoseleccionado?.amount) - Number(pagoseleccionado?.amount_covered)) +
+                (Number(pagoseleccionado?.late_fee) - Number(pagoseleccionado?.cinterest_covered));
+
+            const cuota = isNaN(cuotaCalc) ? 0 : Number(cuotaCalc);
+
+            const fechaCuota = pagoseleccionado?.schedule_date
+                ? moment(pagoseleccionado.schedule_date).format("YYYY-MM-DD")
+                : null;
+
+            const horaRegistro = new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+                .toISOString()
+                .split("T")[1]
+                .split(".")[0];
+
+            const payload = {
+                orderStatus,
+                codigoOrden: orderCode,
+                paymentLinkUrl,
+
+                identificadorPrestamo: pagoseleccionado?.container_id ?? null,
+                identificadorPago: pagoseleccionado?.schedule_position ?? null,
+
+                idCliente: clienteData?.customer_id ?? null,
+                identidadCliente: clienteData?.person_code ?? null,
+                nombreCliente: clienteData?.realname ?? null,
+                correoElectronico: clienteData?.email ?? null,
+                celular: clienteData?.mob_phone ?? null,
+
+                fechaPago: fechaHoyUTC6 ?? null,
+                fechaCuota,
+                horaRegistro,
+
+                cuota: Number(cuota.toFixed(2)),
+                montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
+            };
+
+            const res = await fetch("http://localhost:8000/api/nico/postNicoPago.php", {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(data?.mensaje || "Error llamando postNicoPago.php");
+            }
+
+            setN1coInsertado(true);
+            console.log("postNicoPago OK:", data);
+            return data;
+            };
 
 
 
