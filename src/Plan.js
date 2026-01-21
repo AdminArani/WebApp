@@ -563,10 +563,13 @@ function Plan() {
         }
     }, [exitoEnvio]);
     
-    const handleOpenModalN1co = () => {
-        validarPerfilEnCore()
-            .then((c) => setClienteData(c))
-            .catch(() => {});
+    const handleOpenModalN1co = async () => {
+        try {
+            const c = await validarPerfilEnCore();
+            setClienteData(c);
+        } catch (e) {
+            // si falla, igual puedes decidir si dejar abrir el modal o no
+        };
 
         const primerPagoPendiente = listaPagos?.find(
             (p) => parseInt(p.status) !== 1 && parseInt(p.status) !== 6
@@ -792,7 +795,7 @@ function Plan() {
                 montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
             };
 
-            const res = await fetch("http://localhost:8000/api/nico/postNicoPago.php", {
+            const res = await fetch("http://localhost/reportsarani/postNicoPago.php", {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json",
