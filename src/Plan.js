@@ -798,11 +798,16 @@ function Plan() {
             const res = await fetch("http://localhost/reportsarani/postNicoPago.php", {
                 method: "POST",
                 headers: {
-                "Content-Type": "application/json",
-                "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+                    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                    "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
                 },
-                body: JSON.stringify(payload),
-            });
+                body: new URLSearchParams(
+                    Object.entries(payload).reduce((acc, [k, v]) => {
+                    acc[k] = v === null || v === undefined ? "" : String(v);
+                    return acc;
+                    }, {})
+                ).toString(),
+                });
 
             const data = await res.json().catch(() => ({}));
 
