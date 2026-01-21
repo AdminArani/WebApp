@@ -712,7 +712,7 @@ function Plan() {
                 pollingRef.current = null;
 
                 // Si terminó bien: insertamos y cerramos
-                if (st === "FINISHED") {
+                if (st === "FINALIZED") {
                 try {
                     await enviarPostNicoPago({
                     orderCode,
