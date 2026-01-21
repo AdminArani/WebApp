@@ -49,6 +49,7 @@ function Plan() {
     const [n1coPagoLabel, setN1coPagoLabel] = useState('');
     const [n1coOrderCode, setN1coOrderCode] = useState('');
     const [n1coOrderStatus, setN1coOrderStatus] = useState('');
+    const [n1coInsertado, setN1coInsertado] = useState(false);
     const [n1coPaso, setN1coPaso] = useState('idle'); // idle | esperando | pagado | error
 
     const pollingRef = useRef(null);
@@ -563,6 +564,10 @@ function Plan() {
     }, [exitoEnvio]);
     
     const handleOpenModalN1co = () => {
+        validarPerfilEnCore()
+            .then((c) => setClienteData(c))
+            .catch(() => {});
+
         const primerPagoPendiente = listaPagos?.find(
             (p) => parseInt(p.status) !== 1 && parseInt(p.status) !== 6
         );
@@ -571,16 +576,11 @@ function Plan() {
 
         set_pagoseleccionado(primerPagoPendiente);
 
-        // Índice del pago
-        const idx = listaPagos.findIndex(
-            (p) => p.id === primerPagoPendiente.id
-        );
+        const idx = listaPagos.findIndex((p) => p.id === primerPagoPendiente.id);
 
-        // ✅ Label tipo: Pago 1 de 2
         const pagoLabel = `Pago ${idx + 1} de ${listaPagos.length}`;
         setN1coPagoLabel(pagoLabel);
 
-        // Monto usando el mismo cálculo que ya usas
         const monto =
             (Number(primerPagoPendiente.charge) - Number(primerPagoPendiente.charge_covered)) +
             (Number(primerPagoPendiente.administrator_fee) - Number(primerPagoPendiente.administrator_fee_covered)) +
@@ -592,8 +592,15 @@ function Plan() {
         setN1coAmount(montoSeguro.toFixed(2));
         setN1coLink('');
         setErrorLinkN1co('');
+
+        setN1coOrderCode('');
+        setN1coOrderStatus('');
+        setN1coPaso('idle');
+        setN1coInsertado(false);
+
         setOpenModalN1co(true);
         };
+
 
         const extraerOrderCode = (paymentLinkUrl) => {
         try {
