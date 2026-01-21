@@ -689,26 +689,53 @@ function Plan() {
             return;
             }
 
-            // ✅ polling cada 15 segundos
-            if (pollingRef.current) clearInterval(pollingRef.current);
+            // polling cada 15 segundos
+            if (pollingRef.current) {
+            clearInterval(pollingRef.current);
+            pollingRef.current = null;
+            }
 
             pollingRef.current = setInterval(async () => {
             try {
                 const r = await consultarStatusN1co(orderCode);
-                const st = r?.orderStatus || '';
+                const st = String(r?.orderStatus || "").toUpperCase();
                 setN1coOrderStatus(st);
 
-                if (st && st !== "PENDING") {
+                // Sigue pendiente: no hacemos nada
+                if (!st || st === "PENDING") return;
+
+                // Ya cambió: detenemos polling
                 clearInterval(pollingRef.current);
                 pollingRef.current = null;
 
-                setN1coPaso('pagado');
-                setTimeout(() => cerrarModalN1co(), 1500);
+                // Si terminó bien: insertamos y cerramos
+                if (st === "FINISHED") {
+                try {
+                    await enviarPostNicoPago({
+                    orderCode,
+                    orderStatus: st,
+                    paymentLinkUrl: n1coLink, // usa el state que ya guardaste
+                    });
+
+                    setN1coPaso("pagado");
+                    setTimeout(() => cerrarModalN1co(), 1500);
+                } catch (e) {
+                    setN1coPaso("error");
+                    setErrorLinkN1co(e?.message || "Error insertando pago N1co");
                 }
+                return;
+                }
+
+                // Otro estado final (CANCELLED/EXPIRED/etc)
+                setN1coPaso("error");
+                setErrorLinkN1co(`El pago no se completó. Estado: ${st}`);
+
             } catch (e) {
-                setErrorLinkN1co(e.message || "Error consultando status");
+                setN1coPaso("error");
+                setErrorLinkN1co(e?.message || "Error consultando status");
             }
             }, 15000);
+
 
         } catch (err) {
             console.error(err);
