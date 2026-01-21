@@ -719,7 +719,7 @@ function Plan() {
         }
         };
 
-        const enviarPostNicoPago = async ({ orderCode, orderStatus, paymentLinkUrl }) => {
+    const enviarPostNicoPago = async ({ orderCode, orderStatus, paymentLinkUrl }) => {
             if (n1coInsertado) return;
 
             if (!clienteData?.customer_id) {
