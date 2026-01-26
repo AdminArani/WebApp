@@ -692,11 +692,10 @@ function Plan() {
 
             if (esFinalOK1) {
                 try {
-                await enviarPostNicoPago({
-                    orderCode,
-                    orderStatus: st1,
-                    paymentLinkUrl: link, // IMPORTANTE: usa la variable link, no el state
-                });
+                await enviarPostNicoPago(
+                    { orderCode, orderStatus: st1, paymentLinkUrl: link },
+                    { logRepeats: 5, logEveryMs: 300 } // 5 veces, cada 300ms
+                    );
 
                 setN1coPaso("pagado");
                 setTimeout(() => cerrarModalN1co(), 1500);
@@ -768,15 +767,15 @@ function Plan() {
         }
         };
 
-    const enviarPostNicoPago = async ({ orderCode, orderStatus, paymentLinkUrl }) => {
+    const enviarPostNicoPago = async (
+        { orderCode, orderStatus, paymentLinkUrl },
+        opts = { logRepeats: 1, logEveryMs: 0 } // logRepeats > 1 para que repita el log
+        ) => {
         if (n1coInsertado) return;
 
         if (!clienteData?.customer_id) {
             throw new Error("No hay clienteData (perfil) cargado.");
         }
-
-        // Normaliza status por si viene raro
-        const statusNorm = String(orderStatus || "").trim().toUpperCase();
 
         const cuotaCalc =
             (Number(pagoseleccionado?.charge) - Number(pagoseleccionado?.charge_covered)) +
@@ -788,28 +787,31 @@ function Plan() {
 
         const fechaCuota = pagoseleccionado?.schedule_date
             ? moment(pagoseleccionado.schedule_date).format("YYYY-MM-DD")
-            : "";
+            : null;
 
-        const horaRegistro = new Date(Date.now() - 6 * 60 * 60 * 1000)
+        const horaRegistro = new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
             .toISOString()
             .split("T")[1]
             .split(".")[0];
 
+        // Normaliza status por si viene "finalized " o "Finalized"
+        const orderStatusNorm = String(orderStatus || "").trim().toUpperCase();
+
         const payload = {
-            orderStatus: statusNorm,
+            orderStatus: orderStatusNorm,
             codigoOrden: orderCode,
             paymentLinkUrl,
 
-            identificadorPrestamo: pagoseleccionado?.container_id ?? "",
-            identificadorPago: pagoseleccionado?.schedule_position ?? "",
+            identificadorPrestamo: pagoseleccionado?.container_id ?? null,
+            identificadorPago: pagoseleccionado?.schedule_position ?? null,
 
-            idCliente: clienteData?.customer_id ?? "",
-            identidadCliente: clienteData?.person_code ?? "",
-            nombreCliente: clienteData?.realname ?? "",
-            correoElectronico: clienteData?.email ?? "",
-            celular: clienteData?.mob_phone ?? "",
+            idCliente: clienteData?.customer_id ?? null,
+            identidadCliente: clienteData?.person_code ?? null,
+            nombreCliente: clienteData?.realname ?? null,
+            correoElectronico: clienteData?.email ?? null,
+            celular: clienteData?.mob_phone ?? null,
 
-            fechaPago: fechaHoyUTC6 ?? "",
+            fechaPago: fechaHoyUTC6 ?? null,
             fechaCuota,
             horaRegistro,
 
@@ -817,14 +819,27 @@ function Plan() {
             montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
         };
 
-        const body = new URLSearchParams(
+        const bodyStr = new URLSearchParams(
             Object.entries(payload).reduce((acc, [k, v]) => {
             acc[k] = v === null || v === undefined ? "" : String(v);
             return acc;
             }, {})
         ).toString();
 
-        console.log("[postNicoPago] payload:", payload);
+        // 🔁 logger repetible (si quieres verlo varias veces)
+        const logRepeated = async (label, obj) => {
+            const repeats = Math.max(1, Number(opts?.logRepeats || 1));
+            const gap = Math.max(0, Number(opts?.logEveryMs || 0));
+
+            for (let i = 1; i <= repeats; i++) {
+            console.log(`[postNicoPago] ${label} (${i}/${repeats})`, obj);
+            if (gap > 0 && i < repeats) {
+                await new Promise((r) => setTimeout(r, gap));
+            }
+            }
+        };
+
+        await logRepeated("payload", payload);
 
         const res = await fetch("http://localhost/reportsarani/postNicoPago.php", {
             method: "POST",
@@ -832,35 +847,52 @@ function Plan() {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
             "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
             },
-            body,
+            body: bodyStr,
         });
 
-        const text = await res.text(); // primero texto por si no es JSON
         let data = {};
-        try { data = JSON.parse(text); } catch { data = { raw: text }; }
-
-        console.log("[postNicoPago] HTTP:", res.status, res.statusText);
-        console.log("[postNicoPago] resp:", data);
-
-        // Si el servidor devolvió error HTTP real
-        if (!res.ok) {
-            throw new Error(data?.mensaje || `Error HTTP ${res.status}`);
+        try {
+            data = await res.json();
+        } catch {
+            data = {};
         }
 
-        // ✅ SOLO consideramos éxito si insertó o si ya existe
-        const msg = String(data?.mensaje || "");
-        const fueInsertado =
-            res.status === 201 ||
-            msg.includes("registrado exitosamente") ||
-            msg.includes("ya registrado");
+        console.log("[postNicoPago] HTTP:", res.status, res.statusText);
+        await logRepeated("resp", data);
 
-        if (fueInsertado) {
+        // ✅ Respeta tu contrato exacto:
+        // 200 -> ya registrado (OK lógico)
+        // 201 -> registrado exitosamente (OK lógico)
+        // 409 -> aún no finalizado (NO OK lógico)
+        // 400/401/500 -> errores
+
+        if (res.status === 201) {
+            setN1coInsertado(true);
+            return data; // { mensaje: "Pago N1co registrado exitosamente" }
+        }
+
+        if (res.status === 200) {
+            // "Pago N1co ya registrado"
             setN1coInsertado(true);
             return data;
         }
 
-        // Si llega aquí, no fue insert. Ej: "aún no finalizado"
-        throw new Error(data?.mensaje || "No se insertó el pago (respuesta inesperada)");
+        if (res.status === 409) {
+            // "Pago N1co aún no finalizado"
+            // NO marcar insertado
+            throw new Error(data?.mensaje || "Pago N1co aún no finalizado");
+        }
+
+        if (res.status === 401) {
+            throw new Error(data?.mensaje || "Token no válido");
+        }
+
+        if (res.status === 400) {
+            throw new Error(data?.mensaje || "Faltan datos obligatorios");
+        }
+
+        // 500 u otros
+        throw new Error(data?.mensaje || "Error al registrar el pago N1co");
         };
 
 
