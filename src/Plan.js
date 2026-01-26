@@ -737,7 +737,7 @@ function Plan() {
                         await enviarPostNicoPago({
                         orderCode,
                         orderStatus: st,
-                        paymentLinkUrl: n1coLink,
+                        paymentLinkUrl: link,
                         });
 
                         setN1coPaso("pagado");
