@@ -769,75 +769,100 @@ function Plan() {
         };
 
     const enviarPostNicoPago = async ({ orderCode, orderStatus, paymentLinkUrl }) => {
-            if (n1coInsertado) return;
+        if (n1coInsertado) return;
 
-            if (!clienteData?.customer_id) {
-                throw new Error("No hay clienteData (perfil) cargado.");
-            }
+        if (!clienteData?.customer_id) {
+            throw new Error("No hay clienteData (perfil) cargado.");
+        }
 
-            const cuotaCalc =
-                (Number(pagoseleccionado?.charge) - Number(pagoseleccionado?.charge_covered)) +
-                (Number(pagoseleccionado?.administrator_fee) - Number(pagoseleccionado?.administrator_fee_covered)) +
-                (Number(pagoseleccionado?.amount) - Number(pagoseleccionado?.amount_covered)) +
-                (Number(pagoseleccionado?.late_fee) - Number(pagoseleccionado?.cinterest_covered));
+        // Normaliza status por si viene raro
+        const statusNorm = String(orderStatus || "").trim().toUpperCase();
 
-            const cuota = isNaN(cuotaCalc) ? 0 : Number(cuotaCalc);
+        const cuotaCalc =
+            (Number(pagoseleccionado?.charge) - Number(pagoseleccionado?.charge_covered)) +
+            (Number(pagoseleccionado?.administrator_fee) - Number(pagoseleccionado?.administrator_fee_covered)) +
+            (Number(pagoseleccionado?.amount) - Number(pagoseleccionado?.amount_covered)) +
+            (Number(pagoseleccionado?.late_fee) - Number(pagoseleccionado?.cinterest_covered));
 
-            const fechaCuota = pagoseleccionado?.schedule_date
-                ? moment(pagoseleccionado.schedule_date).format("YYYY-MM-DD")
-                : null;
+        const cuota = isNaN(cuotaCalc) ? 0 : Number(cuotaCalc);
 
-            const horaRegistro = new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
-                .toISOString()
-                .split("T")[1]
-                .split(".")[0];
+        const fechaCuota = pagoseleccionado?.schedule_date
+            ? moment(pagoseleccionado.schedule_date).format("YYYY-MM-DD")
+            : "";
 
-            const payload = {
-                orderStatus,
-                codigoOrden: orderCode,
-                paymentLinkUrl,
+        const horaRegistro = new Date(Date.now() - 6 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[1]
+            .split(".")[0];
 
-                identificadorPrestamo: pagoseleccionado?.container_id ?? null,
-                identificadorPago: pagoseleccionado?.schedule_position ?? null,
+        const payload = {
+            orderStatus: statusNorm,
+            codigoOrden: orderCode,
+            paymentLinkUrl,
 
-                idCliente: clienteData?.customer_id ?? null,
-                identidadCliente: clienteData?.person_code ?? null,
-                nombreCliente: clienteData?.realname ?? null,
-                correoElectronico: clienteData?.email ?? null,
-                celular: clienteData?.mob_phone ?? null,
+            identificadorPrestamo: pagoseleccionado?.container_id ?? "",
+            identificadorPago: pagoseleccionado?.schedule_position ?? "",
 
-                fechaPago: fechaHoyUTC6 ?? null,
-                fechaCuota,
-                horaRegistro,
+            idCliente: clienteData?.customer_id ?? "",
+            identidadCliente: clienteData?.person_code ?? "",
+            nombreCliente: clienteData?.realname ?? "",
+            correoElectronico: clienteData?.email ?? "",
+            celular: clienteData?.mob_phone ?? "",
 
-                cuota: Number(cuota.toFixed(2)),
-                montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
-            };
+            fechaPago: fechaHoyUTC6 ?? "",
+            fechaCuota,
+            horaRegistro,
 
-            const res = await fetch("http://localhost/reportsarani/postNicoPago.php", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-                    "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
-                },
-                body: new URLSearchParams(
-                    Object.entries(payload).reduce((acc, [k, v]) => {
-                    acc[k] = v === null || v === undefined ? "" : String(v);
-                    return acc;
-                    }, {})
-                ).toString(),
-                });
+            cuota: Number(cuota.toFixed(2)),
+            montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
+        };
 
-            const data = await res.json().catch(() => ({}));
+        const body = new URLSearchParams(
+            Object.entries(payload).reduce((acc, [k, v]) => {
+            acc[k] = v === null || v === undefined ? "" : String(v);
+            return acc;
+            }, {})
+        ).toString();
 
-            if (!res.ok) {
-                throw new Error(data?.mensaje || "Error llamando postNicoPago.php");
-            }
+        console.log("[postNicoPago] payload:", payload);
 
+        const res = await fetch("http://localhost/reportsarani/postNicoPago.php", {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+            },
+            body,
+        });
+
+        const text = await res.text(); // primero texto por si no es JSON
+        let data = {};
+        try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+        console.log("[postNicoPago] HTTP:", res.status, res.statusText);
+        console.log("[postNicoPago] resp:", data);
+
+        // Si el servidor devolvió error HTTP real
+        if (!res.ok) {
+            throw new Error(data?.mensaje || `Error HTTP ${res.status}`);
+        }
+
+        // ✅ SOLO consideramos éxito si insertó o si ya existe
+        const msg = String(data?.mensaje || "");
+        const fueInsertado =
+            res.status === 201 ||
+            msg.includes("registrado exitosamente") ||
+            msg.includes("ya registrado");
+
+        if (fueInsertado) {
             setN1coInsertado(true);
-            console.log("postNicoPago OK:", data);
             return data;
-            };
+        }
+
+        // Si llega aquí, no fue insert. Ej: "aún no finalizado"
+        throw new Error(data?.mensaje || "No se insertó el pago (respuesta inesperada)");
+        };
+
 
 
 
