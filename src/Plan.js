@@ -769,12 +769,23 @@ function Plan() {
 
     const enviarPostNicoPago = async (
         { orderCode, orderStatus, paymentLinkUrl },
-        opts = { logRepeats: 1, logEveryMs: 0 } // logRepeats > 1 para que repita el log
+        opts = { logRepeats: 1, logEveryMs: 0 } // logRepeats > 1 para repetir logs
         ) => {
+        // evita doble insert 
         if (n1coInsertado) return;
 
         if (!clienteData?.customer_id) {
             throw new Error("No hay clienteData (perfil) cargado.");
+        }
+
+        const sp = Number(pagoseleccionado?.schedule_position);
+        const identificadorPagoCuota = Number.isFinite(sp) ? sp + 1 : null;
+
+        // valida rango 1..4 
+        if (!identificadorPagoCuota || identificadorPagoCuota < 1 || identificadorPagoCuota > 4) {
+            throw new Error(
+            `identificadorPago inválido: ${identificadorPagoCuota} (debe ser 1 a 4). schedule_position=${pagoseleccionado?.schedule_position}`
+            );
         }
 
         const cuotaCalc =
@@ -794,7 +805,6 @@ function Plan() {
             .split("T")[1]
             .split(".")[0];
 
-        // Normaliza status por si viene "finalized " o "Finalized"
         const orderStatusNorm = String(orderStatus || "").trim().toUpperCase();
 
         const payload = {
@@ -803,7 +813,7 @@ function Plan() {
             paymentLinkUrl,
 
             identificadorPrestamo: pagoseleccionado?.container_id ?? null,
-            identificadorPago: pagoseleccionado?.schedule_position ?? null,
+            identificadorPago: identificadorPagoCuota, // CUOTA 1..4
 
             idCliente: clienteData?.customer_id ?? null,
             identidadCliente: clienteData?.person_code ?? null,
@@ -819,6 +829,7 @@ function Plan() {
             montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
         };
 
+        // body x-www-form-urlencoded (para que $_POST funcione en PHP)
         const bodyStr = new URLSearchParams(
             Object.entries(payload).reduce((acc, [k, v]) => {
             acc[k] = v === null || v === undefined ? "" : String(v);
@@ -826,7 +837,7 @@ function Plan() {
             }, {})
         ).toString();
 
-        // 🔁 logger repetible (si quieres verlo varias veces)
+        // logger repetible 
         const logRepeated = async (label, obj) => {
             const repeats = Math.max(1, Number(opts?.logRepeats || 1));
             const gap = Math.max(0, Number(opts?.logEveryMs || 0));
@@ -860,26 +871,30 @@ function Plan() {
         console.log("[postNicoPago] HTTP:", res.status, res.statusText);
         await logRepeated("resp", data);
 
-        // ✅ Respeta tu contrato exacto:
-        // 200 -> ya registrado (OK lógico)
-        // 201 -> registrado exitosamente (OK lógico)
-        // 409 -> aún no finalizado (NO OK lógico)
-        // 400/401/500 -> errores
+        // Contrato exacto de códigos:
+        // 200 → { "mensaje": "Pago N1co ya registrado" }
+        // 201 → { "mensaje": "Pago N1co registrado exitosamente" }
+        // 400 → { "mensaje": "Faltan datos obligatorios" }
+        // 401 → { "mensaje": "Token no válido" }
+        // 409 → { "mensaje": "Pago N1co aún no finalizado" }
+        // 500 → { "mensaje": "Error al registrar el pago N1co" }
 
         if (res.status === 201) {
-            setN1coInsertado(true);
-            return data; // { mensaje: "Pago N1co registrado exitosamente" }
-        }
-
-        if (res.status === 200) {
-            // "Pago N1co ya registrado"
             setN1coInsertado(true);
             return data;
         }
 
+        if (res.status === 200) {
+            // solo se trata como ya registrado
+            if (data?.mensaje === "Pago N1co ya registrado") {
+            setN1coInsertado(true);
+            return data;
+            }
+            // si por alguna razón el backend manda 200 con otro mensaje, se trata como error lógico
+            throw new Error(data?.mensaje || "Respuesta 200 inesperada");
+        }
+
         if (res.status === 409) {
-            // "Pago N1co aún no finalizado"
-            // NO marcar insertado
             throw new Error(data?.mensaje || "Pago N1co aún no finalizado");
         }
 
