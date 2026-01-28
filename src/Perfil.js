@@ -1207,7 +1207,32 @@ function Perfil() {
                             <Grid item xs={12} sm={6}>
                             <List>
                                 <ListItemButton 
-                                    onClick={() => {
+                                    onClick={async () => {
+                                        // Limpia solo el mensaje específico de validación si estaba puesto
+                                        if (errorMessage === "Se alcanzó el número máximo de intentos.") {
+                                            setErrorMessage("");
+                                        }
+
+                                        try {
+                                            const resp = await axios.post(
+                                                "https://app.aranih.com/api/airparser/getClienteValidado.php",
+                                                {
+                                                    client_id: String(usuarioDetalle.customer_id),
+                                                    token: "XEwGAyyYweoqt2Ov7O6jUp9VvBQaqBSLgYzlbjHpTL1dR3I4Xf2cW8fyga7XmHAs",
+                                                },
+                                                { headers: { "Content-Type": "application/json" } }
+                                            );
+
+                                            if (resp?.data?.resultado === "denegado") {
+                                                setErrorMessage("Se alcanzó el número máximo de intentos.");
+                                                return; // NO abrir nada
+                                            }
+                                        } catch (e) {
+                                            // Si falla la llamada, no bloqueamos (puedes cambiarlo si quieres bloquear por error)
+                                            console.error("Error validando cliente en AirParser:", e);
+                                        }
+
+                                        // Lógica existente
                                         if (usuarioDetalle.status === "0") {
                                             set_moduloEditarActivo('file1'); 
                                             set_openEditarCampos(true);
@@ -1215,15 +1240,30 @@ function Perfil() {
                                             alert("Esta opción estará disponible en 12 meses.");
                                         }
                                     }} 
-                                    disabled={usuarioDetalle.status === "1"} // Deshabilita el botón si es "1"
-                                    style={{ cursor: usuarioDetalle.status === "1" ? "not-allowed" : "pointer", opacity: usuarioDetalle.status === "1" ? 0.5 : 1 }}
+                                    disabled={
+                                        usuarioDetalle.status === "1" ||
+                                        errorMessage === "Se alcanzó el número máximo de intentos."
+                                    }
+                                    style={{ 
+                                        cursor: (usuarioDetalle.status === "1" || errorMessage === "Se alcanzó el número máximo de intentos.") ? "not-allowed" : "pointer",
+                                        opacity: (usuarioDetalle.status === "1" || errorMessage === "Se alcanzó el número máximo de intentos.") ? 0.5 : 1
+                                    }}
                                 >
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">badge</span>
                                     </ListItemIcon>
                                     <ListItemText 
                                         primary={(usuarioDetalle.file1) ? usuarioDetalle.file1.substr(-19) : "-----"} 
-                                        secondary="* Identidad frontal" 
+                                        secondary={
+                                            <>
+                                                * Identidad frontal
+                                                {errorMessage === "Se alcanzó el número máximo de intentos." && (
+                                                    <Typography variant="caption" sx={{ display: "block", color: "#ff3e3e" }}>
+                                                        Se alcanzó el número máximo de intentos.
+                                                    </Typography>
+                                                )}
+                                            </>
+                                        }
                                     />
                                 </ListItemButton>
                             </List>
@@ -1556,7 +1596,7 @@ function Perfil() {
                         {/* {(moduloEditarActivo === 'documentos') && <FormEditDocumentos cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />} */}
                         {(moduloEditarActivo === 'cambiarpass') && <FormCambiarClave cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
                         {(moduloEditarActivo === 'banco') && <FormCambiarBanco cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} apiCamposConstructor={apiCamposConstructor} usuarioDetalle={usuarioDetalle}/>}
-                        {(moduloEditarActivo === 'file1') && <FormEditFile1 cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
+                        {(moduloEditarActivo === 'file1') && <FormEditFile1 cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} usuarioDetalle={usuarioDetalle} reiniciarpantalla={reiniciarpantalla} />}
                         {(moduloEditarActivo === 'file2') && <FormEditFile2 cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
                         {(moduloEditarActivo === 'file3') && <FormEditFile3 cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
                         {(moduloEditarActivo === 'file4') && <FormEditFile4 cerrar={()=>{set_openEditarCampos(false)}} usuarioFiles={usuarioFiles} reiniciarpantalla={reiniciarpantalla} />}
