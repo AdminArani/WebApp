@@ -778,6 +778,16 @@ function Plan() {
             throw new Error("No hay clienteData (perfil) cargado.");
         }
 
+        const nombreClienteConcat = [
+            clienteData?.realname,
+            clienteData?.midname,
+            clienteData?.midname2,
+            clienteData?.surname,
+            ]
+            .filter(Boolean)
+            .join(" ");
+
+
         const sp = Number(pagoseleccionado?.schedule_position);
         const identificadorPagoCuota = Number.isFinite(sp) ? sp + 1 : null;
 
@@ -817,7 +827,7 @@ function Plan() {
 
             idCliente: clienteData?.customer_id ?? null,
             identidadCliente: clienteData?.person_code ?? null,
-            nombreCliente: clienteData?.realname ?? null,
+            nombreCliente: nombreClienteConcat,
             correoElectronico: clienteData?.email ?? null,
             celular: clienteData?.mob_phone ?? null,
 
