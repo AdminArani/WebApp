@@ -413,8 +413,8 @@ function Main() {
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
                     {(() => {
                         const fechaActual = new Date();
-                        const inicioFeriado = new Date('2026-1-17'); // Inicio del feriado
-                        const finFeriado = new Date('2026-1-18'); // Fin del feriado
+                        const inicioFeriado = new Date('2026-01-31'); // Inicio del feriado
+                        const finFeriado = new Date('2026-02-01'); // Fin del feriado
 
                         if (usuarioDetalle.status === "1" && fechaActual >= inicioFeriado && fechaActual <= finFeriado) {
                             return (
@@ -451,12 +451,14 @@ function Main() {
                         {(() => {
                             const fechaActual = new Date();
                             const fechaUTC6 = new Date(fechaActual.toLocaleString("en-US", { timeZone: "America/Tegucigalpa" }));
+                            const anio = fechaUTC6.getFullYear();
                             const mes = fechaUTC6.getMonth() + 1; // Los meses en JavaScript son base 0
                             const dia = fechaUTC6.getDate();
 
-                            // Verificar si estamos en los días de feriado
-                            const diasFeriado = [17,18];
-                            const esFeriado = mes === 1 && diasFeriado.includes(dia);
+                            // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
+                            const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+                            const fechasFeriado = new Set(["2026-01-31", "2026-02-01"]);
+                            const esFeriado = fechasFeriado.has(claveFecha);
 
                             if (esFeriado) {
                                 return (
