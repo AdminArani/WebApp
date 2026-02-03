@@ -373,25 +373,16 @@ function Main() {
                     {usuarioDetalle.status === "0" && (
                             <div style={styles.container}>
                                 {(() => {
-                                    // Verifica si existe errores_perfil y si la fecha modified es un día antes al actual
-                                    if (usuarioDetalle.errores_perfil && usuarioDetalle.modified) {
-                                        const modifiedDate = new Date(usuarioDetalle.modified);
-                                        const today = new Date();
-                                        // Normaliza ambas fechas a medianoche
-                                        modifiedDate.setHours(0,0,0,0);
-                                        today.setHours(0,0,0,0);
-                                        // Calcula la diferencia en días
-                                        const diffDays = (today - modifiedDate) / (1000 * 60 * 60 * 24);
-                                        if (diffDays === 0 && usuarioDetalle.errores_perfil !== "20") {
-                                            return (
-                                                <Typography
-                                                    style={styles.text}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil,
-                                                    }}
-                                                />
-                                            );
-                                        }
+                                    // Si existe errores_perfil, mostrarlo siempre (sin importar cuántos días hayan pasado)
+                                    if (usuarioDetalle.errores_perfil && usuarioDetalle.errores_perfil !== "20") {
+                                        return (
+                                            <Typography
+                                                style={styles.text}
+                                                dangerouslySetInnerHTML={{
+                                                    __html: mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil,
+                                                }}
+                                            />
+                                        );
                                     }
                                     // Si no hay error o la fecha no es un día antes, muestra el mensaje normal
                                     return (
