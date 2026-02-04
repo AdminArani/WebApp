@@ -54,6 +54,14 @@ function Plan() {
 
     const pollingRef = useRef(null);
     const popupRef = useRef(null);
+    // --- N1co timers ---
+    const [n1coExpiraEnSeg, setN1coExpiraEnSeg] = useState(null); // 300..0
+    const [n1coCierreEnSeg, setN1coCierreEnSeg] = useState(null); // 30..0
+
+    const n1coExpireIntervalRef = useRef(null);
+    const n1coExpireTimeoutRef = useRef(null);
+    const n1coCloseCountdownRef = useRef(null);
+
 
 
 
@@ -629,6 +637,7 @@ function Plan() {
         };
 
         const cerrarModalN1co = () => {
+        limpiarTimersN1co();    
         setOpenModalN1co(false);
         setErrorLinkN1co('');
         setN1coLink('');
@@ -641,6 +650,95 @@ function Plan() {
             pollingRef.current = null;
         }
         };
+
+        const limpiarTimersN1co = () => {
+        if (n1coExpireIntervalRef.current) {
+            clearInterval(n1coExpireIntervalRef.current);
+            n1coExpireIntervalRef.current = null;
+        }
+
+        if (n1coExpireTimeoutRef.current) {
+            clearTimeout(n1coExpireTimeoutRef.current);
+            n1coExpireTimeoutRef.current = null;
+        }
+
+        if (n1coCloseCountdownRef.current) {
+            clearInterval(n1coCloseCountdownRef.current);
+            n1coCloseCountdownRef.current = null;
+        }
+
+        setN1coExpiraEnSeg(null);
+        setN1coCierreEnSeg(null);
+        };
+
+        const iniciarTimersN1co = () => {
+        limpiarTimersN1co();
+
+        const total = 300;        // 5 min
+        const warningAt = 30;     // mostrar warning cuando falten 30s
+
+        setN1coExpiraEnSeg(total);
+        setN1coCierreEnSeg(null);
+
+        n1coExpireIntervalRef.current = setInterval(() => {
+            setN1coExpiraEnSeg((prev) => {
+            if (prev === null) return total;
+
+            const next = prev > 0 ? prev - 1 : 0;
+
+            // Cuando falten 30s, empieza el countdown visible 30..0
+            if (next === warningAt) {
+                setN1coCierreEnSeg(warningAt);
+
+                // countdown visible (30..0)
+                if (n1coCloseCountdownRef.current) {
+                clearInterval(n1coCloseCountdownRef.current);
+                n1coCloseCountdownRef.current = null;
+                }
+
+                n1coCloseCountdownRef.current = setInterval(() => {
+                setN1coCierreEnSeg((p) => {
+                    if (p === null) return warningAt;
+                    return p > 0 ? p - 1 : 0;
+                });
+                }, 1000);
+            }
+
+            // Cuando llegue a 0, cerrar todo
+            if (next === 0) {
+                // stop polling
+                if (pollingRef.current) {
+                clearInterval(pollingRef.current);
+                pollingRef.current = null;
+                }
+
+                // parar interval principal
+                if (n1coExpireIntervalRef.current) {
+                clearInterval(n1coExpireIntervalRef.current);
+                n1coExpireIntervalRef.current = null;
+                }
+
+                // parar countdown warning
+                if (n1coCloseCountdownRef.current) {
+                clearInterval(n1coCloseCountdownRef.current);
+                n1coCloseCountdownRef.current = null;
+                }
+
+                setN1coPaso("error");
+                setErrorLinkN1co("El tiempo del link expiró. Genera un nuevo link para intentar de nuevo.");
+
+                // opcional: cerrar popup
+                try { popupRef.current?.close?.(); } catch {}
+
+                // cerrar modal
+                cerrarModalN1co();
+            }
+
+            return next;
+            });
+        }, 1000);
+        };
+
 
 
         const generarLinkN1co = async () => {
@@ -680,6 +778,7 @@ function Plan() {
             const orderCode = extraerOrderCode(link);
             setN1coOrderCode(orderCode);
             setN1coPaso('esperando');
+            iniciarTimersN1co();
 
             // ✅ 1er check inmediato
             const first = await consultarStatusN1co(orderCode);
@@ -698,6 +797,7 @@ function Plan() {
                     );
 
                 setN1coPaso("pagado");
+                limpiarTimersN1co();
                 setTimeout(() => cerrarModalN1co(), 1500);
                 } catch (e) {
                 setN1coPaso("error");
@@ -1236,6 +1336,29 @@ function Plan() {
                     No cierres esta ventana.
                     </Typography>
                 )}
+
+            {/* Cuenta regresiva total (5 min) */}
+                    {n1coExpiraEnSeg !== null && (
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                        Link expira en:{" "}
+                        <b>
+                        {Math.floor(n1coExpiraEnSeg / 60)}:
+                        {String(n1coExpiraEnSeg % 60).padStart(2, "0")}
+                        </b>
+                    </Typography>
+                    )}
+
+                    {/* Mensaje solo cuando falten 30s */}
+                    {n1coCierreEnSeg !== null && (
+                    <Typography
+                        variant="body2"
+                        sx={{ mt: 2, color: "red", fontWeight: "bold" }}
+                    >
+                        Esta ventana se cerrará en {n1coCierreEnSeg} segundos.
+                        <br />
+                        Si no realizaste el pago, no podrás volver a utilizar este link.
+                    </Typography>
+                    )}
 
                 {n1coPaso === "pagado" && (
                     <Typography variant="body2" sx={{ mb: 2, mt: 1, fontWeight: "bold", color: "green" }}>
