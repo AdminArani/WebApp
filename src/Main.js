@@ -147,8 +147,7 @@ function Main() {
                     "Gracias, Honduras",
                     "Roatán, Honduras",
                     "French Harbour, Honduras",
-                    "Santa Rosa, Honduras",
-                    "Intibucá, Honduras"
+                    "Santa Rosa, Honduras"
                 ];
         
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
@@ -408,8 +407,8 @@ function Main() {
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
                     {(() => {
                         const fechaActual = new Date();
-                        const inicioFeriado = new Date('2026-01-31'); // Inicio del feriado
-                        const finFeriado = new Date('2026-02-01'); // Fin del feriado
+                        const inicioFeriado = new Date('2026-02-07'); // Inicio del feriado
+                        const finFeriado = new Date('2026-02-08'); // Fin del feriado
 
                         if (usuarioDetalle.status === "1" && fechaActual >= inicioFeriado && fechaActual <= finFeriado) {
                             return (
@@ -466,7 +465,7 @@ function Main() {
 
                             // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
                             const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-                            const fechasFeriado = new Set(["2026-01-31", "2026-02-01"]);
+                            const fechasFeriado = new Set(["2026-02-07", "2026-02-08"]);
                             const esFeriado = fechasFeriado.has(claveFecha);
 
                             if (esFeriado) {
