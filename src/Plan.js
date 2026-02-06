@@ -572,45 +572,109 @@ function Plan() {
     }, [exitoEnvio]);
     
     const handleOpenModalN1co = async () => {
+        let c = null;
+
+        // 1) Cargar perfil (clienteData)
         try {
-            const c = await validarPerfilEnCore();
+            c = await validarPerfilEnCore();
             setClienteData(c);
         } catch (e) {
-            // si falla, igual puedes decidir si dejar abrir el modal o no
-        };
+            // si falla, no tiene sentido seguir porque ocupamos idCliente
+            setErrorLinkN1co("No se pudo cargar el perfil del cliente.");
+            setOpenModalN1co(true);
+            return;
+        }
 
-        const primerPagoPendiente = listaPagos?.find(
-            (p) => parseInt(p.status) !== 1 && parseInt(p.status) !== 6
-        );
+        // 2) Validar que haya listaPagos
+        if (!Array.isArray(listaPagos) || listaPagos.length === 0) {
+            setErrorLinkN1co("No hay calendario de pagos disponible.");
+            setOpenModalN1co(true);
+            return;
+        }
 
-        if (!primerPagoPendiente) return;
+        // 3) Consultar a la DB qué cuotas de N1co ya están registradas
+        let cuotasPagadasDB = [];
+        try {
+            const body = new URLSearchParams({
+            idCliente: String(c?.customer_id ?? ""),
+            identificadorPrestamo: String(prestamoSeleccionado?.container_id ?? ""),
+            }).toString();
 
-        set_pagoseleccionado(primerPagoPendiente);
+            const res = await fetch("http://localhost/reportsarani/getNicoCuotasPagadas.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+            },
+            body,
+            });
 
-        const idx = listaPagos.findIndex((p) => p.id === primerPagoPendiente.id);
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data?.mensaje || "Error consultando cuotas en DB");
 
+            cuotasPagadasDB = Array.isArray(data?.cuotasPagadas) ? data.cuotasPagadas : [];
+        } catch (err) {
+            setErrorLinkN1co(err?.message || "Error consultando cuotas en DB.");
+            setOpenModalN1co(true);
+            return;
+        }
+
+        // 4) Buscar el primer pago pendiente del CORE que NO esté registrado en DB como Pago_Nico
+        //    cuotaN = schedule_position + 1  (1..4)
+        const siguientePago = listaPagos.find((p) => {
+            const st = parseInt(p.status, 10);
+            const pendienteCore = st !== 1 && st !== 6;
+
+            const sp = Number(p.schedule_position);
+            const cuotaN = Number.isFinite(sp) ? sp + 1 : null;
+
+            const noRegistradaEnDB = cuotaN && !cuotasPagadasDB.includes(cuotaN);
+
+            return pendienteCore && noRegistradaEnDB;
+        });
+
+        // 5) Si no hay pagos disponibles (todo pagado o ya registrado)
+        if (!siguientePago) {
+            setN1coLink("");
+            setN1coAmount("");
+            setN1coPagoLabel("");
+            setN1coOrderCode("");
+            setN1coOrderStatus("");
+            setN1coPaso("idle");
+            setN1coInsertado(false);
+
+            setErrorLinkN1co("Ya ha pagado todas las cuotas.");
+            setOpenModalN1co(true);
+            return;
+        }
+
+        // 6) Seleccionar esa cuota y armar UI igual que tu versión
+        set_pagoseleccionado(siguientePago);
+
+        const idx = listaPagos.findIndex((p) => p.id === siguientePago.id);
         const pagoLabel = `Pago ${idx + 1} de ${listaPagos.length}`;
         setN1coPagoLabel(pagoLabel);
 
         const monto =
-            (Number(primerPagoPendiente.charge) - Number(primerPagoPendiente.charge_covered)) +
-            (Number(primerPagoPendiente.administrator_fee) - Number(primerPagoPendiente.administrator_fee_covered)) +
-            (Number(primerPagoPendiente.amount) - Number(primerPagoPendiente.amount_covered)) +
-            (Number(primerPagoPendiente.late_fee) - Number(primerPagoPendiente.cinterest_covered));
+            (Number(siguientePago.charge) - Number(siguientePago.charge_covered)) +
+            (Number(siguientePago.administrator_fee) - Number(siguientePago.administrator_fee_covered)) +
+            (Number(siguientePago.amount) - Number(siguientePago.amount_covered)) +
+            (Number(siguientePago.late_fee) - Number(siguientePago.cinterest_covered));
 
         const montoSeguro = isNaN(monto) ? 0 : monto;
 
         setN1coAmount(montoSeguro.toFixed(2));
-        setN1coLink('');
-        setErrorLinkN1co('');
+        setN1coLink("");
+        setErrorLinkN1co("");
 
-        setN1coOrderCode('');
-        setN1coOrderStatus('');
-        setN1coPaso('idle');
+        setN1coOrderCode("");
+        setN1coOrderStatus("");
+        setN1coPaso("idle");
         setN1coInsertado(false);
 
         setOpenModalN1co(true);
         };
+
 
 
         const extraerOrderCode = (paymentLinkUrl) => {
