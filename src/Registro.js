@@ -609,7 +609,7 @@ function VerticalLinearStepper2(){
     const enviarARegistroApi = ()=>{
         set_enviandoDataFinal(true);
         axios.request({
-            url: `${config.apiUrl}/api/app/register.php`,
+            url: `${config.apiUrl}/api/app/registerScore.php`,
             method: "post",
             withCredentials: true,
             data: {
@@ -644,7 +644,7 @@ function VerticalLinearStepper2(){
                 procesar_login(inputCorreo.valor, inputPass1.valor, function(data){
                     gContext.set_logeado({estado: true, token: data.payload.sid});
                     localStorage.setItem('arani_session_id', data.payload.sid);
-                    navigate("/perfil");
+                    navigate("/");
                 }, function(messageerr){
                     console.log(messageerr);
                 });

@@ -147,7 +147,8 @@ function Main() {
                     "Gracias, Honduras",
                     "Roatán, Honduras",
                     "French Harbour, Honduras",
-                    "Santa Rosa, Honduras"
+                    "Santa Rosa, Honduras",
+                    "Intibucá, Honduras"
                 ];
         
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
@@ -295,7 +296,10 @@ function Main() {
         16: "Recibo público mayor al tiempo permitido. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         17: "Referencias no son validas. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         18: "No pudimos validar tu identidad. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-        19: "Cuenta de banco no es valida, Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>."
+        19: "Cuenta de banco no es valida, Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        21: "Solicitud no aprobada por ahora no fue posible aprobar tu préstamo tras el análisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación.",
+        22: "Solicitud no aprobada por ahora no fue posible aprobar tu préstamo tras el análisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación.",
+        23: "Solicitud no aprobada por ahora no fue posible aprobar tu préstamo tras el análisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación."
     };
     
     
@@ -431,11 +435,25 @@ function Main() {
     
 
                     <div className="contetilebotonpri">
-                        <Link to="/perfil" className="tilebotonpri">
-                            <div className="tilebotonpri-tit">Perfil</div>
-                            <div className="tilebotonpri-desc">Actualiza todos los datos de tu cuenta.</div>
-                            <div className="tilebotonpri-icon"><img alt="" src={tile_perfil} /></div>
-                        </Link>
+                        {["21", "22", "23"].includes(usuarioDetalle?.errores_perfil) ? (
+                            <Link
+                                to="#"
+                                className="tilebotonpri disabled"
+                                aria-disabled="true"
+                                tabIndex={-1}
+                                onClick={(e) => e.preventDefault()}
+                            >
+                                <div className="tilebotonpri-tit">Perfil</div>
+                                <div className="tilebotonpri-desc">Lo sentimos tu perfil no es elegible.</div>
+                                <div className="tilebotonpri-icon"><img alt="" src={tile_perfil} /></div>
+                            </Link>
+                        ) : (
+                            <Link to="/perfil" className="tilebotonpri">
+                                <div className="tilebotonpri-tit">Perfil</div>
+                                <div className="tilebotonpri-desc">Actualiza todos los datos de tu cuenta.</div>
+                                <div className="tilebotonpri-icon"><img alt="" src={tile_perfil} /></div>
+                            </Link>
+                        )}
 
 
                         {/* Si el usuario está en la ubicación deseada, muestra el enlace de aplicar */}
