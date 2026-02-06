@@ -1344,59 +1344,6 @@ function Plan() {
                     </DialogContent>
                 </Dialog>
 
-
-
-                {/* Modal para BAC */}
-                <Dialog open={openModalBAC} onClose={() => {
-                    setOpenModalBAC(false);
-                    setExitoEnvio(false); // Resetea el mensaje de éxito al cerrar el modal
-                }}>
-                <DialogContent>
-                    <Typography variant="h5">Subir Archivo BAC</Typography>
-                    <Typography variant="body2" sx={{mb: 2}}>Adjunte su comprobante de pago BAC.</Typography>
-                    {/* Input para el montoPago */}
-                    <TextField
-                        label="Monto a Pagar"
-                        value={montoPago}
-                        onChange={handleMontoPagoChange}
-                        type="number"
-                        fullWidth
-                        sx={{ mt: 2 }}
-                    />
-
-                    <TextField
-                        label="Número de Referencia"
-                        value={numReferencia}
-                        onChange={handleNumReferenciaChange}
-                        type="text"
-                        fullWidth
-                        sx={{ mt: 2 }}
-                        error={!!estadoReferencia}
-                        helperText={estadoReferencia}
-                    />
-
-                    <Button 
-                        fullWidth 
-                        variant="contained" 
-                        component="label" 
-                        startIcon={<span className="material-symbols-outlined">cloud_upload</span>} 
-                        sx={{ mt: 2 }}
-                        disabled={!numReferencia}
-                    >
-                        Adjuntar documento
-                        <input type="file" onChange={handleFileChange} accept="image/*" hidden multiple />
-                    </Button>
-                    <Typography variant="body2" sx={{mt: 2}}>Una vez enviado, será revisado por uno de nuestros agentes para validar que el pago se haya realizado correctamente.</Typography>
-                    
-                    {/* Mostrar estado de envío */}
-                    <div>
-            {/* Mostrar estado de carga */}
-            {cargandoEnvio && (
-                <Typography variant="body2" sx={{ color: 'blue', mt: 2 }}>
-                    Cargando...
-                </Typography>
-            )}
-
                 {/* Modal para N1co */}
                 <Dialog
                 open={openModalN1co}
@@ -1506,6 +1453,59 @@ function Plan() {
                 </Box>
                 </DialogContent>
                 </Dialog>
+
+
+
+                {/* Modal para BAC */}
+                <Dialog open={openModalBAC} onClose={() => {
+                    setOpenModalBAC(false);
+                    setExitoEnvio(false); // Resetea el mensaje de éxito al cerrar el modal
+                }}>
+                <DialogContent>
+                    <Typography variant="h5">Subir Archivo BAC</Typography>
+                    <Typography variant="body2" sx={{mb: 2}}>Adjunte su comprobante de pago BAC.</Typography>
+                    {/* Input para el montoPago */}
+                    <TextField
+                        label="Monto a Pagar"
+                        value={montoPago}
+                        onChange={handleMontoPagoChange}
+                        type="number"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                    />
+
+                    <TextField
+                        label="Número de Referencia"
+                        value={numReferencia}
+                        onChange={handleNumReferenciaChange}
+                        type="text"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                        error={!!estadoReferencia}
+                        helperText={estadoReferencia}
+                    />
+
+                    <Button 
+                        fullWidth 
+                        variant="contained" 
+                        component="label" 
+                        startIcon={<span className="material-symbols-outlined">cloud_upload</span>} 
+                        sx={{ mt: 2 }}
+                        disabled={!numReferencia}
+                    >
+                        Adjuntar documento
+                        <input type="file" onChange={handleFileChange} accept="image/*" hidden multiple />
+                    </Button>
+                    <Typography variant="body2" sx={{mt: 2}}>Una vez enviado, será revisado por uno de nuestros agentes para validar que el pago se haya realizado correctamente.</Typography>
+                    
+                    {/* Mostrar estado de envío */}
+                    <div>
+            {/* Mostrar estado de carga */}
+            {cargandoEnvio && (
+                <Typography variant="body2" sx={{ color: 'blue', mt: 2 }}>
+                    Cargando...
+                </Typography>
+            )}
 
             {/* Modal de Confirmación de Pago */}
             <Modal
