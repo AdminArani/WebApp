@@ -1228,6 +1228,7 @@ function Plan() {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     flexDirection: 'column',
+                                    gap: '12px', p: '12px',
                                 }}
                                 >
                                 <Button
@@ -1240,6 +1241,7 @@ function Plan() {
                                 }}
                                 variant="contained"
                                 sx={{
+                                    width: { xs: '220px', sm: '260px' },
                                     backgroundColor: 'red',
                                     color: 'white',
                                     fontSize: { xs: '0.75rem', sm: '1rem' }, // más pequeño en mobile
