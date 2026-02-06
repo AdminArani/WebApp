@@ -578,8 +578,7 @@ function Plan() {
         try {
             c = await validarPerfilEnCore();
             setClienteData(c);
-        } catch (e) {
-            // si falla, no tiene sentido seguir porque ocupamos idCliente
+        } catch (e) {         
             setErrorLinkN1co("No se pudo cargar el perfil del cliente.");
             setOpenModalN1co(true);
             return;
@@ -648,7 +647,7 @@ function Plan() {
             return;
         }
 
-        // 6) Seleccionar esa cuota y armar UI igual que tu versión
+        // 6) Seleccionar esa cuota y armar UI 
         set_pagoseleccionado(siguientePago);
 
         const idx = listaPagos.findIndex((p) => p.id === siguientePago.id);
@@ -835,16 +834,16 @@ function Plan() {
 
             setN1coLink(link);
 
-            // ✅ abrir solo el link (sin about:blank)
+            // Abrir solo el link (sin about:blank)
             popupRef.current = window.open(link, "_blank", "noopener,noreferrer");
 
-            // ✅ cambia modal a esperando
+            // Cambia modal a esperando
             const orderCode = extraerOrderCode(link);
             setN1coOrderCode(orderCode);
             setN1coPaso('esperando');
             iniciarTimersN1co();
 
-            // ✅ 1er check inmediato
+            // 1er check inmediato
             const first = await consultarStatusN1co(orderCode);
             const st1 = String(first?.orderStatus || "").trim().toUpperCase();
             setN1coOrderStatus(st1);
@@ -876,7 +875,7 @@ function Plan() {
             return;
             }
 
-            // polling cada 15 segundos
+            // Polling cada 15 segundos
             if (pollingRef.current) {
             clearInterval(pollingRef.current);
             pollingRef.current = null;
@@ -1045,7 +1044,7 @@ function Plan() {
         console.log("[postNicoPago] HTTP:", res.status, res.statusText);
         await logRepeated("resp", data);
 
-        // Contrato exacto de códigos:
+        // Códigos:
         // 200 → { "mensaje": "Pago N1co ya registrado" }
         // 201 → { "mensaje": "Pago N1co registrado exitosamente" }
         // 400 → { "mensaje": "Faltan datos obligatorios" }
@@ -1371,7 +1370,7 @@ function Plan() {
                 <Dialog
                 open={openModalN1co}
                 onClose={(event, reason) => {
-                    // ✅ Bloquea cierre si está esperando (opcional)
+                    // Bloquea cierre si está esperando (opcional)
                     if (n1coPaso === 'esperando') return;
                     cerrarModalN1co();
                 }}
@@ -1380,7 +1379,7 @@ function Plan() {
                 <DialogContent>
                 <Typography variant="h5">Pago con N1co</Typography>
 
-                {/* ✅ Muestra qué pago se está realizando */}
+                {/* Muestra qué pago se está realizando */}
                 <Typography variant="subtitle1" sx={{ fontWeight: "bold", mt: 1 }}>
                     {n1coPagoLabel}
                 </Typography>
@@ -1430,7 +1429,7 @@ function Plan() {
                     </Typography>
                 )}
 
-                {/* ✅ Monto fijo (no editable) */}
+                {/* Monto fijo (no editable) */}
                 <TextField
                     label="Monto a pagar"
                     value={`L. ${n1coAmount}`}
@@ -1465,7 +1464,7 @@ function Plan() {
                     {cargandoLinkN1co ? "Abriendo..." : (n1coPaso === "esperando" ? "Esperando..." : "Pagar")}
                     </Button>
 
-                    {/* ✅ No dejar cerrar mientras está esperando */}
+                    {/* No dejar cerrar mientras está esperando */}
                     <Button
                     variant="outlined"
                     onClick={cerrarModalN1co}
