@@ -55,7 +55,7 @@ function Plan() {
     const pollingRef = useRef(null);
     const popupRef = useRef(null);
     // --- N1co timers ---
-    const [n1coExpiraEnSeg, setN1coExpiraEnSeg] = useState(null); // 300..0
+    const [n1coExpiraEnSeg, setN1coExpiraEnSeg] = useState(null); // 600..0
     const [n1coCierreEnSeg, setN1coCierreEnSeg] = useState(null); // 30..0
 
     const n1coExpireIntervalRef = useRef(null);
@@ -736,7 +736,7 @@ function Plan() {
         const iniciarTimersN1co = () => {
         limpiarTimersN1co();
 
-        const total = 300;        // 5 min
+        const total = 600;        // 10 min
         const warningAt = 30;     // mostrar warning cuando falten 30s
 
         setN1coExpiraEnSeg(total);
@@ -873,7 +873,7 @@ function Plan() {
             return;
             }
 
-            // Polling cada 15 segundos
+            // Polling cada 8 segundos
             if (pollingRef.current) {
             clearInterval(pollingRef.current);
             pollingRef.current = null;
@@ -901,7 +901,7 @@ function Plan() {
                         });
 
                         setN1coPaso("pagado");
-                        setTimeout(() => cerrarModalN1co(), 1500);
+                        setTimeout(() => cerrarModalN1co(), 2500);
                     } catch (e) {
                         setN1coPaso("error");
                         setErrorLinkN1co(e?.message || "Error insertando pago N1co");
@@ -915,7 +915,7 @@ function Plan() {
                     setN1coPaso("error");
                     setErrorLinkN1co(e?.message || "Error consultando status");
                 }
-                }, 15000);
+                }, 8000);
 
 
 
@@ -1380,7 +1380,7 @@ function Plan() {
                     </Typography>
                 )}
 
-            {/* Cuenta regresiva total (5 min) */}
+            {/* Cuenta regresiva total (10 min) */}
                     {n1coExpiraEnSeg !== null && (
                     <Typography variant="body2" sx={{ mt: 1 }}>
                         Link expira en:{" "}
