@@ -599,7 +599,7 @@ function Plan() {
             identificadorPrestamo: String(prestamoSeleccionado?.container_id ?? ""),
             }).toString();
 
-            const res = await fetch("https://app.aranih.com/reportsarani/getNicoCuotasPagadas.php", {
+            const res = await fetch("https://app.arani.hn/api/chatbot/pagosBac/getNicoCuotasPagadas.php", {
             method: "POST",
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
@@ -1023,7 +1023,7 @@ function Plan() {
 
         await logRepeated("payload", payload);
 
-        const res = await fetch("https://app.aranih.com/reportsarani/postNicoPago.php", {
+        const res = await fetch("https://app.aranih.com/api/chatbot/pagosBac/postNicoPago.php", {
             method: "POST",
             headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
