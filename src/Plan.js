@@ -1222,7 +1222,7 @@ function Plan() {
                             {listaPagos?.length > 0 && (
                                 <Box
                                 sx={{
-                                    backgroundColor: '#ecf2fa',
+                                    backgroundColor: '#ffffff',
                                     borderRadius: '8px',
                                     display: 'flex',
                                     justifyContent: 'center',
