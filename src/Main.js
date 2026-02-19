@@ -282,13 +282,13 @@ function Main() {
         2: "Tu recibo público no es válido en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         3: "No pudimos confirmar tus documentos en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         4: "No pudimos confirmar tu DNI en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-        5: "Eres menor de edad y no aplicas en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-        7: "Eres menor de edad y no aplicas en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-        8: "Tipo de usuario no elegible. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-        9: "Ingresos por debajo del minimo requerido. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-        10: "Experiencia laboral insuficiente. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-        11: "Educación invalida. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-        12: "Tipo de trabajo fallido. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        5: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        7: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        8: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        9: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        10: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        11: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        12: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         13: "Faltan documentos requeridos. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         14: "Validación de fotografía selfie fallida. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         15: "Recibo público no es válido. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
@@ -407,8 +407,8 @@ function Main() {
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
                     {(() => {
                         const fechaActual = new Date();
-                        const inicioFeriado = new Date('2026-02-07'); // Inicio del feriado
-                        const finFeriado = new Date('2026-02-08'); // Fin del feriado
+                        const inicioFeriado = new Date('2026-02-21'); // Inicio del feriado
+                        const finFeriado = new Date('2026-02-22'); // Fin del feriado
 
                         if (usuarioDetalle.status === "1" && fechaActual >= inicioFeriado && fechaActual <= finFeriado) {
                             return (
@@ -465,7 +465,7 @@ function Main() {
 
                             // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
                             const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-                            const fechasFeriado = new Set(["2026-02-07", "2026-02-08"]);
+                            const fechasFeriado = new Set(["2026-02-21", "2026-02-22"]);
                             const esFeriado = fechasFeriado.has(claveFecha);
 
                             if (esFeriado) {
