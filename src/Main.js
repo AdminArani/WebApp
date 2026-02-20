@@ -532,26 +532,108 @@ function Main() {
                                             e.preventDefault();
                                             setShowModal(true);
                                         } else {
+
+                                            // IMPORTANTE: detener navegación automática hasta tener respuesta
+                                            e.preventDefault();
+
                                             try {
-                                                // Enviar datos a la API
-                                                const response = await fetch('https://app.aranih.com/api/app/modeloClienteExistente.php', {
-                                                    method: 'POST',
+                                                // --- NUEVA REQUEST ANTES DE IR A /aplicar ---
+                                                const tokenPriceList = "d4d0YcB89pFZB4qYQALfQiqpTGaDY4VrsZrFSy8OomiVfe2pbOxk9TxbTFOTULTJ";
+
+                                                const inicioWork = usuarioDetalle.work_experience
+                                                    ? new Date(`${usuarioDetalle.work_experience}T00:00:00`)
+                                                    : null;
+
+                                                const hoy = new Date();
+                                                const dias = (inicioWork && !Number.isNaN(inicioWork.getTime()))
+                                                    ? Math.max(0, Math.floor((hoy.getTime() - inicioWork.getTime()) / (1000 * 60 * 60 * 24)))
+                                                    : 0;
+
+                                                const clientIdPriceList = usuarioDetalle.customerId ?? usuarioDetalle.customer_id; // por si viene con otro nombre
+                                                const identidad = usuarioDetalle.person_code;
+
+                                                const payloadPriceList = {
+                                                    client_id: String(clientIdPriceList ?? ""),
+                                                    identidad: String(identidad ?? ""),
+                                                    token: tokenPriceList,
+                                                    dias: dias,
+                                                    salario: Number(usuarioDetalle.income ?? 0),
+                                                };
+
+                                                console.log("[Aplicar] postPriceList -> URL:", "https://app.aranih.com/api/DecisionRules/postPriceList.php");
+                                                console.log("[Aplicar] postPriceList -> usuarioDetalle.customerId:", usuarioDetalle.customerId);
+                                                console.log("[Aplicar] postPriceList -> usuarioDetalle.customer_id:", usuarioDetalle.customer_id);
+                                                console.log("[Aplicar] postPriceList -> usuarioDetalle.person_code:", usuarioDetalle.person_code);
+                                                console.log("[Aplicar] postPriceList -> usuarioDetalle.work_experience:", usuarioDetalle.work_experience);
+                                                console.log("[Aplicar] postPriceList -> inicioWork:", inicioWork);
+                                                console.log("[Aplicar] postPriceList -> hoy:", hoy);
+                                                console.log("[Aplicar] postPriceList -> dias calculados:", dias);
+                                                console.log("[Aplicar] postPriceList -> usuarioDetalle.income:", usuarioDetalle.income);
+                                                console.log("[Aplicar] postPriceList -> payload:", payloadPriceList);
+
+                                                const priceListResponse = await fetch("https://app.aranih.com/api/DecisionRules/postPriceList.php", {
+                                                    method: "POST",
                                                     headers: {
-                                                        'Content-Type': 'application/json',
+                                                        "Content-Type": "application/json",
                                                     },
-                                                    body: JSON.stringify({
-                                                        codigo: "f7a6d3b4-5c29-4e7f-92a4-28e5d39c3a8e",
-                                                        clientId: usuarioDetalle.customer_id, // Usar el clientId del usuario
-                                                    }),
+                                                    body: JSON.stringify(payloadPriceList),
                                                 });
 
-                                                if (!response.ok) {
-                                                    console.error('Error al enviar datos a la API:', await response.text());
+                                                console.log("[Aplicar] postPriceList -> status:", priceListResponse.status, priceListResponse.statusText);
+
+                                                if (!priceListResponse.ok) {
+                                                    const errText = await priceListResponse.text();
+                                                    console.error("[Aplicar] postPriceList -> ERROR body:", errText);
+                                                    return; // NO avanzar a /aplicar
                                                 } else {
-                                                    console.log('Datos enviados correctamente a la API');
+                                                    // Si el endpoint devuelve JSON y quieres verlo:
+                                                    // const okJson = await priceListResponse.json();
+                                                    // console.log("[Aplicar] postPriceList -> OK JSON:", okJson);
+
+                                                    // Si no estás seguro si es JSON:
+                                                    const okText = await priceListResponse.text();
+                                                    console.log("[Aplicar] postPriceList -> OK body:", okText);
                                                 }
+
+                                                // --- TU CÓDIGO ANTERIOR (SIN CAMBIOS, solo agrego logs) ---
+                                                try {
+                                                    const payloadModeloCliente = {
+                                                        codigo: "f7a6d3b4-5c29-4e7f-92a4-28e5d39c3a8e",
+                                                        clientId: usuarioDetalle.customer_id, // Usar el clientId del usuario
+                                                    };
+
+                                                    console.log("[Aplicar] modeloClienteExistente -> URL:", "https://app.aranih.com/api/app/modeloClienteExistente.php");
+                                                    console.log("[Aplicar] modeloClienteExistente -> payload:", payloadModeloCliente);
+
+                                                    // Enviar datos a la API
+                                                    const response = await fetch("https://app.aranih.com/api/app/modeloClienteExistente.php", {
+                                                        method: "POST",
+                                                        headers: {
+                                                            "Content-Type": "application/json",
+                                                        },
+                                                        body: JSON.stringify(payloadModeloCliente),
+                                                    });
+
+                                                    console.log("[Aplicar] modeloClienteExistente -> status:", response.status, response.statusText);
+
+                                                    if (!response.ok) {
+                                                        console.error("[Aplicar] modeloClienteExistente -> ERROR body:", await response.text());
+                                                    } else {
+                                                        console.log("[Aplicar] modeloClienteExistente -> OK body:", await response.text());
+                                                    }
+                                                } catch (error) {
+                                                    console.error("[Aplicar] modeloClienteExistente -> Error al realizar la solicitud:", error);
+                                                }
+
+                                                // Ahora sí: avanzar a /aplicar (hash router)
+                                                window.location.hash = "#/aplicar";
                                             } catch (error) {
-                                                console.error('Error al realizar la solicitud:', error);
+                                                console.error("[Aplicar] Error general (postPriceList/modeloClienteExistente):", error);
+                                                // NO avanzar a /aplicar
+                                            } finally {
+                                                // Si no navegó (por return/error), quitar loader aquí
+                                                // Si ya navegó, este setLoading podría no ejecutarse antes del unmount, pero no afecta.
+                                                setLoading(false);
                                             }
                                         }
                                     }}
