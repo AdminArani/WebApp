@@ -540,9 +540,20 @@ function Main() {
                                                 // --- NUEVA REQUEST ANTES DE IR A /aplicar ---
                                                 const tokenPriceList = "d4d0YcB89pFZB4qYQALfQiqpTGaDY4VrsZrFSy8OomiVfe2pbOxk9TxbTFOTULTJ";
 
-                                                const inicioWork = usuarioDetalle.work_experience
-                                                    ? new Date(`${usuarioDetalle.work_experience}T00:00:00`)
-                                                    : null;
+                                                const parseFechaSQL = (value) => {
+                                                    if (!value) return null;
+                                                    const raw = String(value).trim();
+
+                                                    // Soporta: "YYYY-MM-DD" y "YYYY-MM-DD HH:mm:ss" (formato típico SQL)
+                                                    // Safari suele fallar con el espacio; por eso se normaliza a ISO.
+                                                    const soloFecha = raw.includes(" ") ? raw.split(" ")[0] : raw;
+                                                    const iso = `${soloFecha}T00:00:00`;
+                                                    const date = new Date(iso);
+
+                                                    return Number.isNaN(date.getTime()) ? null : date;
+                                                };
+
+                                                const inicioWork = parseFechaSQL(usuarioDetalle.created);
 
                                                 const hoy = new Date();
                                                 const dias = (inicioWork && !Number.isNaN(inicioWork.getTime()))
@@ -564,7 +575,7 @@ function Main() {
                                                 console.log("[Aplicar] postPriceList -> usuarioDetalle.customerId:", usuarioDetalle.customerId);
                                                 console.log("[Aplicar] postPriceList -> usuarioDetalle.customer_id:", usuarioDetalle.customer_id);
                                                 console.log("[Aplicar] postPriceList -> usuarioDetalle.person_code:", usuarioDetalle.person_code);
-                                                console.log("[Aplicar] postPriceList -> usuarioDetalle.work_experience:", usuarioDetalle.work_experience);
+                                                console.log("[Aplicar] postPriceList -> usuarioDetalle.created:", usuarioDetalle.created);
                                                 console.log("[Aplicar] postPriceList -> inicioWork:", inicioWork);
                                                 console.log("[Aplicar] postPriceList -> hoy:", hoy);
                                                 console.log("[Aplicar] postPriceList -> dias calculados:", dias);
