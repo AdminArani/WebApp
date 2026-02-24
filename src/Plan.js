@@ -55,12 +55,16 @@ function Plan() {
     const pollingRef = useRef(null);
     const popupRef = useRef(null);
     // --- N1co timers ---
+    const [openModalEsperaN1co, setOpenModalEsperaN1co] = useState(false);
+    const [msgEsperaN1co, setMsgEsperaN1co] = useState('');
     const [n1coExpiraEnSeg, setN1coExpiraEnSeg] = useState(null); // 600..0
     const [n1coCierreEnSeg, setN1coCierreEnSeg] = useState(null); // 30..0
 
     const n1coExpireIntervalRef = useRef(null);
     const n1coExpireTimeoutRef = useRef(null);
     const n1coCloseCountdownRef = useRef(null);
+
+    
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(async (position) => {
@@ -674,6 +678,41 @@ function Plan() {
         setOpenModalN1co(true);
         };
 
+        const validarVentana42hN1co = () => {
+        if (!Array.isArray(listaPagos) || listaPagos.length === 0) {
+            return { ok: true };
+        }
+
+        const createdMoments = listaPagos
+            .map(p => p?.created)
+            .filter(Boolean)
+            .map(dt => moment(dt));
+
+        // Si no hay created válido, no se bloquea.
+        const validCreated = createdMoments.filter(m => m.isValid());
+        if (validCreated.length === 0) {
+            return { ok: true };
+        }
+
+        const createdMax = moment.max(validCreated); // el created más reciente
+        const habilitaEn = createdMax.clone().add(42, 'hours');
+        const ahora = moment();
+
+        if (ahora.isSameOrAfter(habilitaEn)) {
+            return { ok: true };
+        }
+
+        const dur = moment.duration(habilitaEn.diff(ahora));
+        const horas = Math.floor(dur.asHours());
+        const mins = dur.minutes();
+
+        return {
+            ok: false,
+            habilitaEn,
+            faltanTxt: `${horas}h ${String(mins).padStart(2, '0')}m`
+        };
+        };
+
 
         const extraerOrderCode = (paymentLinkUrl) => {
         try {
@@ -1261,7 +1300,21 @@ function Plan() {
 
                                  {/* BOTON DE NICO */}
                                 <Button
-                                    onClick={handleOpenModalN1co}
+                                onClick={() => {
+                                    const v = validarVentana42hN1co();
+
+                                    if (!v.ok) {
+                                    setMsgEsperaN1co(
+                                        `Aún no puedes pagar con tarjeta. Debes esperar 42 horas desde la creación del plan.\n` +
+                                        `Te faltan: ${v.faltanTxt}.\n` +
+                                        `Disponible a partir de: ${v.habilitaEn.locale('es').format("D [de] MMMM [de] YYYY [a las] h:mm A")}`
+                                    );
+                                    setOpenModalEsperaN1co(true);
+                                    return;
+                                    }
+
+                                    handleOpenModalN1co();
+                                }}
                                 variant="contained"
                                 sx={{
                                     width: { xs: '220px', sm: '260px' },
@@ -1345,6 +1398,22 @@ function Plan() {
                         <Button disabled={Boolean(!fDOCComprobante) || cargandoEnviandoComprobante} onClick={guardarAdjuntarComprobante} variant="contained">{(cargandoEnviandoComprobante)?"Subiendo....":"Enviar comprobante"}</Button>
                     </DialogContent>
                 </Dialog>
+
+                <Dialog open={openModalEsperaN1co} onClose={() => setOpenModalEsperaN1co(false)}>
+                <DialogContent>
+                    <Typography variant="h6">Pago con tarjeta no disponible aún</Typography>
+                    <Typography variant="body2" sx={{ mt: 2, whiteSpace: 'pre-line' }}>
+                    {msgEsperaN1co}
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenModalEsperaN1co(false)} variant="contained">
+                    Entendido
+                    </Button>
+                </DialogActions>
+                </Dialog>
+
+
 
                 {/* Modal para N1co */}
                 <Dialog
