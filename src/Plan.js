@@ -1305,7 +1305,7 @@ function Plan() {
 
                                     if (!v.ok) {
                                     setMsgEsperaN1co(
-                                        `Aún no puedes pagar con tarjeta. Debes esperar 42 horas desde la creación del plan.\n` +
+                                        `Aún no puedes realizar tu pago. Debes esperar 42 horas después del desembolso de tu préstamo.\n` +
                                         `Te faltan: ${v.faltanTxt}.\n` +
                                         `Disponible a partir de: ${v.habilitaEn.locale('es').format("D [de] MMMM [de] YYYY [a las] h:mm A")}`
                                     );
