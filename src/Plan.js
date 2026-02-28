@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
+import { RadioGroup, FormControlLabel, Radio } from "@mui/material";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Box, Container, Modal, Button, Chip, Dialog, DialogActions, DialogContent, TextField, Divider, Grid, List, ListItem, ListItemText, Paper, Typography, } from "@mui/material";
 import axios from "axios";
@@ -54,6 +55,11 @@ function Plan() {
 
     const pollingRef = useRef(null);
     const popupRef = useRef(null);
+    // --- Pago completo N1co ---
+    const [n1coModo, setN1coModo] = useState("cuota"); // "cuota" | "full"
+    const [n1coFullPagado, setN1coFullPagado] = useState(false); // bloquea pagos si existe FULL en DB
+    const [n1coCuotasPagadasDB, setN1coCuotasPagadasDB] = useState([]); // cache para no recalcular
+    const [n1coCuotasIncluidasFull, setN1coCuotasIncluidasFull] = useState([]); // solo para comentario/trace
     // --- N1co timers ---
     const [openModalEsperaN1co, setOpenModalEsperaN1co] = useState(false);
     const [msgEsperaN1co, setMsgEsperaN1co] = useState('');
@@ -574,29 +580,142 @@ function Plan() {
         set_fDOCComprobante(file);
     }
     
+            const calcMontoCuotaN1co = (p) => {
+        const v = (x) => Number(x || 0);
+        const monto =
+            (v(p?.charge) - v(p?.charge_covered)) +
+            (v(p?.administrator_fee) - v(p?.administrator_fee_covered)) +
+            (v(p?.amount) - v(p?.amount_covered)) +
+            (v(p?.late_fee) - v(p?.cinterest_covered));
+        return Number.isFinite(monto) ? monto : 0;
+        };
 
-        const handleOpenModalN1co = async () => {
+        const getPendientesCoreN1co = (lista) =>
+        (lista || []).filter((p) => {
+            const st = parseInt(p.status, 10);
+            return st !== 1 && st !== 6;
+        });
+
+        const getCuotaNFromPago = (p) => {
+        const sp = Number(p?.schedule_position);
+        return Number.isFinite(sp) ? sp + 1 : null; // 1..N
+        };
+
+        const buildPagoCompletoN1co = (listaPagosLocal, cuotasPagadasDBLocal) => {
+        const pendientes = getPendientesCoreN1co(listaPagosLocal);
+
+        const pendientesConCuota = pendientes
+            .map((p) => ({ p, cuotaN: getCuotaNFromPago(p) }))
+            .filter((x) => x.cuotaN);
+
+        // excluye las ya registradas (pagos por cuota)
+        const pendientesNoRegistradas = pendientesConCuota.filter(
+            (x) => !cuotasPagadasDBLocal.includes(x.cuotaN)
+        );
+
+        const total = pendientesNoRegistradas.reduce(
+            (acc, x) => acc + calcMontoCuotaN1co(x.p),
+            0
+        );
+
+        const cuotasIncluidas = pendientesNoRegistradas.map((x) => x.cuotaN);
+
+        // fecha más lejana (solo para registrar bonito)
+        let fechaFinal = null;
+        const moments = pendientesNoRegistradas
+            .map((x) => moment(x.p.schedule_date))
+            .filter((m) => m.isValid());
+
+        if (moments.length) {
+            fechaFinal = moment.max(moments).format("YYYY-MM-DD");
+        }
+
+        return { total, cuotasIncluidas, fechaFinal };
+        };
+
+        const prepararModalN1coSegunModo = (modo, cuotasPagadasDBLocal) => {
+        if (!Array.isArray(listaPagos) || listaPagos.length === 0) {
+            setErrorLinkN1co("No hay calendario de pagos disponible.");
+            return;
+        }
+
+        if (modo === "cuota") {
+            const siguientePago = listaPagos.find((p) => {
+            const st = parseInt(p.status, 10);
+            const pendienteCore = st !== 1 && st !== 6;
+
+            const cuotaN = getCuotaNFromPago(p);
+            const noRegistradaEnDB = cuotaN && !cuotasPagadasDBLocal.includes(cuotaN);
+
+            return pendienteCore && noRegistradaEnDB;
+            });
+
+            if (!siguientePago) {
+            setErrorLinkN1co("Ya ha pagado todas las cuotas.");
+            setN1coAmount("");
+            setN1coPagoLabel("");
+            return;
+            }
+
+            set_pagoseleccionado(siguientePago);
+
+            const idx = listaPagos.findIndex((p) => p.id === siguientePago.id);
+            setN1coPagoLabel(`Pago ${idx + 1} de ${listaPagos.length}`);
+
+            const monto = calcMontoCuotaN1co(siguientePago);
+            setN1coAmount(Number(monto).toFixed(2));
+
+            setN1coCuotasIncluidasFull([]);
+            setErrorLinkN1co("");
+            return;
+        }
+
+        // modo FULL
+        const { total, cuotasIncluidas } = buildPagoCompletoN1co(listaPagos, cuotasPagadasDBLocal);
+
+        if (!cuotasIncluidas.length || total <= 0) {
+            setErrorLinkN1co("Ya ha pagado todas las cuotas.");
+            setN1coAmount("");
+            setN1coPagoLabel("");
+            return;
+        }
+
+        setN1coCuotasIncluidasFull(cuotasIncluidas);
+
+        const dummy = getPendientesCoreN1co(listaPagos)[0] || listaPagos[0];
+        set_pagoseleccionado(dummy);
+
+        setN1coPagoLabel(`Pago completo (${cuotasIncluidas.length} cuotas)`);
+        setN1coAmount(Number(total).toFixed(2));
+
+        setErrorLinkN1co("");
+        };
+
+
+       const handleOpenModalN1co = async () => {
         let c = null;
 
-        // 1) Cargar perfil (clienteData)
+        // 1) Perfil
         try {
             c = await validarPerfilEnCore();
             setClienteData(c);
-        } catch (e) {         
+        } catch (e) {
             setErrorLinkN1co("No se pudo cargar el perfil del cliente.");
             setOpenModalN1co(true);
             return;
         }
 
-        // 2) Validar que haya listaPagos
+        // 2) Validar listaPagos
         if (!Array.isArray(listaPagos) || listaPagos.length === 0) {
             setErrorLinkN1co("No hay calendario de pagos disponible.");
             setOpenModalN1co(true);
             return;
         }
 
-        // 3) Consultar a la DB qué cuotas de N1co ya están registradas
+        // 3) DB: cuotas pagadas + FULL
         let cuotasPagadasDB = [];
+        let fullPaid = false;
+
         try {
             const body = new URLSearchParams({
             idCliente: String(c?.customer_id ?? ""),
@@ -616,28 +735,18 @@ function Plan() {
             if (!res.ok) throw new Error(data?.mensaje || "Error consultando cuotas en DB");
 
             cuotasPagadasDB = Array.isArray(data?.cuotasPagadas) ? data.cuotasPagadas : [];
+            fullPaid = data?.fullPaid === true;
+
+            setN1coCuotasPagadasDB(cuotasPagadasDB);
+            setN1coFullPagado(fullPaid);
         } catch (err) {
             setErrorLinkN1co(err?.message || "Error consultando cuotas en DB.");
             setOpenModalN1co(true);
             return;
         }
 
-        // 4) Buscar el primer pago pendiente del CORE que NO esté registrado en DB como Pago_Nico
-        //    cuotaN = schedule_position + 1  (1..4)
-        const siguientePago = listaPagos.find((p) => {
-            const st = parseInt(p.status, 10);
-            const pendienteCore = st !== 1 && st !== 6;
-
-            const sp = Number(p.schedule_position);
-            const cuotaN = Number.isFinite(sp) ? sp + 1 : null;
-
-            const noRegistradaEnDB = cuotaN && !cuotasPagadasDB.includes(cuotaN);
-
-            return pendienteCore && noRegistradaEnDB;
-        });
-
-        // 5) Si no hay pagos disponibles (todo pagado o ya registrado)
-        if (!siguientePago) {
+        // 4) Si FULL existe, bloquear
+        if (fullPaid) {
             setN1coLink("");
             setN1coAmount("");
             setN1coPagoLabel("");
@@ -651,29 +760,16 @@ function Plan() {
             return;
         }
 
-        // 6) Seleccionar esa cuota y armar UI
-        set_pagoseleccionado(siguientePago);
-
-        const idx = listaPagos.findIndex((p) => p.id === siguientePago.id);
-        const pagoLabel = `Pago ${idx + 1} de ${listaPagos.length}`;
-        setN1coPagoLabel(pagoLabel);
-
-        const monto =
-            (Number(siguientePago.charge) - Number(siguientePago.charge_covered)) +
-            (Number(siguientePago.administrator_fee) - Number(siguientePago.administrator_fee_covered)) +
-            (Number(siguientePago.amount) - Number(siguientePago.amount_covered)) +
-            (Number(siguientePago.late_fee) - Number(siguientePago.cinterest_covered));
-
-        const montoSeguro = isNaN(monto) ? 0 : monto;
-
-        setN1coAmount(montoSeguro.toFixed(2));
+        // 5) Reset estado modal
         setN1coLink("");
-        setErrorLinkN1co("");
-
         setN1coOrderCode("");
         setN1coOrderStatus("");
         setN1coPaso("idle");
         setN1coInsertado(false);
+
+        // 6) Por defecto: cuota
+        setN1coModo("cuota");
+        prepararModalN1coSegunModo("cuota", cuotasPagadasDB);
 
         setOpenModalN1co(true);
         };
@@ -967,11 +1063,11 @@ function Plan() {
         }
         };
 
-    const enviarPostNicoPago = async (
+            const enviarPostNicoPago = async (
         { orderCode, orderStatus, paymentLinkUrl },
-        opts = { logRepeats: 1, logEveryMs: 0 } // logRepeats > 1 para repetir logs
+        opts = { logRepeats: 1, logEveryMs: 0 }
         ) => {
-        // evita doble insert 
+        // evita doble insert en la sesión
         if (n1coInsertado) return;
 
         if (!clienteData?.customer_id) {
@@ -983,71 +1079,13 @@ function Plan() {
             clienteData?.midname,
             clienteData?.midname2,
             clienteData?.surname,
-            ]
+        ]
             .filter(Boolean)
             .join(" ");
 
-
-        const sp = Number(pagoseleccionado?.schedule_position);
-        const identificadorPagoCuota = Number.isFinite(sp) ? sp + 1 : null;
-
-        // valida rango 1..4 
-        if (!identificadorPagoCuota || identificadorPagoCuota < 1 || identificadorPagoCuota > 4) {
-            throw new Error(
-            `identificadorPago inválido: ${identificadorPagoCuota} (debe ser 1 a 4). schedule_position=${pagoseleccionado?.schedule_position}`
-            );
-        }
-
-        const cuotaCalc =
-            (Number(pagoseleccionado?.charge) - Number(pagoseleccionado?.charge_covered)) +
-            (Number(pagoseleccionado?.administrator_fee) - Number(pagoseleccionado?.administrator_fee_covered)) +
-            (Number(pagoseleccionado?.amount) - Number(pagoseleccionado?.amount_covered)) +
-            (Number(pagoseleccionado?.late_fee) - Number(pagoseleccionado?.cinterest_covered));
-
-        const cuota = isNaN(cuotaCalc) ? 0 : Number(cuotaCalc);
-
-        const fechaCuota = pagoseleccionado?.schedule_date
-            ? moment(pagoseleccionado.schedule_date).format("YYYY-MM-DD")
-            : null;
-
-        const horaRegistro = new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[1]
-            .split(".")[0];
-
         const orderStatusNorm = String(orderStatus || "").trim().toUpperCase();
 
-        const payload = {
-            orderStatus: orderStatusNorm,
-            codigoOrden: orderCode,
-            paymentLinkUrl,
-
-            identificadorPrestamo: pagoseleccionado?.container_id ?? null,
-            identificadorPago: identificadorPagoCuota, // CUOTA 1..4
-
-            idCliente: clienteData?.customer_id ?? null,
-            identidadCliente: clienteData?.person_code ?? null,
-            nombreCliente: nombreClienteConcat,
-            correoElectronico: clienteData?.email ?? null,
-            celular: clienteData?.mob_phone ?? null,
-
-            fechaPago: fechaHoyUTC6 ?? null,
-            fechaCuota,
-            horaRegistro,
-
-            cuota: Number(cuota.toFixed(2)),
-            montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
-        };
-
-        // body x-www-form-urlencoded (para que $_POST funcione en PHP)
-        const bodyStr = new URLSearchParams(
-            Object.entries(payload).reduce((acc, [k, v]) => {
-            acc[k] = v === null || v === undefined ? "" : String(v);
-            return acc;
-            }, {})
-        ).toString();
-
-        // logger repetible 
+        // logger repetible
         const logRepeated = async (label, obj) => {
             const repeats = Math.max(1, Number(opts?.logRepeats || 1));
             const gap = Math.max(0, Number(opts?.logEveryMs || 0));
@@ -1060,13 +1098,181 @@ function Plan() {
             }
         };
 
+        // -----------------------------------------
+        // MODO FULL: PagosAdelantados -> postNicoPago(FULL)
+        // -----------------------------------------
+        if (n1coModo === "full") {
+            const total = Number(n1coAmount || 0);
+            if (!Number.isFinite(total) || total <= 0) {
+            throw new Error("Monto total inválido para pago completo.");
+            }
+
+            // fecha “final” de referencia
+            const pendientesCore = getPendientesCoreN1co(listaPagos);
+            const moments = pendientesCore.map(p => moment(p.schedule_date)).filter(m => m.isValid());
+            const fechaFinal = moments.length ? moment.max(moments).format("YYYY-MM-DD") : (fechaHoyUTC6 ?? "");
+
+            // 1) insertar PagosAdelantados (JSON + Bearer)
+            const payloadA = {
+            idCliente: String(clienteData?.customer_id ?? ""),
+            identidadCliente: String(clienteData?.person_code ?? ""),
+            nombreCliente: nombreClienteConcat,
+            correoElectronico: String(clienteData?.email ?? ""),
+            celular: String(clienteData?.mob_phone ?? ""),
+
+            identificadorPrestamo: String(prestamoSeleccionado?.container_id ?? pagoseleccionado?.container_id ?? ""),
+            fechaPago: String(fechaHoyUTC6 ?? ""),
+            montoPrestamo: Number(prestamoSeleccionado?.debt || 0),
+            montoPago: Number(total.toFixed(2)),
+
+            validado: "aprobado",
+            comentario: `Pago completo N1co. Cuotas: ${(n1coCuotasIncluidasFull || []).join(",")}`,
+            usuarioValidador_id: 3,
+            };
+
+            await logRepeated("payload pagosAdelantados", payloadA);
+
+            const resA = await fetch(
+            "https://app.aranih.com/api/chatbot/pagosBac/pagosAdelantados.php",
+            {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                Authorization:
+                    "Bearer 70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+                },
+                body: JSON.stringify(payloadA),
+            }
+            );
+
+            const dataA = await resA.json().catch(() => ({}));
+            if (!resA.ok) throw new Error(dataA?.error || "Error registrando pago adelantado.");
+
+            // 2) insertar en Pago usando postNicoPago.php pero con identificadorPago="FULL"
+            const horaRegistro = new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[1]
+            .split(".")[0];
+
+            const payloadB = {
+            orderStatus: orderStatusNorm,
+            codigoOrden: orderCode,
+            paymentLinkUrl,
+
+            identificadorPrestamo: String(prestamoSeleccionado?.container_id ?? pagoseleccionado?.container_id ?? ""),
+            identificadorPago: "FULL",
+
+            idCliente: String(clienteData?.customer_id ?? ""),
+            identidadCliente: String(clienteData?.person_code ?? ""),
+            nombreCliente: nombreClienteConcat,
+            correoElectronico: String(clienteData?.email ?? ""),
+            celular: String(clienteData?.mob_phone ?? ""),
+
+            fechaPago: String(fechaHoyUTC6 ?? ""),
+            fechaCuota: String(fechaFinal ?? ""),
+            horaRegistro,
+
+            cuota: Number(total.toFixed(2)),
+            montoPago: Number(total.toFixed(2)),
+            };
+
+            await logRepeated("payload postNicoPago FULL", payloadB);
+
+            const bodyStrB = new URLSearchParams(payloadB).toString();
+
+            const resB = await fetch(
+            "https://app.aranih.com/api/chatbot/pagosBac/postNicoPago.php",
+            {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                Authorization:
+                    "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+                },
+                body: bodyStrB,
+            }
+            );
+
+            const dataB = await resB.json().catch(() => ({}));
+            console.log("[postNicoPago FULL] HTTP:", resB.status, resB.statusText);
+            await logRepeated("resp FULL", dataB);
+
+            if (resB.status === 201) {
+            setN1coInsertado(true);
+            setN1coFullPagado(true);
+            return dataB;
+            }
+
+            if (resB.status === 200) {
+            // aquí idealmente tu backend devuelve "Pago completo ya registrado"
+            setN1coInsertado(true);
+            setN1coFullPagado(true);
+            return dataB;
+            }
+
+            throw new Error(dataB?.mensaje || "Error registrando el pago FULL en Pago.");
+        }
+
+        // -----------------------------------------
+        // MODO CUOTA (tu lógica actual)
+        // -----------------------------------------
+        const sp = Number(pagoseleccionado?.schedule_position);
+        const identificadorPagoCuota = Number.isFinite(sp) ? sp + 1 : null;
+
+        if (!identificadorPagoCuota || identificadorPagoCuota < 1 || identificadorPagoCuota > 4) {
+            throw new Error(
+            `identificadorPago inválido: ${identificadorPagoCuota} (debe ser 1 a 4). schedule_position=${pagoseleccionado?.schedule_position}`
+            );
+        }
+
+        const cuota = calcMontoCuotaN1co(pagoseleccionado);
+
+        const fechaCuota = pagoseleccionado?.schedule_date
+            ? moment(pagoseleccionado.schedule_date).format("YYYY-MM-DD")
+            : null;
+
+        const horaRegistro = new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[1]
+            .split(".")[0];
+
+        const payload = {
+            orderStatus: orderStatusNorm,
+            codigoOrden: orderCode,
+            paymentLinkUrl,
+
+            identificadorPrestamo: pagoseleccionado?.container_id ?? null,
+            identificadorPago: identificadorPagoCuota,
+
+            idCliente: clienteData?.customer_id ?? null,
+            identidadCliente: clienteData?.person_code ?? null,
+            nombreCliente: nombreClienteConcat,
+            correoElectronico: clienteData?.email ?? null,
+            celular: clienteData?.mob_phone ?? null,
+
+            fechaPago: fechaHoyUTC6 ?? null,
+            fechaCuota,
+            horaRegistro,
+
+            cuota: Number(Number(cuota || 0).toFixed(2)),
+            montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
+        };
+
+        const bodyStr = new URLSearchParams(
+            Object.entries(payload).reduce((acc, [k, v]) => {
+            acc[k] = v === null || v === undefined ? "" : String(v);
+            return acc;
+            }, {})
+        ).toString();
+
         await logRepeated("payload", payload);
 
         const res = await fetch("https://app.aranih.com/api/chatbot/pagosBac/postNicoPago.php", {
             method: "POST",
             headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+            Authorization:
+                "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
             },
             body: bodyStr,
         });
@@ -1078,16 +1284,15 @@ function Plan() {
             data = {};
         }
 
+        // Códigos: // 200 → { "mensaje": "Pago N1co ya registrado" } 
+        // 201 → { "mensaje": "Pago N1co registrado exitosamente" } 
+        // 400 → { "mensaje": "Faltan datos obligatorios" } 
+        // 401 → { "mensaje": "Token no válido" }
+        // 409 → { "mensaje": "Pago N1co aún no finalizado" } 
+        // 500 → { "mensaje": "Error al registrar el pago N1co" }
+
         console.log("[postNicoPago] HTTP:", res.status, res.statusText);
         await logRepeated("resp", data);
-
-        // Códigos:
-        // 200 → { "mensaje": "Pago N1co ya registrado" }
-        // 201 → { "mensaje": "Pago N1co registrado exitosamente" }
-        // 400 → { "mensaje": "Faltan datos obligatorios" }
-        // 401 → { "mensaje": "Token no válido" }
-        // 409 → { "mensaje": "Pago N1co aún no finalizado" }
-        // 500 → { "mensaje": "Error al registrar el pago N1co" }
 
         if (res.status === 201) {
             setN1coInsertado(true);
@@ -1095,28 +1300,17 @@ function Plan() {
         }
 
         if (res.status === 200) {
-            // solo se trata como ya registrado
             if (data?.mensaje === "Pago N1co ya registrado") {
             setN1coInsertado(true);
             return data;
             }
-            // si por alguna razón el backend manda 200 con otro mensaje, se trata como error lógico
             throw new Error(data?.mensaje || "Respuesta 200 inesperada");
         }
 
-        if (res.status === 409) {
-            throw new Error(data?.mensaje || "Pago N1co aún no finalizado");
-        }
+        if (res.status === 409) throw new Error(data?.mensaje || "Pago N1co aún no finalizado");
+        if (res.status === 401) throw new Error(data?.mensaje || "Token no válido");
+        if (res.status === 400) throw new Error(data?.mensaje || "Faltan datos obligatorios");
 
-        if (res.status === 401) {
-            throw new Error(data?.mensaje || "Token no válido");
-        }
-
-        if (res.status === 400) {
-            throw new Error(data?.mensaje || "Faltan datos obligatorios");
-        }
-
-        // 500 u otros
         throw new Error(data?.mensaje || "Error al registrar el pago N1co");
         };
 
@@ -1307,7 +1501,9 @@ function Plan() {
                                     setMsgEsperaN1co(
                                         `Aún no puedes realizar tu pago. Debes esperar 42 horas después del desembolso de tu préstamo.\n` +
                                         `Te faltan: ${v.faltanTxt}.\n` +
-                                        `Disponible a partir de: ${v.habilitaEn.locale('es').format("D [de] MMMM [de] YYYY [a las] h:mm A")}`
+                                        `Disponible a partir de: ${v.habilitaEn
+                                        .locale("es")
+                                        .format("D [de] MMMM [de] YYYY [a las] h:mm A")}`
                                     );
                                     setOpenModalEsperaN1co(true);
                                     return;
@@ -1317,22 +1513,20 @@ function Plan() {
                                 }}
                                 variant="contained"
                                 sx={{
-                                    width: { xs: '220px', sm: '260px' },
-                                    backgroundColor: 'black',
-                                    color: 'white',
-                                    fontSize: { xs: '0.75rem', sm: '1rem' }, // más pequeño en mobile
-                                    padding: { xs: '4px 10px', sm: '8px 16px' }, // menos padding en mobile
-                                    minWidth: { xs: '120px', sm: '180px' }, // ancho mínimo menor en mobile
-                                    '&:hover': {
-                                        backgroundColor: '#808080',
-                                        borderColor: '#808080',
-                                    },
+                                    width: { xs: "220px", sm: "260px" },
+                                    backgroundColor: "black",
+                                    color: "white",
+                                    fontSize: { xs: "0.75rem", sm: "1rem" },
+                                    padding: { xs: "4px 10px", sm: "8px 16px" },
+                                    minWidth: { xs: "120px", sm: "180px" },
+                                    "&:hover": { backgroundColor: "#808080", borderColor: "#808080" },
                                 }}
-                                
-                                disabled={!estaEnRango()}
+                                disabled={!estaEnRango() || n1coFullPagado}
                                 >
-                                    Pagar con Tarjeta 
+                                {n1coFullPagado ? "Ya hizo todos sus pagos" : "Pagar con Tarjeta"}
                                 </Button>
+
+                                
 
                                 {!estaEnRango() && (
                                     <strong style={{ marginTop: '10px', color: 'black' }}>
@@ -1427,6 +1621,39 @@ function Plan() {
 
                 <DialogContent>
                 <Typography variant="h5">Pago con N1co</Typography>
+
+                <RadioGroup
+                    row
+                    value={n1coModo}
+                    onChange={(e) => {
+                        const nuevoModo = e.target.value;
+                        setN1coModo(nuevoModo);
+
+                        // reset link/estado cuando cambias opción
+                        setN1coLink("");
+                        setN1coOrderCode("");
+                        setN1coOrderStatus("");
+                        setN1coPaso("idle");
+                        setN1coInsertado(false);
+                        limpiarTimersN1co();
+
+                        // recalcula monto/label según modo
+                        prepararModalN1coSegunModo(nuevoModo, n1coCuotasPagadasDB);
+                    }}
+                    >
+                    <FormControlLabel
+                        disabled={n1coPaso === "esperando"}
+                        value="cuota"
+                        control={<Radio />}
+                        label="Pago por cuota"
+                    />
+                    <FormControlLabel
+                        disabled={n1coPaso === "esperando"}
+                        value="full"
+                        control={<Radio />}
+                        label="Pago completo"
+                    />
+                    </RadioGroup>
 
                 {/* Muestra qué pago se está realizando */}
                 <Typography variant="subtitle1" sx={{ fontWeight: "bold", mt: 1 }}>
