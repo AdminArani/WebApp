@@ -60,6 +60,8 @@ function Plan() {
     const [n1coFullPagado, setN1coFullPagado] = useState(false); // bloquea pagos si existe FULL en DB
     const [n1coCuotasPagadasDB, setN1coCuotasPagadasDB] = useState([]); // cache para no recalcular
     const [n1coCuotasIncluidasFull, setN1coCuotasIncluidasFull] = useState([]); // solo para comentario/trace
+    const [n1coBloqueaPagoCompletoPorCuota, setN1coBloqueaPagoCompletoPorCuota] = useState(false);
+    const [n1coMsgFull, setN1coMsgFull] = useState("");
     // --- N1co timers ---
     const [openModalEsperaN1co, setOpenModalEsperaN1co] = useState(false);
     const [msgEsperaN1co, setMsgEsperaN1co] = useState('');
@@ -601,29 +603,18 @@ function Plan() {
         return Number.isFinite(sp) ? sp + 1 : null; // 1..N
         };
 
-        const buildPagoCompletoN1co = (listaPagosLocal, cuotasPagadasDBLocal) => {
+        const buildPagoCompletoN1co = (listaPagosLocal) => {
         const pendientes = getPendientesCoreN1co(listaPagosLocal);
 
-        const pendientesConCuota = pendientes
-            .map((p) => ({ p, cuotaN: getCuotaNFromPago(p) }))
-            .filter((x) => x.cuotaN);
+        const total = pendientes.reduce((acc, p) => acc + calcMontoCuotaN1co(p), 0);
 
-        // excluye las ya registradas (pagos por cuota)
-        const pendientesNoRegistradas = pendientesConCuota.filter(
-            (x) => !cuotasPagadasDBLocal.includes(x.cuotaN)
-        );
+        const cuotasIncluidas = pendientes
+            .map((p) => getCuotaNFromPago(p))
+            .filter(Boolean);
 
-        const total = pendientesNoRegistradas.reduce(
-            (acc, x) => acc + calcMontoCuotaN1co(x.p),
-            0
-        );
-
-        const cuotasIncluidas = pendientesNoRegistradas.map((x) => x.cuotaN);
-
-        // fecha más lejana (solo para registrar bonito)
         let fechaFinal = null;
-        const moments = pendientesNoRegistradas
-            .map((x) => moment(x.p.schedule_date))
+        const moments = pendientes
+            .map((p) => moment(p.schedule_date))
             .filter((m) => m.isValid());
 
         if (moments.length) {
@@ -634,62 +625,77 @@ function Plan() {
         };
 
         const prepararModalN1coSegunModo = (modo, cuotasPagadasDBLocal) => {
-        if (!Array.isArray(listaPagos) || listaPagos.length === 0) {
-            setErrorLinkN1co("No hay calendario de pagos disponible.");
-            return;
-        }
-
-        if (modo === "cuota") {
-            const siguientePago = listaPagos.find((p) => {
-            const st = parseInt(p.status, 10);
-            const pendienteCore = st !== 1 && st !== 6;
-
-            const cuotaN = getCuotaNFromPago(p);
-            const noRegistradaEnDB = cuotaN && !cuotasPagadasDBLocal.includes(cuotaN);
-
-            return pendienteCore && noRegistradaEnDB;
-            });
-
-            if (!siguientePago) {
-            setErrorLinkN1co("Ya ha pagado todas las cuotas.");
-            setN1coAmount("");
-            setN1coPagoLabel("");
-            return;
+            if (!Array.isArray(listaPagos) || listaPagos.length === 0) {
+                setErrorLinkN1co("No hay calendario de pagos disponible.");
+                return;
             }
 
-            set_pagoseleccionado(siguientePago);
+            const yaPagoCuota = Array.isArray(cuotasPagadasDBLocal) && cuotasPagadasDBLocal.length > 0;
+            setN1coBloqueaPagoCompletoPorCuota(yaPagoCuota);
 
-            const idx = listaPagos.findIndex((p) => p.id === siguientePago.id);
-            setN1coPagoLabel(`Pago ${idx + 1} de ${listaPagos.length}`);
+            setN1coMsgFull(
+                yaPagoCuota
+                ? "⚠️ Importante: Si realizas un pago por cuota, ya no podrás realizar un pago completo luego."
+                : "ℹ️ Si eliges pago completo, se cobrará el total pendiente del préstamo."
+            );
 
-            const monto = calcMontoCuotaN1co(siguientePago);
-            setN1coAmount(Number(monto).toFixed(2));
+            if (modo === "cuota") {
+                const siguientePago = listaPagos.find((p) => {
+                const st = parseInt(p.status, 10);
+                const pendienteCore = st !== 1 && st !== 6;
 
-            setN1coCuotasIncluidasFull([]);
+                const cuotaN = getCuotaNFromPago(p);
+                const noRegistradaEnDB = cuotaN && !cuotasPagadasDBLocal.includes(cuotaN);
+
+                return pendienteCore && noRegistradaEnDB;
+                });
+
+                if (!siguientePago) {
+                setErrorLinkN1co("Ya ha pagado todas las cuotas.");
+                setN1coAmount("");
+                setN1coPagoLabel("");
+                return;
+                }
+
+                set_pagoseleccionado(siguientePago);
+
+                const idx = listaPagos.findIndex((p) => p.id === siguientePago.id);
+                setN1coPagoLabel(`Pago ${idx + 1} de ${listaPagos.length}`);
+
+                const monto = calcMontoCuotaN1co(siguientePago);
+                setN1coAmount(Number(monto).toFixed(2));
+
+                setN1coCuotasIncluidasFull([]);
+                setErrorLinkN1co("");
+                return;
+            }
+
+            // modo FULL
+            if (yaPagoCuota) {
+                setErrorLinkN1co("No puedes hacer pago completo porque ya registraste un pago por cuota.");
+                setN1coAmount("");
+                setN1coPagoLabel("Pago completo");
+                return;
+            }
+
+            const { total, cuotasIncluidas } = buildPagoCompletoN1co(listaPagos);
+
+            if (!cuotasIncluidas.length || total <= 0) {
+                setErrorLinkN1co("Ya ha pagado todas las cuotas.");
+                setN1coAmount("");
+                setN1coPagoLabel("");
+                return;
+            }
+
+            setN1coCuotasIncluidasFull(cuotasIncluidas);
+
+            const dummy = getPendientesCoreN1co(listaPagos)[0] || listaPagos[0];
+            set_pagoseleccionado(dummy);
+
+            setN1coPagoLabel(`Pago completo (${cuotasIncluidas.length} cuotas)`);
+            setN1coAmount(Number(total).toFixed(2));
             setErrorLinkN1co("");
-            return;
-        }
-
-        // modo FULL
-        const { total, cuotasIncluidas } = buildPagoCompletoN1co(listaPagos, cuotasPagadasDBLocal);
-
-        if (!cuotasIncluidas.length || total <= 0) {
-            setErrorLinkN1co("Ya ha pagado todas las cuotas.");
-            setN1coAmount("");
-            setN1coPagoLabel("");
-            return;
-        }
-
-        setN1coCuotasIncluidasFull(cuotasIncluidas);
-
-        const dummy = getPendientesCoreN1co(listaPagos)[0] || listaPagos[0];
-        set_pagoseleccionado(dummy);
-
-        setN1coPagoLabel(`Pago completo (${cuotasIncluidas.length} cuotas)`);
-        setN1coAmount(Number(total).toFixed(2));
-
-        setErrorLinkN1co("");
-        };
+            };
 
 
        const handleOpenModalN1co = async () => {
@@ -712,62 +718,42 @@ function Plan() {
             return;
         }
 
-        // 3) DB: cuotas pagadas + FULL
         let cuotasPagadasDB = [];
-        let fullPaid = false;
-
         try {
-            const body = new URLSearchParams({
+        const body = new URLSearchParams({
             idCliente: String(c?.customer_id ?? ""),
             identificadorPrestamo: String(prestamoSeleccionado?.container_id ?? ""),
-            }).toString();
+        }).toString();
 
-            const res = await fetch("https://app.arani.hn/api/chatbot/pagosBac/getNicoCuotasPagadas.php", {
+        const res = await fetch("https://app.arani.hn/api/chatbot/pagosBac/getNicoCuotasPagadas.php", {
             method: "POST",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-                "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "Authorization": "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
             },
             body,
-            });
+        });
 
-            const data = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(data?.mensaje || "Error consultando cuotas en DB");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.mensaje || "Error consultando cuotas en DB");
 
-            cuotasPagadasDB = Array.isArray(data?.cuotasPagadas) ? data.cuotasPagadas : [];
-            fullPaid = data?.fullPaid === true;
-
-            setN1coCuotasPagadasDB(cuotasPagadasDB);
-            setN1coFullPagado(fullPaid);
+        cuotasPagadasDB = Array.isArray(data?.cuotasPagadas) ? data.cuotasPagadas : [];
+        setN1coCuotasPagadasDB(cuotasPagadasDB);
         } catch (err) {
-            setErrorLinkN1co(err?.message || "Error consultando cuotas en DB.");
-            setOpenModalN1co(true);
-            return;
+        setErrorLinkN1co(err?.message || "Error consultando cuotas en DB.");
+        setOpenModalN1co(true);
+        return;
         }
 
-        // 4) Si FULL existe, bloquear
-        if (fullPaid) {
-            setN1coLink("");
-            setN1coAmount("");
-            setN1coPagoLabel("");
-            setN1coOrderCode("");
-            setN1coOrderStatus("");
-            setN1coPaso("idle");
-            setN1coInsertado(false);
-
-            setErrorLinkN1co("Ya ha pagado todas las cuotas.");
-            setOpenModalN1co(true);
-            return;
-        }
-
-        // 5) Reset estado modal
+        // reset modal
         setN1coLink("");
         setN1coOrderCode("");
         setN1coOrderStatus("");
         setN1coPaso("idle");
         setN1coInsertado(false);
+        limpiarTimersN1co();
 
-        // 6) Por defecto: cuota
+        // default cuota
         setN1coModo("cuota");
         prepararModalN1coSegunModo("cuota", cuotasPagadasDB);
 
@@ -940,17 +926,66 @@ function Plan() {
         const generarLinkN1co = async () => {
         try {
             setCargandoLinkN1co(true);
-            setErrorLinkN1co('');
-            setN1coLink('');
-            setN1coOrderCode('');
-            setN1coOrderStatus('');
-            setN1coPaso('idle');
+            setErrorLinkN1co("");
+            setN1coLink("");
+            setN1coOrderCode("");
+            setN1coOrderStatus("");
+            setN1coPaso("idle");
 
+            if (n1coModo === "full") {
+            const yaPagoCuota =
+                Array.isArray(n1coCuotasPagadasDB) && n1coCuotasPagadasDB.length > 0;
+
+            if (yaPagoCuota) {
+                setN1coPaso("error");
+                setErrorLinkN1co(
+                "No puedes hacer pago completo porque ya registraste un pago por cuota."
+                );
+                return;
+            }
+
+            // Validar contra DB: mismo prestamo + mismo montoTotal (montoPago)
+            const bodyCheck = new URLSearchParams({
+                idCliente: String(clienteData?.customer_id ?? ""),
+                identificadorPrestamo: String(prestamoSeleccionado?.container_id ?? ""),
+                montoTotal: String(Number(n1coAmount || 0).toFixed(2)),
+            }).toString();
+
+            const resCheck = await fetch(
+                "https://app.arani.hn/api/chatbot/pagosBac/getNicoCuotasPagadas.php",
+                {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                    Authorization:
+                    "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+                },
+                body: bodyCheck,
+                }
+            );
+
+            const dataCheck = await resCheck.json().catch(() => ({}));
+            if (!resCheck.ok) {
+                throw new Error(dataCheck?.mensaje || "Error validando pago completo.");
+            }
+
+            if (dataCheck?.existePagoCompleto === true) {
+                setN1coPaso("error");
+                setErrorLinkN1co(
+                "✅ Ya existe un pago completo registrado con este mismo monto para este préstamo."
+                );
+                return;
+            }
+            }
+
+            // -------------------------------------------------------
+            // Generar link
+            // -------------------------------------------------------
             const body = {
             token: "V3cFeaOiRmP4t2d8wrZMYxch5t4sdEIJeg6JXUeOFpiJ9ZIlcEM0f3YwlUXh0Sqs",
             nombre: "Pago ARANI",
             monto: Number(n1coAmount),
-            descripcion: n1coPagoLabel
+            descripcion: n1coPagoLabel,
             };
 
             const res = await fetch("https://app.aranih.com/api/nico/GetUrl.php", {
@@ -973,7 +1008,7 @@ function Plan() {
             // Cambia modal a esperando
             const orderCode = extraerOrderCode(link);
             setN1coOrderCode(orderCode);
-            setN1coPaso('esperando');
+            setN1coPaso("esperando");
             iniciarTimersN1co();
 
             // 1er check inmediato
@@ -989,8 +1024,8 @@ function Plan() {
                 try {
                 await enviarPostNicoPago(
                     { orderCode, orderStatus: st1, paymentLinkUrl: link },
-                    { logRepeats: 5, logEveryMs: 300 } // 5 veces, cada 300ms
-                    );
+                    { logRepeats: 5, logEveryMs: 300 }
+                );
 
                 setN1coPaso("pagado");
                 limpiarTimersN1co();
@@ -1002,7 +1037,6 @@ function Plan() {
                 return;
             }
 
-            // Si cambió pero no fue exitoso
             setN1coPaso("error");
             setErrorLinkN1co(`El pago no se completó. Estado: ${st1}`);
             return;
@@ -1015,304 +1049,320 @@ function Plan() {
             }
 
             pollingRef.current = setInterval(async () => {
+            try {
+                const r = await consultarStatusN1co(orderCode);
+                const st = String(r?.orderStatus || "").trim().toUpperCase();
+                setN1coOrderStatus(st);
+
+                if (!st || st === "PENDING") return;
+
+                clearInterval(pollingRef.current);
+                pollingRef.current = null;
+
+                const esFinalOK = st === "FINALIZED" || st === "FINISHED";
+
+                if (esFinalOK) {
                 try {
-                    const r = await consultarStatusN1co(orderCode);
-                    const st = String(r?.orderStatus || "").trim().toUpperCase();
-                    setN1coOrderStatus(st);
+                    await enviarPostNicoPago({
+                    orderCode,
+                    orderStatus: st,
+                    paymentLinkUrl: link,
+                    });
 
-                    if (!st || st === "PENDING") return;
-
-                    clearInterval(pollingRef.current);
-                    pollingRef.current = null;
-
-                    const esFinalOK = st === "FINALIZED" || st === "FINISHED";
-
-                    if (esFinalOK) {
-                    try {
-                        await enviarPostNicoPago({
-                        orderCode,
-                        orderStatus: st,
-                        paymentLinkUrl: link,
-                        });
-
-                        setN1coPaso("pagado");
-                        setTimeout(() => cerrarModalN1co(), 2500);
-                    } catch (e) {
-                        setN1coPaso("error");
-                        setErrorLinkN1co(e?.message || "Error insertando pago N1co");
-                    }
-                    return;
-                    }
-
-                    setN1coPaso("error");
-                    setErrorLinkN1co(`El pago no se completó. Estado: ${st}`);
+                    setN1coPaso("pagado");
+                    setTimeout(() => cerrarModalN1co(), 2500);
                 } catch (e) {
                     setN1coPaso("error");
-                    setErrorLinkN1co(e?.message || "Error consultando status");
+                    setErrorLinkN1co(e?.message || "Error insertando pago N1co");
                 }
-                }, 8000);
+                return;
+                }
 
-
-
+                setN1coPaso("error");
+                setErrorLinkN1co(`El pago no se completó. Estado: ${st}`);
+            } catch (e) {
+                setN1coPaso("error");
+                setErrorLinkN1co(e?.message || "Error consultando status");
+            }
+            }, 8000);
         } catch (err) {
             console.error(err);
-            setN1coPaso('error');
+            setN1coPaso("error");
             setErrorLinkN1co(err.message || "No se pudo generar el link de pago N1co.");
         } finally {
             setCargandoLinkN1co(false);
         }
         };
 
-            const enviarPostNicoPago = async (
-        { orderCode, orderStatus, paymentLinkUrl },
-        opts = { logRepeats: 1, logEveryMs: 0 }
-        ) => {
-        // evita doble insert en la sesión
-        if (n1coInsertado) return;
+        const enviarPostNicoPago = async (
+            { orderCode, orderStatus, paymentLinkUrl },
+            opts = { logRepeats: 1, logEveryMs: 0 }
+            ) => {
+            // evita doble insert en la sesión
+            if (n1coInsertado) return;
 
-        if (!clienteData?.customer_id) {
-            throw new Error("No hay clienteData (perfil) cargado.");
-        }
-
-        const nombreClienteConcat = [
-            clienteData?.realname,
-            clienteData?.midname,
-            clienteData?.midname2,
-            clienteData?.surname,
-        ]
-            .filter(Boolean)
-            .join(" ");
-
-        const orderStatusNorm = String(orderStatus || "").trim().toUpperCase();
-
-        // logger repetible
-        const logRepeated = async (label, obj) => {
-            const repeats = Math.max(1, Number(opts?.logRepeats || 1));
-            const gap = Math.max(0, Number(opts?.logEveryMs || 0));
-
-            for (let i = 1; i <= repeats; i++) {
-            console.log(`[postNicoPago] ${label} (${i}/${repeats})`, obj);
-            if (gap > 0 && i < repeats) {
-                await new Promise((r) => setTimeout(r, gap));
-            }
-            }
-        };
-
-        // -----------------------------------------
-        // MODO FULL: PagosAdelantados -> postNicoPago(FULL)
-        // -----------------------------------------
-        if (n1coModo === "full") {
-            const total = Number(n1coAmount || 0);
-            if (!Number.isFinite(total) || total <= 0) {
-            throw new Error("Monto total inválido para pago completo.");
+            if (!clienteData?.customer_id) {
+                throw new Error("No hay clienteData (perfil) cargado.");
             }
 
-            // fecha “final” de referencia
-            const pendientesCore = getPendientesCoreN1co(listaPagos);
-            const moments = pendientesCore.map(p => moment(p.schedule_date)).filter(m => m.isValid());
-            const fechaFinal = moments.length ? moment.max(moments).format("YYYY-MM-DD") : (fechaHoyUTC6 ?? "");
+            const nombreClienteConcat = [
+                clienteData?.realname,
+                clienteData?.midname,
+                clienteData?.midname2,
+                clienteData?.surname,
+            ]
+                .filter(Boolean)
+                .join(" ");
 
-            // 1) insertar PagosAdelantados (JSON + Bearer)
-            const payloadA = {
-            idCliente: String(clienteData?.customer_id ?? ""),
-            identidadCliente: String(clienteData?.person_code ?? ""),
-            nombreCliente: nombreClienteConcat,
-            correoElectronico: String(clienteData?.email ?? ""),
-            celular: String(clienteData?.mob_phone ?? ""),
+            const orderStatusNorm = String(orderStatus || "").trim().toUpperCase();
 
-            identificadorPrestamo: String(prestamoSeleccionado?.container_id ?? pagoseleccionado?.container_id ?? ""),
-            fechaPago: String(fechaHoyUTC6 ?? ""),
-            montoPrestamo: Number(prestamoSeleccionado?.debt || 0),
-            montoPago: Number(total.toFixed(2)),
+            // logger repetible
+            const logRepeated = async (label, obj) => {
+                const repeats = Math.max(1, Number(opts?.logRepeats || 1));
+                const gap = Math.max(0, Number(opts?.logEveryMs || 0));
 
-            validado: "aprobado",
-            comentario: `Pago completo N1co. Cuotas: ${(n1coCuotasIncluidasFull || []).join(",")}`,
-            usuarioValidador_id: 3,
+                for (let i = 1; i <= repeats; i++) {
+                console.log(`[postNicoPago] ${label} (${i}/${repeats})`, obj);
+                if (gap > 0 && i < repeats) {
+                    await new Promise((r) => setTimeout(r, gap));
+                }
+                }
             };
 
-            await logRepeated("payload pagosAdelantados", payloadA);
+            // -----------------------------------------
+            // MODO FULL: PagosAdelantados -> postNicoPago(total)
+            // identificadorPago = 1 (solo en FULL)
+            // -----------------------------------------
+            if (n1coModo === "full") {
+                const total = Number(n1coAmount || 0);
+                if (!Number.isFinite(total) || total <= 0) {
+                throw new Error("Monto total inválido para pago completo.");
+                }
 
-            const resA = await fetch(
-            "https://app.aranih.com/api/chatbot/pagosBac/pagosAdelantados.php",
-            {
-                method: "POST",
-                headers: {
-                "Content-Type": "application/json",
-                Authorization:
-                    "Bearer 70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
-                },
-                body: JSON.stringify(payloadA),
+                const pendientesCore = getPendientesCoreN1co(listaPagos);
+                const moments = pendientesCore
+                .map((p) => moment(p.schedule_date))
+                .filter((m) => m.isValid());
+                const fechaFinal = moments.length
+                ? moment.max(moments).format("YYYY-MM-DD")
+                : fechaHoyUTC6 ?? "";
+
+                // 1) PagosAdelantados
+                const payloadA = {
+                idCliente: String(clienteData?.customer_id ?? ""),
+                identidadCliente: String(clienteData?.person_code ?? ""),
+                nombreCliente: nombreClienteConcat,
+                correoElectronico: String(clienteData?.email ?? ""),
+                celular: String(clienteData?.mob_phone ?? ""),
+
+                identificadorPrestamo: String(
+                    prestamoSeleccionado?.container_id ?? pagoseleccionado?.container_id ?? ""
+                ),
+                fechaPago: String(fechaHoyUTC6 ?? ""),
+                montoPrestamo: Number(prestamoSeleccionado?.debt || 0),
+                montoPago: Number(total.toFixed(2)),
+
+                validado: "aprobado",
+                comentario: `Pago completo N1co. Cuotas: ${(n1coCuotasIncluidasFull || []).join(
+                    ","
+                )}`,
+                usuarioValidador_id: 3,
+                };
+
+                await logRepeated("payload pagosAdelantados", payloadA);
+
+                const resA = await fetch(
+                "https://app.aranih.com/api/chatbot/pagosBac/pagosAdelantados.php",
+                {
+                    method: "POST",
+                    headers: {
+                    "Content-Type": "application/json",
+                    Authorization:
+                        "Bearer 70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+                    },
+                    body: JSON.stringify(payloadA),
+                }
+                );
+
+                const dataA = await resA.json().catch(() => ({}));
+                if (!resA.ok)
+                throw new Error(dataA?.error || "Error registrando pago adelantado.");
+
+                // 2) Insert en Pago con total
+                const horaRegistro = new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+                .toISOString()
+                .split("T")[1]
+                .split(".")[0];
+
+                const payloadB = {
+                orderStatus: orderStatusNorm,
+                codigoOrden: orderCode,
+                paymentLinkUrl,
+
+                identificadorPrestamo: String(
+                    prestamoSeleccionado?.container_id ?? pagoseleccionado?.container_id ?? ""
+                ),
+
+                // FULL siempre 1
+                identificadorPago: 1,
+
+                idCliente: String(clienteData?.customer_id ?? ""),
+                identidadCliente: String(clienteData?.person_code ?? ""),
+                nombreCliente: nombreClienteConcat,
+                correoElectronico: String(clienteData?.email ?? ""),
+                celular: String(clienteData?.mob_phone ?? ""),
+
+                fechaPago: String(fechaHoyUTC6 ?? ""),
+                fechaCuota: String(fechaFinal ?? ""),
+                horaRegistro,
+
+                cuota: Number(total.toFixed(2)),
+                montoPago: Number(total.toFixed(2)),
+                };
+
+                await logRepeated("payload postNicoPago FULL(total)", payloadB);
+
+                const bodyStrB = new URLSearchParams(
+                Object.entries(payloadB).reduce((acc, [k, v]) => {
+                    acc[k] = v === null || v === undefined ? "" : String(v);
+                    return acc;
+                }, {})
+                ).toString();
+
+                const resB = await fetch(
+                "https://app.aranih.com/api/chatbot/pagosBac/postNicoPago.php",
+                {
+                    method: "POST",
+                    headers: {
+                    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                    Authorization:
+                        "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+                    },
+                    body: bodyStrB,
+                }
+                );
+
+                const dataB = await resB.json().catch(() => ({}));
+                console.log("[postNicoPago FULL] HTTP:", resB.status, resB.statusText);
+                await logRepeated("resp FULL", dataB);
+
+                if (resB.status === 201 || resB.status === 200) {
+                setN1coInsertado(true);
+                return dataB;
+                }
+
+                throw new Error(dataB?.mensaje || "Error registrando el pago completo en Pago.");
             }
-            );
 
-            const dataA = await resA.json().catch(() => ({}));
-            if (!resA.ok) throw new Error(dataA?.error || "Error registrando pago adelantado.");
+            // -----------------------------------------
+            // MODO CUOTA
+            // identificadorPago = numero de cuota (schedule_position + 1)
+            // -----------------------------------------
+            const sp = Number(pagoseleccionado?.schedule_position);
+            const identificadorPagoCuota = Number.isFinite(sp) ? sp + 1 : null;
 
-            // 2) insertar en Pago usando postNicoPago.php pero con identificadorPago="FULL"
+            if (!identificadorPagoCuota || identificadorPagoCuota < 1) {
+                throw new Error(
+                `identificadorPago inválido: ${identificadorPagoCuota}. schedule_position=${pagoseleccionado?.schedule_position}`
+                );
+            }
+
+            const cuota = calcMontoCuotaN1co(pagoseleccionado);
+
+            const fechaCuota = pagoseleccionado?.schedule_date
+                ? moment(pagoseleccionado.schedule_date).format("YYYY-MM-DD")
+                : null;
+
             const horaRegistro = new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[1]
-            .split(".")[0];
+                .toISOString()
+                .split("T")[1]
+                .split(".")[0];
 
-            const payloadB = {
-            orderStatus: orderStatusNorm,
-            codigoOrden: orderCode,
-            paymentLinkUrl,
+            const payload = {
+                orderStatus: orderStatusNorm,
+                codigoOrden: orderCode,
+                paymentLinkUrl,
 
-            identificadorPrestamo: String(prestamoSeleccionado?.container_id ?? pagoseleccionado?.container_id ?? ""),
-            identificadorPago: "FULL",
+                identificadorPrestamo: pagoseleccionado?.container_id ?? null,
 
-            idCliente: String(clienteData?.customer_id ?? ""),
-            identidadCliente: String(clienteData?.person_code ?? ""),
-            nombreCliente: nombreClienteConcat,
-            correoElectronico: String(clienteData?.email ?? ""),
-            celular: String(clienteData?.mob_phone ?? ""),
+                // CUOTA = # de cuota real
+                identificadorPago: identificadorPagoCuota,
 
-            fechaPago: String(fechaHoyUTC6 ?? ""),
-            fechaCuota: String(fechaFinal ?? ""),
-            horaRegistro,
+                idCliente: clienteData?.customer_id ?? null,
+                identidadCliente: clienteData?.person_code ?? null,
+                nombreCliente: nombreClienteConcat,
+                correoElectronico: clienteData?.email ?? null,
+                celular: clienteData?.mob_phone ?? null,
 
-            cuota: Number(total.toFixed(2)),
-            montoPago: Number(total.toFixed(2)),
+                fechaPago: fechaHoyUTC6 ?? null,
+                fechaCuota,
+                horaRegistro,
+
+                cuota: Number(Number(cuota || 0).toFixed(2)),
+                montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
             };
 
-            await logRepeated("payload postNicoPago FULL", payloadB);
+            const bodyStr = new URLSearchParams(
+                Object.entries(payload).reduce((acc, [k, v]) => {
+                acc[k] = v === null || v === undefined ? "" : String(v);
+                return acc;
+                }, {})
+            ).toString();
 
-            const bodyStrB = new URLSearchParams(payloadB).toString();
+            await logRepeated("payload", payload);
 
-            const resB = await fetch(
-            "https://app.aranih.com/api/chatbot/pagosBac/postNicoPago.php",
-            {
+            const res = await fetch(
+                "https://app.aranih.com/api/chatbot/pagosBac/postNicoPago.php",
+                {
                 method: "POST",
                 headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-                Authorization:
+                    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                    Authorization:
                     "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
                 },
-                body: bodyStrB,
-            }
+                body: bodyStr,
+                }
             );
 
-            const dataB = await resB.json().catch(() => ({}));
-            console.log("[postNicoPago FULL] HTTP:", resB.status, resB.statusText);
-            await logRepeated("resp FULL", dataB);
-
-            if (resB.status === 201) {
-            setN1coInsertado(true);
-            setN1coFullPagado(true);
-            return dataB;
+            let data = {};
+            try {
+                data = await res.json();
+            } catch {
+                data = {};
             }
 
-            if (resB.status === 200) {
-            // aquí idealmente tu backend devuelve "Pago completo ya registrado"
-            setN1coInsertado(true);
-            setN1coFullPagado(true);
-            return dataB;
+            console.log("[postNicoPago] HTTP:", res.status, res.statusText);
+            await logRepeated("resp", data);
+            
+            // Códigos: 
+            // 200 → { "mensaje": "Pago N1co ya registrado" } 
+            // 201 → { "mensaje": "Pago N1co registrado exitosamente" } 
+            // 400 → { "mensaje": "Faltan datos obligatorios" } 
+            // 401 → { "mensaje": "Token no válido" }
+            // 409 → { "mensaje": "Pago N1co aún no finalizado" } 
+            // 500 → { "mensaje": "Error al registrar el pago N1co" }
+
+            if (res.status === 201) {
+                setN1coInsertado(true);
+                return data;
             }
 
-            throw new Error(dataB?.mensaje || "Error registrando el pago FULL en Pago.");
-        }
-
-        // -----------------------------------------
-        // MODO CUOTA (tu lógica actual)
-        // -----------------------------------------
-        const sp = Number(pagoseleccionado?.schedule_position);
-        const identificadorPagoCuota = Number.isFinite(sp) ? sp + 1 : null;
-
-        if (!identificadorPagoCuota || identificadorPagoCuota < 1 || identificadorPagoCuota > 4) {
-            throw new Error(
-            `identificadorPago inválido: ${identificadorPagoCuota} (debe ser 1 a 4). schedule_position=${pagoseleccionado?.schedule_position}`
-            );
-        }
-
-        const cuota = calcMontoCuotaN1co(pagoseleccionado);
-
-        const fechaCuota = pagoseleccionado?.schedule_date
-            ? moment(pagoseleccionado.schedule_date).format("YYYY-MM-DD")
-            : null;
-
-        const horaRegistro = new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[1]
-            .split(".")[0];
-
-        const payload = {
-            orderStatus: orderStatusNorm,
-            codigoOrden: orderCode,
-            paymentLinkUrl,
-
-            identificadorPrestamo: pagoseleccionado?.container_id ?? null,
-            identificadorPago: identificadorPagoCuota,
-
-            idCliente: clienteData?.customer_id ?? null,
-            identidadCliente: clienteData?.person_code ?? null,
-            nombreCliente: nombreClienteConcat,
-            correoElectronico: clienteData?.email ?? null,
-            celular: clienteData?.mob_phone ?? null,
-
-            fechaPago: fechaHoyUTC6 ?? null,
-            fechaCuota,
-            horaRegistro,
-
-            cuota: Number(Number(cuota || 0).toFixed(2)),
-            montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
-        };
-
-        const bodyStr = new URLSearchParams(
-            Object.entries(payload).reduce((acc, [k, v]) => {
-            acc[k] = v === null || v === undefined ? "" : String(v);
-            return acc;
-            }, {})
-        ).toString();
-
-        await logRepeated("payload", payload);
-
-        const res = await fetch("https://app.aranih.com/api/chatbot/pagosBac/postNicoPago.php", {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-            Authorization:
-                "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
-            },
-            body: bodyStr,
-        });
-
-        let data = {};
-        try {
-            data = await res.json();
-        } catch {
-            data = {};
-        }
-
-        // Códigos: // 200 → { "mensaje": "Pago N1co ya registrado" } 
-        // 201 → { "mensaje": "Pago N1co registrado exitosamente" } 
-        // 400 → { "mensaje": "Faltan datos obligatorios" } 
-        // 401 → { "mensaje": "Token no válido" }
-        // 409 → { "mensaje": "Pago N1co aún no finalizado" } 
-        // 500 → { "mensaje": "Error al registrar el pago N1co" }
-
-        console.log("[postNicoPago] HTTP:", res.status, res.statusText);
-        await logRepeated("resp", data);
-
-        if (res.status === 201) {
-            setN1coInsertado(true);
-            return data;
-        }
-
-        if (res.status === 200) {
-            if (data?.mensaje === "Pago N1co ya registrado") {
-            setN1coInsertado(true);
-            return data;
+            if (res.status === 200) {
+                if (data?.mensaje) {
+                setN1coInsertado(true);
+                return data;
+                }
+                throw new Error("Respuesta 200 inesperada");
             }
-            throw new Error(data?.mensaje || "Respuesta 200 inesperada");
-        }
 
-        if (res.status === 409) throw new Error(data?.mensaje || "Pago N1co aún no finalizado");
-        if (res.status === 401) throw new Error(data?.mensaje || "Token no válido");
-        if (res.status === 400) throw new Error(data?.mensaje || "Faltan datos obligatorios");
+            if (res.status === 409)
+                throw new Error(data?.mensaje || "Pago N1co aún no finalizado");
+            if (res.status === 401) throw new Error(data?.mensaje || "Token no válido");
+            if (res.status === 400)
+                throw new Error(data?.mensaje || "Faltan datos obligatorios");
 
-        throw new Error(data?.mensaje || "Error al registrar el pago N1co");
-        };
+            throw new Error(data?.mensaje || "Error al registrar el pago N1co");
+            };
 
 
     function obtenerCalendarioPagos(containerId) {
@@ -1521,9 +1571,9 @@ function Plan() {
                                     minWidth: { xs: "120px", sm: "180px" },
                                     "&:hover": { backgroundColor: "#808080", borderColor: "#808080" },
                                 }}
-                                disabled={!estaEnRango() || n1coFullPagado}
+                                disabled={!estaEnRango()}
                                 >
-                                {n1coFullPagado ? "Ya hizo todos sus pagos" : "Pagar con Tarjeta"}
+                                Pagar con Tarjeta
                                 </Button>
 
                                 
