@@ -147,7 +147,8 @@ function Main() {
                     "Gracias, Honduras",
                     "Roatán, Honduras",
                     "French Harbour, Honduras",
-                    "Santa Rosa, Honduras"
+                    "Santa Rosa, Honduras",
+                    "Intibucá, Honduras",
                 ];
         
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
@@ -518,7 +519,7 @@ function Main() {
                             // Caso normal
                             return showAplicarLink ? (
                                 <Link
-                                    to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per) ? "#" : "/aplicar"}
+                                    to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per) ? "#" : "/aplicar2"}
                                     className="tilebotonpri"
                                     onClick={async (e) => {
                                         if (
@@ -636,11 +637,11 @@ function Main() {
                                                     console.error("[Aplicar] modeloClienteExistente -> Error al realizar la solicitud:", error);
                                                 }
 
-                                                // Ahora sí: avanzar a /aplicar (hash router)
-                                                window.location.hash = "#/aplicar";
+                                                // Ahora sí: avanzar a /aplicar2 (hash router)
+                                                window.location.hash = "#/aplicar2";
                                             } catch (error) {
                                                 console.error("[Aplicar] Error general (postPriceList/modeloClienteExistente):", error);
-                                                // NO avanzar a /aplicar
+                                                // NO avanzar a /aplicar2
                                             } finally {
                                                 // Si no navegó (por return/error), quitar loader aquí
                                                 // Si ya navegó, este setLoading podría no ejecutarse antes del unmount, pero no afecta.

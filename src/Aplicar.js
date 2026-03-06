@@ -17,6 +17,7 @@ import { orange } from "@mui/material/colors";
 
 function Aplicar() {
     const gContext = useContext(AppContext);
+    const sid = gContext.logeado?.token;
     const [usuarioRegistradoEnCore, set_usuarioRegistradoEnCore] = useState(false);
     const [cargandoPage, set_cargandoPage] = useState(true);
     const [usuarioAprobadoManual, set_usuarioAprobadoManual] = useState(false);
@@ -26,12 +27,16 @@ function Aplicar() {
     
     const navigate = useNavigate();
 
+    useEffect(() => {
+        console.log("[Aplicar] sid:", sid);
+    }, [sid]);
+
     function validarPerfilEnCore(){ // Para saber si ya esta registrado en el CORE o no
         axios.request({
             url:  `${config.apiUrl}/api/app/getProfile.php`,
             method: "post",
             data: {
-                sid: gContext.logeado?.token,
+                sid: sid,
               },
         })
         .then((res) => {
