@@ -725,7 +725,7 @@ function Plan() {
             identificadorPrestamo: String(prestamoSeleccionado?.container_id ?? ""),
         }).toString();
 
-        const res = await fetch("https://app.arani.hn/api/chatbot/pagosBac/getNicoCuotasPagadas.php", {
+        const res = await fetch("https://app.aranih.com/api/chatbot/pagosBac/getNicoCuotasPagadas.php", {
             method: "POST",
             headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
