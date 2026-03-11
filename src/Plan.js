@@ -716,6 +716,7 @@ function Plan() {
             setErrorLinkN1co("No hay calendario de pagos disponible.");
             setOpenModalN1co(true);
             return;
+
         }
 
         let cuotasPagadasDB = [];
@@ -952,7 +953,7 @@ function Plan() {
             }).toString();
 
             const resCheck = await fetch(
-                "https://app.arani.hn/api/chatbot/pagosBac/getNicoCuotasPagadas.php",
+                "https://app.aranih.com/api/chatbot/pagosBac/getNicoCuotasPagadas.php",
                 {
                 method: "POST",
                 headers: {
@@ -1070,6 +1071,7 @@ function Plan() {
                     });
 
                     setN1coPaso("pagado");
+                    limpiarTimersN1co();
                     setTimeout(() => cerrarModalN1co(), 2500);
                 } catch (e) {
                     setN1coPaso("error");
@@ -1178,7 +1180,7 @@ function Plan() {
                     headers: {
                     "Content-Type": "application/json",
                     Authorization:
-                        "Bearer 70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
+                        "70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa",
                     },
                     body: JSON.stringify(payloadA),
                 }
