@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import { AppContext } from "./App";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Container from "@mui/material/Container";
 import { alpha, useTheme } from "@mui/material/styles";
 import config from "./config";
@@ -18,7 +18,7 @@ import {
     Paper,
     Typography,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import BarraFinal from "./componentes/BarraFinal";
 import BarraApp from "./componentes/BarraApp";
 import FormCambiarBanco from "./componentes/cambiarBanco.js";
@@ -26,6 +26,7 @@ import FormCambiarBanco from "./componentes/cambiarBanco.js";
 function Aplicar2() {
     const gContext = useContext(AppContext);
     const theme = useTheme();
+    const navigate = useNavigate();
     const [mesesSeleccionados, setMesesSeleccionados] = useState(null);
     const [openCambiarCuenta, setOpenCambiarCuenta] = useState(false);
     const [verCondiciones, setVerCondiciones] = useState(false);
@@ -43,12 +44,31 @@ function Aplicar2() {
     const [pagareRaw, set_pagareRaw] = useState("");
     const [loadingCondiciones, set_loadingCondiciones] = useState(false);
 
+    const [defaultPurposeId, set_defaultPurposeId] = useState(null);
+    const [defaultProductId, set_defaultProductId] = useState(null);
+    const [postingOffer, set_postingOffer] = useState(false);
+    const [openResumen, set_openResumen] = useState(false);
+    const [offerContainerId, set_offerContainerId] = useState(null);
+    const [facturaData, set_facturaData] = useState(null);
+    const [loadingFactura, set_loadingFactura] = useState(false);
+    const [recibirError, set_recibirError] = useState("");
+    const facturaIntervalRef = useRef(null);
+
     const token = gContext.logeado?.token;
     const set_logeado = gContext.set_logeado;
 
     useEffect(() => {
         console.log("[Aplicar2] sid:", token);
     }, [token]);
+
+    useEffect(() => {
+        return () => {
+            if (facturaIntervalRef.current) {
+                clearInterval(facturaIntervalRef.current);
+                facturaIntervalRef.current = null;
+            }
+        };
+    }, []);
 
     const OFFER_DR_TOKEN = "sFtBTsxF5Eri5zvQ8rqjQBiQWKFiThEwzBztGcJ9lY60Lyf50QGdoLKfUzXPMEqt";
 
@@ -222,7 +242,17 @@ function Aplicar2() {
 
     const parseMoney = (value) => {
         if (value === null || value === undefined) return null;
-        const num = typeof value === "number" ? value : Number(String(value).replace(/,/g, ""));
+        if (typeof value === "number") return Number.isFinite(value) ? value : null;
+
+        const raw = String(value);
+        const cleaned = raw
+            .replace(/,/g, "")
+            .replace(/\s+/g, "")
+            .replace(/[^0-9.-]/g, "");
+
+        if (!cleaned) return null;
+
+        const num = Number.parseFloat(cleaned);
         return Number.isFinite(num) ? num : null;
     };
 
@@ -363,6 +393,77 @@ function Aplicar2() {
         cargarCuentaBanco();
     }, [token]);
 
+    useEffect(() => {
+        if (!token) return;
+
+        axios
+            .request({
+                url: `${config.apiUrl}/api/app/getPurposeList.php`,
+                method: "post",
+                data: { sid: token },
+            })
+            .then((res) => {
+                if (res?.data?.status === "ERS") {
+                    localStorage.removeItem("arani_session_id");
+                    if (typeof set_logeado === "function") set_logeado({ estado: false, token: "" });
+                    return;
+                }
+                if (res?.data?.status !== "OK") return;
+
+                const payload = res.data.payload;
+                const firstKey = payload && typeof payload === "object" ? Object.keys(payload)[0] : null;
+                const firstId = firstKey ? payload?.[firstKey]?.id : null;
+                if (firstId !== null && firstId !== undefined && String(firstId).trim() !== "") {
+                    set_defaultPurposeId(String(firstId));
+                }
+            })
+            .catch((err) => {
+                console.log("[Aplicar2] getPurposeList.php -> error", err);
+            });
+    }, [token, set_logeado]);
+
+    useEffect(() => {
+        if (!token) return;
+
+        axios
+            .request({
+                url: `${config.apiUrl}/api/app/getApplicationProfilev2.php`,
+                method: "post",
+                data: { sid: token },
+            })
+            .then((res) => {
+                if (res?.data?.status === "ERS") {
+                    localStorage.removeItem("arani_session_id");
+                    if (typeof set_logeado === "function") set_logeado({ estado: false, token: "" });
+                    return;
+                }
+                if (res?.data?.status !== "OK") return;
+
+                const productsObj = res.data.payload?.Products;
+                const allowed = res.data.payload?.Products_r;
+                const products = productsObj && typeof productsObj === "object" ? Object.values(productsObj) : [];
+
+                const isAllowed = (proCod) => {
+                    if (!allowed) return true;
+                    if (Array.isArray(allowed)) return allowed.includes(proCod);
+                    if (typeof allowed === "string") return allowed.split(",").map((s) => s.trim()).includes(String(proCod));
+                    return true;
+                };
+
+                const mensual =
+                    products.find((p) => isAllowed(p?.ProCod) && String(p?.ProTip ?? "").toLowerCase() === "mensual") ||
+                    products.find((p) => isAllowed(p?.ProCod)) ||
+                    null;
+
+                if (mensual?.ProCod) {
+                    set_defaultProductId(mensual.ProCod);
+                }
+            })
+            .catch((err) => {
+                console.log("[Aplicar2] getApplicationProfilev2.php -> error", err);
+            });
+    }, [token, set_logeado]);
+
     function cargarCuentaBanco() {
         if (!token) return Promise.resolve();
 
@@ -443,29 +544,23 @@ function Aplicar2() {
             });
     }, [customerId]);
 
-    const cuotaFromOffer = parseMoney(offerDr?.cuota);
-    const cuotaValue = cuotaFromOffer ?? 0;
+    const buildPlanFromOffer = (meses) => {
+        const m = Number(meses);
 
-    const plans = [
-        {
-            meses: 1,
-            recibes: parseMoney(offerDr?.output1M) ?? 0,
-            cuotaMensual: cuotaValue,
-            total: cuotaValue * 1,
-        },
-        {
-            meses: 2,
-            recibes: parseMoney(offerDr?.output2M) ?? 0,
-            cuotaMensual: cuotaValue,
-            total: cuotaValue * 2,
-        },
-        {
-            meses: 3,
-            recibes: parseMoney(offerDr?.output3M) ?? 0,
-            cuotaMensual: cuotaValue,
-            total: cuotaValue * 3,
-        },
-    ];
+        const recibes = parseMoney(offerDr?.[`outLoanAmount${m}M`]) ?? 0;
+        const cuotaMensual = parseMoney(offerDr?.[`output${m}M`]) ?? 0;
+        const interes = parseMoney(offerDr?.[`outInterest${m}M`]) ?? 0;
+        const adminFee = parseMoney(offerDr?.[`outadminFee${m}M`]) ?? 0;
+
+        return {
+            meses: m,
+            recibes,
+            cuotaMensual,
+            total: recibes + interes + adminFee,
+        };
+    };
+
+    const plans = [buildPlanFromOffer(1), buildPlanFromOffer(2), buildPlanFromOffer(3)];
 
     const plansUi = plans.map((p) => ({
         ...p,
@@ -484,7 +579,15 @@ function Aplicar2() {
             setVerCondiciones(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [offerDr, cuotaValue]);
+    }, [offerDr]);
+
+    const cuotaAprobada =
+        parseMoney(
+            offerDr?.cuota ??
+                offerDr?.data?.cuota ??
+                offerDr?.payload?.cuota ??
+                offerDr?.CUOTA
+        ) ?? 0;
 
     const contratoFinal = aplicarVariablesDocumento(contratoRaw);
     const pagareFinal = aplicarVariablesDocumento(pagareRaw);
@@ -500,6 +603,166 @@ function Aplicar2() {
     const canRecibir = hasPlanSelected && hasBankAndAccount && Boolean(verCondiciones);
 
     const loadingInfo = loadingPerfil || loadingOffer || loadingBank;
+
+    const stopFacturaPolling = () => {
+        if (facturaIntervalRef.current) {
+            clearInterval(facturaIntervalRef.current);
+            facturaIntervalRef.current = null;
+        }
+    };
+
+    const fetchFacturaOnce = (containerId) => {
+        if (!token) return Promise.resolve(null);
+        return axios
+            .request({
+                url: `${config.apiUrl}/api/app/getFactura.php`,
+                method: "post",
+                data: {
+                    sid: token,
+                    ...(containerId
+                        ? {
+                              ContainerId: containerId,
+                              container_id: containerId,
+                          }
+                        : null),
+                },
+            })
+            .then((res) => {
+                if (res?.status !== 200) return null;
+                return res.data;
+            })
+            .catch((err) => {
+                console.log("[Aplicar2] getFactura.php -> error", err);
+                return null;
+            });
+    };
+
+    const startFacturaPolling = (containerId) => {
+        stopFacturaPolling();
+        set_loadingFactura(true);
+        set_recibirError("");
+
+        let attempts = 0;
+        const maxAttempts = 25;
+
+        const tick = async () => {
+            attempts += 1;
+            const data = await fetchFacturaOnce(containerId);
+            if (data) {
+                set_facturaData(data);
+                const total = parseMoney(data?.totalAPagar);
+                const pagos = Array.isArray(data?.pagos) ? data.pagos : [];
+
+                if ((total !== null && total > 0) || pagos.length > 0) {
+                    set_loadingFactura(false);
+                    stopFacturaPolling();
+                    return;
+                }
+            }
+
+            if (attempts >= maxAttempts) {
+                set_loadingFactura(false);
+                stopFacturaPolling();
+                set_recibirError("No pudimos obtener la factura todavía. Intenta de nuevo en unos segundos.");
+            }
+        };
+
+        tick();
+        facturaIntervalRef.current = setInterval(tick, 1000);
+    };
+
+    const handleRecibir = async () => {
+        if (postingOffer) return;
+        if (!token) return;
+        if (!selectedPlan) return;
+
+        set_openResumen(true);
+        set_facturaData(null);
+        set_offerContainerId(null);
+        set_loadingFactura(false);
+        set_recibirError("");
+
+        if (!defaultProductId) {
+            set_recibirError("No encontramos un producto disponible para registrar tu solicitud.");
+            return;
+        }
+        if (!defaultPurposeId) {
+            set_recibirError("No encontramos un propósito disponible para registrar tu solicitud.");
+            return;
+        }
+
+        const periodDays = Number(selectedPlan.meses) * 30;
+        const amount = parseMoney(selectedPlan.recibes) ?? 0;
+        if (!Number.isFinite(periodDays) || periodDays <= 0 || amount <= 0) {
+            set_recibirError("El plan seleccionado no es válido.");
+            return;
+        }
+
+        const postOfferBody = {
+            sid: token,
+            period: periodDays,
+            amount,
+            purpose: defaultPurposeId,
+            productId: defaultProductId,
+        };
+
+        const maskedSid =
+            typeof token === "string" && token.length >= 8
+                ? `${token.slice(0, 4)}...${token.slice(-4)}`
+                : token;
+
+        console.log("[Aplicar2] postOffer.php -> request", {
+            ...postOfferBody,
+            sid: maskedSid,
+        });
+
+        set_postingOffer(true);
+        try {
+            const res = await axios.request({
+                url: `${config.apiUrl}/api/app/postOffer.php`,
+                method: "post",
+                withCredentials: true,
+                data: postOfferBody,
+            });
+
+            console.log("[Aplicar2] postOffer.php -> response", res?.data);
+
+            if (res?.data?.status === "ERS") {
+                localStorage.removeItem("arani_session_id");
+                if (typeof set_logeado === "function") set_logeado({ estado: false, token: "" });
+                return;
+            }
+
+            if (res?.data?.status !== "OK") {
+                set_recibirError(res?.data?.payload?.message || "No se pudo registrar la solicitud.");
+                return;
+            }
+
+            const containerId =
+                res?.data?.container_id ??
+                res?.data?.containerId ??
+                res?.data?.payload?.container_id ??
+                res?.data?.payload?.containerId ??
+                res?.data?.payload?.data?.container_id ??
+                res?.data?.payload?.data?.containerId ??
+                null;
+
+            if (!containerId) {
+                console.log("[Aplicar2] postOffer.php -> missing container_id", res?.data);
+                set_recibirError("Se registró la solicitud, pero no recibimos el identificador del préstamo (container_id). ");
+                return;
+            }
+
+            set_offerContainerId(String(containerId));
+
+            startFacturaPolling(String(containerId));
+        } catch (err) {
+            console.log("[Aplicar2] postOffer.php -> error", err);
+            set_recibirError("Ocurrió un error al enviar tu solicitud.");
+        } finally {
+            set_postingOffer(false);
+        }
+    };
 
     return (
         <Container
@@ -549,10 +812,10 @@ function Aplicar2() {
                                     }}
                                 >
                                     <Typography variant="subtitle1" sx={{ mb: { xs: 1, sm: 2 } }}>
-                                        Tu cuota mensual aprobada
+                                        Tu cuota máxima mensual aprobada
                                     </Typography>
                                     <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-                                        {formatL(cuotaValue)}
+                                        {formatL(cuotaAprobada)}
                                     </Typography>
                                     <Typography variant="body2">Disponible ahora</Typography>
                                 </Box>
@@ -849,7 +1112,7 @@ function Aplicar2() {
                     <Button
                         fullWidth
                         variant="contained"
-                        disabled={!canRecibir}
+                        disabled={!canRecibir || postingOffer}
                         sx={{
                             mt: { xs: 2, sm: 3 },
                             maxWidth: 520,
@@ -865,9 +1128,125 @@ function Aplicar2() {
                                 color: "text.disabled",
                             },
                         }}
+                        onClick={handleRecibir}
                     >
-                        Recibir {formatL(selectedPlan?.recibes ?? 0)}
+                        {postingOffer ? (
+                            <>
+                                <CircularProgress size={18} sx={{ color: "#fff", mr: 1 }} />
+                                Procesando...
+                            </>
+                        ) : (
+                            <>Recibir {formatL(selectedPlan?.recibes ?? 0)}</>
+                        )}
                     </Button>
+
+                    <Dialog
+                        open={openResumen}
+                        onClose={() => {
+                            stopFacturaPolling();
+                            set_openResumen(false);
+                        }}
+                        fullWidth
+                        maxWidth="sm"
+                    >
+                        <DialogTitle>Resumen de tu préstamo</DialogTitle>
+                        <DialogContent>
+                            {postingOffer ? (
+                                <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+                                    <CircularProgress sx={{ color: "#5b75e7" }} />
+                                </Box>
+                            ) : null}
+
+                            {recibirError ? (
+                                <Typography color="error" sx={{ mb: 2 }}>
+                                    {recibirError}
+                                </Typography>
+                            ) : null}
+
+                            {loadingFactura ? (
+                                <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                                    <CircularProgress sx={{ color: "#5b75e7" }} />
+                                </Box>
+                            ) : null}
+
+                            {!loadingFactura && facturaData ? (
+                                <Box>
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                            Cantidad solicitada
+                                        </Typography>
+                                        <Typography variant="body2">{formatL(parseMoney(facturaData?.cantidadSolicitada) ?? 0)}</Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                            Interés
+                                        </Typography>
+                                        <Typography variant="body2">{formatL(parseMoney(facturaData?.intereses) ?? 0)}</Typography>
+                                    </Box>
+
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                            Gastos administrativos
+                                        </Typography>
+                                        <Typography variant="body2">{formatL(parseMoney(facturaData?.gastosAdministrativos) ?? 0)}</Typography>
+                                    </Box>
+
+                                    <Divider sx={{ my: 1.5 }} />
+
+                                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                            Total a pagar
+                                        </Typography>
+                                        <Typography variant="body2">{formatL(parseMoney(facturaData?.totalAPagar) ?? 0)}</Typography>
+                                    </Box>
+
+                                    {Array.isArray(facturaData?.pagos) && facturaData.pagos.length > 0 ? (
+                                        <Box sx={{ mt: 2 }}>
+                                            <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>
+                                                Pagos
+                                            </Typography>
+                                            {facturaData.pagos.map((p, idx) => (
+                                                <Box key={idx} sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                                                    <Box>
+                                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                                            Pago {idx + 1}
+                                                        </Typography>
+                                                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                                                            {p?.fechaDePago || ""}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Typography variant="body2">{formatL(parseMoney(p?.cantidad) ?? 0)}</Typography>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    ) : null}
+                                </Box>
+                            ) : null}
+                        </DialogContent>
+                        <DialogActions sx={{ justifyContent: "flex-start" }}>
+                            <Button
+                                onClick={() => {
+                                    stopFacturaPolling();
+                                    set_openResumen(false);
+                                }}
+                            >
+                                Cerrar
+                            </Button>
+                            <Button
+                                variant="contained"
+                                sx={{ backgroundColor: "#5b75e7", ":hover": { backgroundColor: "#5b75e7" } }}
+                                onClick={() => {
+                                    stopFacturaPolling();
+                                    set_openResumen(false);
+                                    navigate(offerContainerId ? `/plan/${offerContainerId}` : "/plan");
+                                }}
+                                disabled={!offerContainerId}
+                            >
+                                Finalizar
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                         </>
                     )}
                 </Paper>
