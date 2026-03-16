@@ -42,6 +42,8 @@ function Plan() {
     const [ setFDOCComprobante] = useState(null);
     const [setCargandoEnviandoComprobante] = useState(false);
     // --- N1co Payment Link ---
+    const [openModalAvisoConfirmacionN1co, setOpenModalAvisoConfirmacionN1co] = useState(false);
+    const [accionPendienteN1co, setAccionPendienteN1co] = useState(false);
     const [openModalN1co, setOpenModalN1co] = useState(false);
     const [cargandoLinkN1co, setCargandoLinkN1co] = useState(false);
     const [errorLinkN1co, setErrorLinkN1co] = useState('');
@@ -696,6 +698,16 @@ function Plan() {
             setN1coAmount(Number(total).toFixed(2));
             setErrorLinkN1co("");
             };
+
+        const confirmarGeneracionLinkN1co = async () => {
+            try {
+                setAccionPendienteN1co(true);
+                setOpenModalAvisoConfirmacionN1co(false);
+                await generarLinkN1co();
+            } finally {
+                setAccionPendienteN1co(false);
+            }
+        };
 
 
        const handleOpenModalN1co = async () => {
@@ -1546,37 +1558,38 @@ function Plan() {
 
                                  {/* BOTON DE NICO */}
                                 <Button
-                                onClick={() => {
-                                    const v = validarVentana42hN1co();
+                                    onClick={() => {
+                                        const v = validarVentana42hN1co();
 
-                                    if (!v.ok) {
-                                    setMsgEsperaN1co(
-                                        `Aún no puedes realizar tu pago. Debes esperar 42 horas después del desembolso de tu préstamo.\n` +
-                                        `Te faltan: ${v.faltanTxt}.\n` +
-                                        `Disponible a partir de: ${v.habilitaEn
-                                        .locale("es")
-                                        .format("D [de] MMMM [de] YYYY [a las] h:mm A")}`
-                                    );
-                                    setOpenModalEsperaN1co(true);
-                                    return;
-                                    }
+                                        if (!v.ok) {
+                                        setMsgEsperaN1co(
+                                            `Aún no puedes realizar tu pago. Debes esperar 42 horas después del desembolso de tu préstamo.\n` +
+                                            `Te faltan: ${v.faltanTxt}.\n` +
+                                            `Disponible a partir de: ${v.habilitaEn
+                                            .locale("es")
+                                            .format("D [de] MMMM [de] YYYY [a las] h:mm A")}`
+                                        );
+                                        setOpenModalEsperaN1co(true);
+                                        return;
+                                        }
 
-                                    handleOpenModalN1co();
-                                }}
-                                variant="contained"
-                                sx={{
-                                    width: { xs: "220px", sm: "260px" },
-                                    backgroundColor: "black",
-                                    color: "white",
-                                    fontSize: { xs: "0.75rem", sm: "1rem" },
-                                    padding: { xs: "4px 10px", sm: "8px 16px" },
-                                    minWidth: { xs: "120px", sm: "180px" },
-                                    "&:hover": { backgroundColor: "#808080", borderColor: "#808080" },
-                                }}
-                                disabled={!estaEnRango()}
-                                >
-                                Pagar con Tarjeta
-                                </Button>
+                                        handleOpenModalN1co();
+                                    }}
+                                    variant="contained"
+                                    sx={{
+                                        width: { xs: "220px", sm: "260px" },
+                                        backgroundColor: "black",
+                                        color: "white",
+                                        fontSize: { xs: "0.75rem", sm: "1rem" },
+                                        padding: { xs: "4px 10px", sm: "8px 16px" },
+                                        minWidth: { xs: "120px", sm: "180px" },
+                                        "&:hover": { backgroundColor: "#808080", borderColor: "#808080" },
+                                    }}
+                                    disabled={!estaEnRango()}
+                                    >
+                                    Pagar con Tarjeta
+                                    </Button>
+
 
                                 
 
@@ -1785,12 +1798,20 @@ function Plan() {
 
                 <Box sx={{ display: "flex", gap: 1 }}>
                     <Button
-                    variant="contained"
-                    onClick={generarLinkN1co}
-                    disabled={cargandoLinkN1co || !n1coAmount || n1coPaso === "esperando" || n1coPaso === "pagado"}
-                    >
-                    {cargandoLinkN1co ? "Abriendo..." : (n1coPaso === "esperando" ? "Esperando..." : "Pagar")}
-                    </Button>
+                        variant="contained"
+                        onClick={() => setOpenModalAvisoConfirmacionN1co(true)}
+                        disabled={
+                            cargandoLinkN1co ||
+                            accionPendienteN1co ||
+                            !n1coAmount ||
+                            n1coPaso === "esperando" ||
+                            n1coPaso === "pagado"
+                        }
+                        >
+                        {cargandoLinkN1co || accionPendienteN1co
+                            ? "Abriendo..."
+                            : (n1coPaso === "esperando" ? "Esperando..." : "Pagar")}
+                        </Button>
 
                     {/* No dejar cerrar mientras está esperando */}
                     <Button
@@ -1803,6 +1824,46 @@ function Plan() {
                 </Box>
                 </DialogContent>
                 </Dialog>
+
+
+                <Dialog
+                    open={openModalAvisoConfirmacionN1co}
+                    onClose={() => {
+                        if (accionPendienteN1co) return;
+                        setOpenModalAvisoConfirmacionN1co(false);
+                    }}
+                    >
+                    <DialogContent>
+                        <Typography variant="h6">Antes de continuar</Typography>
+
+                        <Typography variant="body2" sx={{ mt: 2, whiteSpace: "pre-line" }}>
+                            No cierres esta ventana mientras estés realizando tu pago.
+
+                            {"\n\n"}
+                            Al presionar <strong>Entendido</strong>, se generará tu link de pago y serás redirigido a N1co.
+                            Esta ventana debe permanecer abierta hasta que el sistema confirme si tu pago fue recibido.
+                        </Typography>
+                    </DialogContent>
+
+                    <DialogActions>
+                        <Button
+                            onClick={() => setOpenModalAvisoConfirmacionN1co(false)}
+                            variant="outlined"
+                            disabled={accionPendienteN1co}
+                        >
+                            Cancelar
+                        </Button>
+
+                        <Button
+                            onClick={confirmarGeneracionLinkN1co}
+                            variant="contained"
+                            disabled={accionPendienteN1co}
+                        >
+                            {accionPendienteN1co ? "Cargando..." : "Entendido"}
+                        </Button>
+                    </DialogActions>
+                    </Dialog>
+
 
 
 
