@@ -1011,18 +1011,30 @@ function Plan() {
             if (!res.ok) throw new Error(data?.error || "Error generando link de pago");
 
             const link = data?.paymentLinkUrl || data;
-            if (!link) throw new Error("No se recibió el link de pago");
+                if (!link) throw new Error("No se recibió el link de pago");
 
-            setN1coLink(link);
+                setN1coLink(link);
 
-            // Abrir solo el link (sin about:blank)
-            popupRef.current = window.open(link, "_blank", "noopener,noreferrer");
+                const orderCode = extraerOrderCode(link);
+                setN1coOrderCode(orderCode);
 
-            // Cambia modal a esperando
-            const orderCode = extraerOrderCode(link);
-            setN1coOrderCode(orderCode);
-            setN1coPaso("esperando");
-            iniciarTimersN1co();
+                // INSERT PENDIENTE APENAS SE GENERA EL LINK
+                try {
+                await enviarPostNicoPago({
+                    orderCode,
+                    orderStatus: "PENDING",
+                    paymentLinkUrl: link,
+                });
+                } catch (e) {
+                setN1coPaso("error");
+                setErrorLinkN1co(e?.message || "Error registrando pago pendiente N1co");
+                return;
+                }
+
+                // luego ya abres popup y dejas polling visual
+                popupRef.current = window.open(link, "_blank", "noopener,noreferrer");
+                setN1coPaso("esperando");
+                iniciarTimersN1co();
 
             // 1er check inmediato
             const first = await consultarStatusN1co(orderCode);
@@ -1209,29 +1221,28 @@ function Plan() {
                 .split(".")[0];
 
                 const payloadB = {
-                orderStatus: orderStatusNorm,
-                codigoOrden: orderCode,
-                paymentLinkUrl,
+                    orderStatus: orderStatusNorm,
+                    codigoOrden: orderCode,
+                    paymentLinkUrl,
 
-                identificadorPrestamo: String(
-                    prestamoSeleccionado?.container_id ?? pagoseleccionado?.container_id ?? ""
-                ),
+                    identificadorPrestamo: String(
+                        prestamoSeleccionado?.container_id ?? pagoseleccionado?.container_id ?? ""
+                    ),
+                    identificadorPago: 1,
 
-                // FULL siempre 1
-                identificadorPago: 1,
+                    idCliente: String(clienteData?.customer_id ?? ""),
+                    identidadCliente: String(clienteData?.person_code ?? ""),
+                    nombreCliente: nombreClienteConcat,
+                    correoElectronico: String(clienteData?.email ?? ""),
+                    celular: String(clienteData?.mob_phone ?? ""),
 
-                idCliente: String(clienteData?.customer_id ?? ""),
-                identidadCliente: String(clienteData?.person_code ?? ""),
-                nombreCliente: nombreClienteConcat,
-                correoElectronico: String(clienteData?.email ?? ""),
-                celular: String(clienteData?.mob_phone ?? ""),
+                    fechaPago: String(fechaHoyUTC6 ?? ""),
+                    fechaCuota: String(fechaFinal ?? ""),
+                    horaRegistro,
 
-                fechaPago: String(fechaHoyUTC6 ?? ""),
-                fechaCuota: String(fechaFinal ?? ""),
-                horaRegistro,
-
-                cuota: Number(total.toFixed(2)),
-                montoPago: Number(total.toFixed(2)),
+                    cuota: Number(total.toFixed(2)),
+                    montoPago: Number(total.toFixed(2)),
+                    comentario: comentarioN1co,
                 };
 
                 await logRepeated("payload postNicoPago FULL(total)", payloadB);
@@ -1281,6 +1292,11 @@ function Plan() {
                 );
             }
 
+            const comentarioN1co =
+            n1coModo === "full"
+            ? "Pago completo pendiente de validación"
+            : "Pago pendiente de validación";
+
             const cuota = calcMontoCuotaN1co(pagoseleccionado);
 
             const fechaCuota = pagoseleccionado?.schedule_date
@@ -1298,8 +1314,6 @@ function Plan() {
                 paymentLinkUrl,
 
                 identificadorPrestamo: pagoseleccionado?.container_id ?? null,
-
-                // CUOTA = # de cuota real
                 identificadorPago: identificadorPagoCuota,
 
                 idCliente: clienteData?.customer_id ?? null,
@@ -1314,6 +1328,7 @@ function Plan() {
 
                 cuota: Number(Number(cuota || 0).toFixed(2)),
                 montoPago: Number(Number(n1coAmount || 0).toFixed(2)),
+                comentario: comentarioN1co,
             };
 
             const bodyStr = new URLSearchParams(
