@@ -612,19 +612,12 @@ function Aplicar2() {
     };
 
     const fetchFacturaOnce = (containerId) => {
-        if (!token) return Promise.resolve(null);
+        if (!containerId) return Promise.resolve(null);
         return axios
-            .request({
-                url: `${config.apiUrl}/api/app/getFactura.php`,
-                method: "post",
-                data: {
-                    sid: token,
-                    ...(containerId
-                        ? {
-                              ContainerId: containerId,
-                              container_id: containerId,
-                          }
-                        : null),
+            .get(`${config.apiUrl}/api/app/getFacturaV2.php`, {
+                withCredentials: true,
+                params: {
+                    containerId: String(containerId),
                 },
             })
             .then((res) => {
@@ -632,7 +625,7 @@ function Aplicar2() {
                 return res.data;
             })
             .catch((err) => {
-                console.log("[Aplicar2] getFactura.php -> error", err);
+                console.log("[Aplicar2] getFacturaV2.php -> error", err);
                 return null;
             });
     };
@@ -642,6 +635,12 @@ function Aplicar2() {
         set_loadingFactura(true);
         set_recibirError("");
 
+        if (!containerId) {
+            set_loadingFactura(false);
+            set_recibirError("No pudimos obtener el identificador del préstamo para consultar la factura.");
+            return;
+        }
+
         let attempts = 0;
         const maxAttempts = 25;
 
@@ -649,9 +648,19 @@ function Aplicar2() {
             attempts += 1;
             const data = await fetchFacturaOnce(containerId);
             if (data) {
-                set_facturaData(data);
-                const total = parseMoney(data?.totalAPagar);
-                const pagos = Array.isArray(data?.pagos) ? data.pagos : [];
+                const factura = data?.payload?.data ?? data?.payload ?? data?.data ?? data;
+                set_facturaData(factura);
+
+                const total =
+                    parseMoney(
+                        factura?.totalAPagar ??
+                            factura?.total_a_pagar ??
+                            factura?.total ??
+                            factura?.totalPago ??
+                            factura?.total_pago
+                    );
+                const pagosRaw = factura?.pagos ?? factura?.payments ?? factura?.payouts;
+                const pagos = Array.isArray(pagosRaw) ? pagosRaw : [];
 
                 if ((total !== null && total > 0) || pagos.length > 0) {
                     set_loadingFactura(false);
@@ -672,97 +681,183 @@ function Aplicar2() {
     };
 
     const handleRecibir = async () => {
-        if (postingOffer) return;
-        if (!token) return;
-        if (!selectedPlan) return;
+    if (postingOffer) return;
+    if (!token) return;
+    if (!selectedPlan) return;
 
-        set_openResumen(true);
-        set_facturaData(null);
-        set_offerContainerId(null);
-        set_loadingFactura(false);
-        set_recibirError("");
+    set_openResumen(true);
+    set_facturaData(null);
+    set_offerContainerId(null);
+    set_loadingFactura(false);
+    set_recibirError("");
 
-        if (!defaultProductId) {
-            set_recibirError("No encontramos un producto disponible para registrar tu solicitud.");
-            return;
-        }
-        if (!defaultPurposeId) {
-            set_recibirError("No encontramos un propósito disponible para registrar tu solicitud.");
-            return;
-        }
+    if (!defaultProductId) {
+        set_recibirError("No encontramos un producto disponible para registrar tu solicitud.");
+        return;
+    }
+    if (!defaultPurposeId) {
+        set_recibirError("No encontramos un propósito disponible para registrar tu solicitud.");
+        return;
+    }
 
-        const periodDays = Number(selectedPlan.meses) * 30;
-        const amount = parseMoney(selectedPlan.recibes) ?? 0;
-        if (!Number.isFinite(periodDays) || periodDays <= 0 || amount <= 0) {
-            set_recibirError("El plan seleccionado no es válido.");
-            return;
-        }
+    const periodDays = Number(selectedPlan.meses) * 30;
+    const amount = parseMoney(selectedPlan.recibes) ?? 0;
+    if (!Number.isFinite(periodDays) || periodDays <= 0 || amount <= 0) {
+        set_recibirError("El plan seleccionado no es válido.");
+        return;
+    }
 
-        const postOfferBody = {
-            sid: token,
-            period: periodDays,
-            amount,
-            purpose: defaultPurposeId,
-            productId: defaultProductId,
-        };
+    const postOfferBody = {
+        sid: token,
+        period: periodDays,
+        amount,
+        purpose: defaultPurposeId,
+        productId: defaultProductId,
+    };
 
-        const maskedSid =
-            typeof token === "string" && token.length >= 8
-                ? `${token.slice(0, 4)}...${token.slice(-4)}`
-                : token;
+    const maskedSid =
+        typeof token === "string" && token.length >= 8
+            ? `${token.slice(0, 4)}...${token.slice(-4)}`
+            : token;
 
-        console.log("[Aplicar2] postOffer.php -> request", {
-            ...postOfferBody,
-            sid: maskedSid,
+    console.log("[Aplicar2] postOffer.php -> request", {
+        ...postOfferBody,
+        sid: maskedSid,
+    });
+
+    set_postingOffer(true);
+    try {
+        const res = await axios.request({
+            url: `${config.apiUrl}/api/app/postOffer.php`,
+            method: "post",
+            withCredentials: true,
+            data: postOfferBody,
         });
 
-        set_postingOffer(true);
-        try {
-            const res = await axios.request({
-                url: `${config.apiUrl}/api/app/postOffer.php`,
-                method: "post",
-                withCredentials: true,
-                data: postOfferBody,
-            });
+        console.log("[Aplicar2] postOffer.php -> response", res?.data);
 
-            console.log("[Aplicar2] postOffer.php -> response", res?.data);
-
-            if (res?.data?.status === "ERS") {
-                localStorage.removeItem("arani_session_id");
-                if (typeof set_logeado === "function") set_logeado({ estado: false, token: "" });
-                return;
+        const safeJsonParse = (value) => {
+            if (typeof value !== "string") return null;
+            try {
+                return JSON.parse(value);
+            } catch {
+                return null;
             }
+        };
 
-            if (res?.data?.status !== "OK") {
-                set_recibirError(res?.data?.payload?.message || "No se pudo registrar la solicitud.");
-                return;
-            }
+        const resBody = typeof res?.data === "string" ? safeJsonParse(res.data) ?? res.data : res?.data;
 
-            const containerId =
-                res?.data?.container_id ??
-                res?.data?.containerId ??
-                res?.data?.payload?.container_id ??
-                res?.data?.payload?.containerId ??
-                res?.data?.payload?.data?.container_id ??
-                res?.data?.payload?.data?.containerId ??
-                null;
-
-            if (!containerId) {
-                console.log("[Aplicar2] postOffer.php -> missing container_id", res?.data);
-                set_recibirError("Se registró la solicitud, pero no recibimos el identificador del préstamo (container_id). ");
-                return;
-            }
-
-            set_offerContainerId(String(containerId));
-
-            startFacturaPolling(String(containerId));
-        } catch (err) {
-            console.log("[Aplicar2] postOffer.php -> error", err);
-            set_recibirError("Ocurrió un error al enviar tu solicitud.");
-        } finally {
-            set_postingOffer(false);
+        if (resBody?.status === "ERS") {
+            localStorage.removeItem("arani_session_id");
+            if (typeof set_logeado === "function") set_logeado({ estado: false, token: "" });
+            return;
         }
-    };
+
+        if (typeof resBody?.status === "string" && resBody.status !== "OK") {
+            set_recibirError(resBody?.payload?.message || resBody?.message || "No se pudo registrar la solicitud.");
+            return;
+        }
+
+        const normalizeId = (value) => {
+            if (value === null || value === undefined) return null;
+            const out = String(value).trim();
+            if (!out || out === "0" || out === "null" || out === "undefined") return null;
+            return out;
+        };
+
+        const extractId = (obj) => {
+            if (!obj || typeof obj !== "object") return null;
+            return (
+                obj.container_id ??
+                obj.containerId ??
+                obj.loan_offer_id ??
+                obj.loanOfferId ??
+                obj.loan_offer?.container_id ??
+                obj.loan_offer?.containerId ??
+                obj.loan_offer?.id ??
+                null
+            );
+        };
+
+        const maybeParsedData = typeof resBody?.data === "string" ? safeJsonParse(resBody.data) : null;
+        const maybeParsedPayload = typeof resBody?.payload === "string" ? safeJsonParse(resBody.payload) : null;
+
+        // 🔥 FIX CLAVE: parsear payload.api (aquí viene el loan_offer_id real)
+        const maybeParsedApi =
+            typeof resBody?.payload?.api === "string"
+                ? safeJsonParse(resBody.payload.api)
+                : null;
+
+        const deepFindContainerId = (root) => {
+            const wanted = new Set(["container_id", "containerId", "loan_offer_id", "loanOfferId"]);
+            const queue = [{ value: root, depth: 0 }];
+            const seen = new Set();
+            const maxDepth = 6;
+            const maxNodes = 300;
+            let nodes = 0;
+
+            while (queue.length > 0) {
+                const current = queue.shift();
+                if (!current) break;
+                const { value, depth } = current;
+                if (!value || typeof value !== "object") continue;
+                if (seen.has(value)) continue;
+                seen.add(value);
+                nodes += 1;
+                if (nodes > maxNodes) break;
+
+                for (const [k, v] of Object.entries(value)) {
+                    if (wanted.has(k)) {
+                        const normalized = normalizeId(v);
+                        if (normalized) return normalized;
+                    }
+                    if (k === "loan_offer" && v && typeof v === "object") {
+                        const normalized = normalizeId(extractId(v));
+                        if (normalized) return normalized;
+                    }
+                    if (depth < maxDepth && v && typeof v === "object") {
+                        queue.push({ value: v, depth: depth + 1 });
+                    }
+                }
+            }
+            return null;
+        };
+
+        const containerId =
+            normalizeId(extractId(resBody)) ??
+            normalizeId(extractId(resBody?.data)) ??
+            normalizeId(extractId(maybeParsedData)) ??
+            normalizeId(extractId(resBody?.payload)) ??
+            normalizeId(extractId(maybeParsedPayload)) ??
+            normalizeId(extractId(maybeParsedApi)) ?? // 👈 FIX
+            normalizeId(extractId(maybeParsedApi?.data)) ?? // 👈 FIX DIRECTO
+            normalizeId(extractId(resBody?.payload?.data)) ??
+            normalizeId(extractId(resBody?.data?.loan_offer)) ??
+            normalizeId(extractId(resBody?.payload?.loan_offer)) ??
+            normalizeId(extractId(resBody?.payload?.data?.loan_offer)) ??
+            deepFindContainerId(resBody) ??
+            deepFindContainerId(maybeParsedData) ??
+            deepFindContainerId(maybeParsedApi) ?? // 👈 FIX
+            null;
+
+        console.log("[Aplicar2] postOffer.php -> extracted containerId", containerId);
+
+        if (!containerId) {
+            console.log("[Aplicar2] postOffer.php -> missing container_id", resBody);
+            set_recibirError("Se registró la solicitud, pero no recibimos el identificador del préstamo (container_id). ");
+            return;
+        }
+
+        set_offerContainerId(String(containerId));
+        startFacturaPolling(String(containerId));
+
+    } catch (err) {
+        console.log("[Aplicar2] postOffer.php -> error", err);
+        set_recibirError("Ocurrió un error al enviar tu solicitud.");
+    } finally {
+        set_postingOffer(false);
+    }
+};
 
     return (
         <Container
@@ -1142,10 +1237,8 @@ function Aplicar2() {
 
                     <Dialog
                         open={openResumen}
-                        onClose={() => {
-                            stopFacturaPolling();
-                            set_openResumen(false);
-                        }}
+                        onClose={() => {}} // evita cerrar al hacer clic fuera
+                        disableEscapeKeyDown // evita cerrar con ESC
                         fullWidth
                         maxWidth="sm"
                     >
@@ -1175,21 +1268,48 @@ function Aplicar2() {
                                         <Typography variant="body2" sx={{ fontWeight: 700 }}>
                                             Cantidad solicitada
                                         </Typography>
-                                        <Typography variant="body2">{formatL(parseMoney(facturaData?.cantidadSolicitada) ?? 0)}</Typography>
+                                        <Typography variant="body2">
+                                            {formatL(
+                                                parseMoney(
+                                                    facturaData?.cantidadSolicitada ??
+                                                        facturaData?.cantidad_solicitada ??
+                                                        facturaData?.amount ??
+                                                        facturaData?.cantidad
+                                                ) ?? 0
+                                            )}
+                                        </Typography>
                                     </Box>
 
                                     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                                         <Typography variant="body2" sx={{ fontWeight: 700 }}>
                                             Interés
                                         </Typography>
-                                        <Typography variant="body2">{formatL(parseMoney(facturaData?.intereses) ?? 0)}</Typography>
+                                        <Typography variant="body2">
+                                            {formatL(
+                                                parseMoney(
+                                                    facturaData?.intereses ??
+                                                        facturaData?.interes ??
+                                                        facturaData?.interest ??
+                                                        facturaData?.interest_amount
+                                                ) ?? 0
+                                            )}
+                                        </Typography>
                                     </Box>
 
                                     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                                         <Typography variant="body2" sx={{ fontWeight: 700 }}>
                                             Gastos administrativos
                                         </Typography>
-                                        <Typography variant="body2">{formatL(parseMoney(facturaData?.gastosAdministrativos) ?? 0)}</Typography>
+                                        <Typography variant="body2">
+                                            {formatL(
+                                                parseMoney(
+                                                    facturaData?.gastosAdministrativos ??
+                                                        facturaData?.gastos_administrativos ??
+                                                        facturaData?.administrative_fee ??
+                                                        facturaData?.administrativeFee
+                                                ) ?? 0
+                                            )}
+                                        </Typography>
                                     </Box>
 
                                     <Divider sx={{ my: 1.5 }} />
@@ -1198,53 +1318,72 @@ function Aplicar2() {
                                         <Typography variant="body2" sx={{ fontWeight: 700 }}>
                                             Total a pagar
                                         </Typography>
-                                        <Typography variant="body2">{formatL(parseMoney(facturaData?.totalAPagar) ?? 0)}</Typography>
+                                        <Typography variant="body2">
+                                            {formatL(
+                                                parseMoney(
+                                                    facturaData?.totalAPagar ??
+                                                        facturaData?.total_a_pagar ??
+                                                        facturaData?.total ??
+                                                        facturaData?.totalPago ??
+                                                        facturaData?.total_pago
+                                                ) ?? 0
+                                            )}
+                                        </Typography>
                                     </Box>
 
-                                    {Array.isArray(facturaData?.pagos) && facturaData.pagos.length > 0 ? (
+                                    {(() => {
+                                        const pagosList = Array.isArray(facturaData?.pagos)
+                                            ? facturaData.pagos
+                                            : Array.isArray(facturaData?.payments)
+                                                ? facturaData.payments
+                                                : Array.isArray(facturaData?.payouts)
+                                                    ? facturaData.payouts
+                                                    : [];
+
+                                        if (pagosList.length === 0) return null;
+
+                                        return (
                                         <Box sx={{ mt: 2 }}>
                                             <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>
                                                 Pagos
                                             </Typography>
-                                            {facturaData.pagos.map((p, idx) => (
+                                            {pagosList.map((p, idx) => (
                                                 <Box key={idx} sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                                                     <Box>
                                                         <Typography variant="body2" sx={{ fontWeight: 700 }}>
                                                             Pago {idx + 1}
                                                         </Typography>
                                                         <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                                                            {p?.fechaDePago || ""}
+                                                            {p?.fechaDePago || p?.fecha_de_pago || p?.date || ""}
                                                         </Typography>
                                                     </Box>
-                                                    <Typography variant="body2">{formatL(parseMoney(p?.cantidad) ?? 0)}</Typography>
+                                                    <Typography variant="body2">
+                                                        {formatL(parseMoney(p?.cantidad ?? p?.amount ?? p?.monto) ?? 0)}
+                                                    </Typography>
                                                 </Box>
                                             ))}
                                         </Box>
-                                    ) : null}
+                                        );
+                                    })()}
                                 </Box>
                             ) : null}
                         </DialogContent>
-                        <DialogActions sx={{ justifyContent: "flex-start" }}>
-                            <Button
-                                onClick={() => {
-                                    stopFacturaPolling();
-                                    set_openResumen(false);
-                                }}
-                            >
-                                Cerrar
-                            </Button>
-                            <Button
-                                variant="contained"
-                                sx={{ backgroundColor: "#5b75e7", ":hover": { backgroundColor: "#5b75e7" } }}
-                                onClick={() => {
-                                    stopFacturaPolling();
-                                    set_openResumen(false);
-                                    navigate(offerContainerId ? `/plan/${offerContainerId}` : "/plan");
-                                }}
-                                disabled={!offerContainerId}
-                            >
-                                Finalizar
-                            </Button>
+                        <DialogActions sx={{ justifyContent: "center" }}>
+                        <Button
+                            variant="contained"
+                            sx={{ 
+                            backgroundColor: "#5b75e7", 
+                            ":hover": { backgroundColor: "#5b75e7" } 
+                            }}
+                            onClick={() => {
+                            stopFacturaPolling();
+                            set_openResumen(false);
+                            // Redirige a "/" recargando la página
+                            window.location.href = "/";
+                            }}
+                        >
+                            Finalizar
+                        </Button>
                         </DialogActions>
                     </Dialog>
                         </>
