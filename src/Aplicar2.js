@@ -19,6 +19,7 @@ import {
     Typography,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+import { orange } from "@mui/material/colors";
 import BarraFinal from "./componentes/BarraFinal";
 import BarraApp from "./componentes/BarraApp";
 import FormCambiarBanco from "./componentes/cambiarBanco.js";
@@ -54,6 +55,10 @@ function Aplicar2() {
     const [recibirError, set_recibirError] = useState("");
     const facturaIntervalRef = useRef(null);
 
+    const [tieneOtroPrestamo, set_tieneOtroPrestamo] = useState(false);
+    const [statusPrestamo, set_statusPrestamo] = useState(false);
+    const [estaCargandoValidacionPrestamo, set_estaCargandoValidacionPrestamo] = useState(true);
+
     const token = gContext.logeado?.token;
     const set_logeado = gContext.set_logeado;
 
@@ -69,6 +74,49 @@ function Aplicar2() {
             }
         };
     }, []);
+
+    function validarSiTienePrestamos() {
+        set_estaCargandoValidacionPrestamo(true);
+        axios.request({
+            url: `${config.apiUrl}/api/app/getCustomerOfferList.php`,
+            method: "post",
+            data: { sid: token },
+        })
+        .then((res) => {
+            set_estaCargandoValidacionPrestamo(false);
+            if (res.data.status === "ER") {
+                console.log(res.data.payload.message);
+            }
+            if (res.data.status === "ERS") {
+                localStorage.removeItem("arani_session_id");
+                localStorage.removeItem("arani_session_data");
+                if (typeof set_logeado === "function") set_logeado({ estado: false, token: "" });
+            }
+            if (res.data.status === "OK") {
+                set_tieneOtroPrestamo(false);
+                for (const key in res.data.payload) {
+                    if (Object.hasOwnProperty.call(res.data.payload, key)) {
+                        const element = res.data.payload[key];
+                        if (element.status === 3) set_tieneOtroPrestamo(true);
+                        if (element.status === 1) set_tieneOtroPrestamo(true);
+                        if (element.status === 0) set_tieneOtroPrestamo(true);
+                        if (element.status === 8) set_tieneOtroPrestamo(true);
+                        if (element.status === 5) set_tieneOtroPrestamo(true);
+                        set_statusPrestamo(element.status);
+                    }
+                }
+            }
+        }).catch((err) => {
+            console.log("[Aplicar2] getCustomerOfferList.php -> error", err);
+            set_estaCargandoValidacionPrestamo(false);
+        });
+    }
+
+    useEffect(() => {
+        if (!token) return;
+        validarSiTienePrestamos();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token]);
 
     const OFFER_DR_TOKEN = "sFtBTsxF5Eri5zvQ8rqjQBiQWKFiThEwzBztGcJ9lY60Lyf50QGdoLKfUzXPMEqt";
 
@@ -602,7 +650,7 @@ function Aplicar2() {
     const hasBankAndAccount = bankValue !== "" && bankValue !== "0" && accountValue !== "" && accountValue !== "0";
     const canRecibir = hasPlanSelected && hasBankAndAccount && Boolean(verCondiciones);
 
-    const loadingInfo = loadingPerfil || loadingOffer || loadingBank;
+    const loadingInfo = loadingPerfil || loadingOffer || loadingBank || estaCargandoValidacionPrestamo;
 
     const stopFacturaPolling = () => {
         if (facturaIntervalRef.current) {
@@ -700,7 +748,8 @@ function Aplicar2() {
         return;
     }
 
-    const periodDays = Number(selectedPlan.meses) * 30;
+    const mesesNum = Number(selectedPlan.meses);
+    const periodDays = mesesNum === 1 ? 31 : mesesNum * 30;
     const amount = parseMoney(selectedPlan.recibes) ?? 0;
     if (!Number.isFinite(periodDays) || periodDays <= 0 || amount <= 0) {
         set_recibirError("El plan seleccionado no es válido.");
@@ -890,6 +939,18 @@ function Aplicar2() {
                             <Typography sx={{ mt: 2, textAlign: "center", color: "text.secondary" }}>
                                 Consultando la información en nuestros servicios
                             </Typography>
+                        </Box>
+                    ) : tieneOtroPrestamo ? (
+                        <Box sx={{ mt: 4, mb: 4, maxWidth: 520, mx: "auto" }}>
+                            {(statusPrestamo === 0) && <Typography variant="body2" sx={{color: '#26c926', paddingTop: '1rem'}}>Gracias por solicitar un préstamo con ARANI. Queremos informarte que hemos recibido tu solicitud y estamos trabajando en revisar la información que nos has proporcionado.</Typography>}
+                                {(statusPrestamo === 1) && <Typography variant="body2" sx={{color: '#26c926', paddingTop: '1rem'}}>Le informamos que su préstamo ha sido asignado a uno de nuestros agentes y actualmente se encuentra en proceso de validación. Nos esforzamos por asegurarnos de que cada préstamo sea revisado cuidadosamente para garantizar la mejor experiencia de préstamo posible.</Typography>}
+                                {(statusPrestamo === 5) && <Typography variant="body2" sx={{color: '#26c926', paddingTop: '1rem'}}>Le informamos que su préstamo ha sido asignado a uno de nuestros agentes y actualmente se encuentra en proceso de validación. Nos esforzamos por asegurarnos de que cada préstamo sea revisado cuidadosamente para garantizar la mejor experiencia de préstamo posible.</Typography>}
+                                {(statusPrestamo === 4) && <Typography variant="body2" sx={{color: '#26c926', paddingTop: '1rem'}}><b>Detalle:</b> Su préstamo ya ha sido pagado por completo.</Typography>}
+                                {(statusPrestamo === 2) && <Typography variant="body2" sx={{color: 'red', paddingTop: '1rem'}}>Le informamos que hemos revisado detalladamente la información que nos proporcionó para su solicitud de préstamo en línea, pero lamentablemente, su solicitud ha sido rechazada por uno de nuestros agentes.</Typography>}
+                                {(statusPrestamo === 3) && <Typography variant="body2" sx={{color: orange[600], paddingTop: '1rem'}}>Ya tiene un préstamo activo.</Typography>}
+                            <Divider sx={{ m: '1rem 0' }} />
+                            <Button component={Link} to="/historial" variant="contained" sx={{ mr: 1 }}>Historial</Button>
+                            <Button component={Link} to="/" variant="outlined">Volver al inicio</Button>
                         </Box>
                     ) : (
 
