@@ -58,6 +58,7 @@ function Aplicar2() {
     const [tieneOtroPrestamo, set_tieneOtroPrestamo] = useState(false);
     const [statusPrestamo, set_statusPrestamo] = useState(false);
     const [estaCargandoValidacionPrestamo, set_estaCargandoValidacionPrestamo] = useState(true);
+    const [offerRechazado, set_offerRechazado] = useState(false);
 
     const token = gContext.logeado?.token;
     const set_logeado = gContext.set_logeado;
@@ -150,7 +151,7 @@ function Aplicar2() {
 
     const formatLempirasAmount = (amount) => {
         const safe = Number.isFinite(amount) ? amount : 0;
-        return safe.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        return safe.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
     const formatDateDDMMYYYY = (date) => {
@@ -579,8 +580,12 @@ function Aplicar2() {
                 console.log("[Aplicar2] getOfferDrClient -> response", res?.data);
                 if (res?.data?.success) {
                     set_offerDr(res.data);
+                    set_offerRechazado(false);
                 } else {
                     set_offerDr(null);
+                    if (res?.data?.success === false) {
+                        set_offerRechazado(true);
+                    }
                 }
             })
             .catch((err) => {
@@ -940,9 +945,17 @@ function Aplicar2() {
                                 Consultando la información en nuestros servicios
                             </Typography>
                         </Box>
+                    ) : offerRechazado ? (
+                        <Box sx={{ mt: 4, mb: 4, maxWidth: 520, mx: "auto" }}>
+                            <Typography variant="body2" sx={{ color: 'red', paddingTop: '1rem' }}>
+                                Queremos agradecerte por haber confiado en nosotros con tu primer préstamo. Por el momento no es posible aprobar una nueva solicitud, pero más adelante tu perfil podrá ser revisado nuevamente. Te invitamos a volver a intentarlo en 3 meses. Gracias por tu confianza y esperamos poder acompañarte otra vez en el futuro.
+                            </Typography>
+                            <Divider sx={{ m: '1rem 0' }} />
+                            <Button component={Link} to="/" variant="outlined">Volver al inicio</Button>
+                        </Box>
                     ) : tieneOtroPrestamo ? (
                         <Box sx={{ mt: 4, mb: 4, maxWidth: 520, mx: "auto" }}>
-                            {(statusPrestamo === 0) && <Typography variant="body2" sx={{color: '#26c926', paddingTop: '1rem'}}>Gracias por solicitar un préstamo con ARANI. Queremos informarte que hemos recibido tu solicitud y estamos trabajando en revisar la información que nos has proporcionado.</Typography>}
+                                {(statusPrestamo === 0) && <Typography variant="body2" sx={{color: '#26c926', paddingTop: '1rem'}}>Gracias por solicitar un préstamo con ARANI. Queremos informarte que hemos recibido tu solicitud y estamos trabajando en revisar la información que nos has proporcionado.</Typography>}
                                 {(statusPrestamo === 1) && <Typography variant="body2" sx={{color: '#26c926', paddingTop: '1rem'}}>Le informamos que su préstamo ha sido asignado a uno de nuestros agentes y actualmente se encuentra en proceso de validación. Nos esforzamos por asegurarnos de que cada préstamo sea revisado cuidadosamente para garantizar la mejor experiencia de préstamo posible.</Typography>}
                                 {(statusPrestamo === 5) && <Typography variant="body2" sx={{color: '#26c926', paddingTop: '1rem'}}>Le informamos que su préstamo ha sido asignado a uno de nuestros agentes y actualmente se encuentra en proceso de validación. Nos esforzamos por asegurarnos de que cada préstamo sea revisado cuidadosamente para garantizar la mejor experiencia de préstamo posible.</Typography>}
                                 {(statusPrestamo === 4) && <Typography variant="body2" sx={{color: '#26c926', paddingTop: '1rem'}}><b>Detalle:</b> Su préstamo ya ha sido pagado por completo.</Typography>}
@@ -1053,21 +1066,21 @@ function Aplicar2() {
                                 </Box>
                                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
                                     <Typography variant="body2">Recibes</Typography>
-                                    <Typography>{formatL(plan.recibes).replace(".00", "")}</Typography>
+                                    <Typography>{formatL(plan.recibes)}</Typography>
                                 </Box>
 
                                 <Divider sx={{ width: "calc(100% + 16px)", mx: -1, my: 1.5 }} />
 
                                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
                                     <Typography variant="body2">Cuota mensual</Typography>
-                                    <Typography>{formatL(plan.cuotaMensual).replace(".00", "")}</Typography>
+                                    <Typography>{formatL(plan.cuotaMensual)}</Typography>
                                 </Box>
 
                                 <Divider sx={{ width: "calc(100% + 16px)", mx: -1, my: 1.5 }} />
 
                                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
                                     <Typography variant="body2">Total</Typography>
-                                    <Typography>{formatL(plan.total).replace(".00", "")}</Typography>
+                                    <Typography>{formatL(plan.total)}</Typography>
                                 </Box>
 
                                 <Divider sx={{ width: "calc(100% + 16px)", mx: -1, my: 1.5 }} />
@@ -1098,7 +1111,7 @@ function Aplicar2() {
                             <Typography variant="body2">Pagas</Typography>
                             <Typography sx={{ fontWeight: 700 }}>
                                 {selectedPlan
-                                    ? `${formatL(selectedPlan.cuotaMensual).replace(".00", "")} X ${selectedPlan.meses}`
+                                    ? `${formatL(selectedPlan.cuotaMensual)} X ${selectedPlan.meses}`
                                     : "L 0.00 X 0"}
                             </Typography>
                             <Box />

@@ -570,6 +570,7 @@ function Main() {
                                                     token: tokenPriceList,
                                                     dias: dias,
                                                     salario: Number(usuarioDetalle.income ?? 0),
+                                                    lastLoanDaysLate: dias,
                                                 };
 
                                                 console.log("[Aplicar] postPriceList -> URL:", "https://app.aranih.com/api/DecisionRules/postPriceList.php");
@@ -637,8 +638,43 @@ function Main() {
                                                     console.error("[Aplicar] modeloClienteExistente -> Error al realizar la solicitud:", error);
                                                 }
 
-                                                // Ahora sí: avanzar a /aplicar2 (hash router)
-                                                window.location.hash = "#/aplicar2";
+                                                // Consultar tipo de cliente para decidir ruta
+                                                const tipoClientePayload = {
+                                                    customerId: String(usuarioDetalle.customer_id ?? ""),
+                                                    token: "I25WlOdFy0yayTP3FAJe6JQZTmidHJm5M711zTdCtihlkgl4ZcC0tfKqXXatKqbZ",
+                                                };
+
+                                                console.log("[Aplicar] getTipoCliente -> payload:", tipoClientePayload);
+
+                                                const tipoClienteResponse = await fetch("https://app.aranih.com/api/app/getTipoCliente.php", {
+                                                    method: "POST",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify(tipoClientePayload),
+                                                });
+
+                                                if (!tipoClienteResponse.ok) {
+                                                    const errText = await tipoClienteResponse.text();
+                                                    console.error("[Aplicar] getTipoCliente -> ERROR:", errText);
+                                                    return; // NO avanzar
+                                                }
+
+                                                const tipoClienteRaw = (await tipoClienteResponse.text()).trim();
+                                                console.log("[Aplicar] getTipoCliente -> respuesta cruda:", tipoClienteRaw);
+
+                                                // Quitar comillas si vienen en formato JSON string
+                                                let tipoClienteResult = tipoClienteRaw;
+                                                try { tipoClienteResult = JSON.parse(tipoClienteRaw); } catch(e) {}
+                                                tipoClienteResult = String(tipoClienteResult).trim();
+
+                                                console.log("[Aplicar] getTipoCliente -> resultado parseado:", tipoClienteResult);
+
+                                                if (tipoClienteResult === "nuevo") {
+                                                    console.log("[Aplicar] -> Redirigiendo a /aplicar (cliente nuevo)");
+                                                    window.location.hash = "#/aplicar";
+                                                } else {
+                                                    console.log("[Aplicar] -> Redirigiendo a /aplicar2 (cliente existente:", tipoClienteResult, ")");
+                                                    window.location.hash = "#/aplicar2";
+                                                }
                                             } catch (error) {
                                                 console.error("[Aplicar] Error general (postPriceList/modeloClienteExistente):", error);
                                                 // NO avanzar a /aplicar2
