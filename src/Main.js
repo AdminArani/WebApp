@@ -14,7 +14,8 @@ import tile_historial from "./images/tile_historial.svg";
 import { Link } from "react-router-dom";
 import BarraApp from "./componentes/BarraApp.js";
 import ModalDatosFaltantes from "./componentes/ModalDatosFaltantes";
-import axios from "axios";
+import axios from "axios";      
+import { orange } from "@mui/material/colors";
 
 function Main() {
     const gContext = useContext(AppContext);
@@ -147,7 +148,8 @@ function Main() {
                     "Gracias, Honduras",
                     "Roatán, Honduras",
                     "French Harbour, Honduras",
-                    "Santa Rosa, Honduras"
+                    "Santa Rosa, Honduras",
+                    "Intibucá, Honduras",
                 ];
         
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
@@ -277,7 +279,7 @@ function Main() {
     }, []);
 
     const mensajesErrores = {
-        0: "Tu perfil sigue en proceso de validación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+        0: "Vas muy bien! Ya pasaste a la segunda etapa",
         1: "No pudimos confirmar tu foto selfie en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         2: "Tu recibo público no es válido en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         3: "No pudimos confirmar tus documentos en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
@@ -320,6 +322,26 @@ function Main() {
           fontWeight: 'bold',
           lineHeight: '1.5',
         },
+        containerOk: {
+                    padding: '16px',
+                    margin: '16px auto',
+                    maxWidth: '500px',
+                    backgroundColor: '#f0fff4',
+                    border: '1px solid #b7ebc6',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                },
+                textOk: {
+                    color: '#5b75e7',
+                    fontSize: '16px',
+                    fontWeight: 'bold',
+                    lineHeight: '1.5',
+                },
+                linkOk: {
+                    color: orange[700],
+                    textDecoration: 'underline',
+                },
     };
 
     const [showModal, setShowModal] = useState(false);
@@ -373,35 +395,62 @@ function Main() {
                         </div>
                     )}
 
-                    {usuarioDetalle.status === "0" && (
-                            <div style={styles.container}>
-                                {(() => {
-                                    // Si existe errores_perfil, mostrarlo siempre (sin importar cuántos días hayan pasado)
-                                    if (usuarioDetalle.errores_perfil && usuarioDetalle.errores_perfil !== "20") {
+                    {(usuarioDetalle.status === "0" || usuarioDetalle.status === 0) && (
+                        <>
+                            {(() => {
+                                const errorPerfil = usuarioDetalle.errores_perfil;
+                                const errorKey = errorPerfil != null ? String(errorPerfil) : "";
+
+                                // Si existe errores_perfil, mostrarlo siempre (sin importar cuántos días hayan pasado)
+                                // Nota: `0` es un valor válido pero es falsy, por eso se valida contra null/undefined.
+                                if (errorPerfil != null && errorKey !== "" && errorKey !== "20") {
+                                    // Caso especial: errores_perfil = 0 (mostrar en verde + link interno)
+                                    if (errorKey === "0") {
                                         return (
+                                            <div style={styles.containerOk}>
+                                                <Typography style={styles.textOk}>
+                                                    {mensajesErrores[0]}
+                                                    <span> 🎉</span>
+                                                    <br />
+                                                    Estás a un paso de solicitar tu préstamo.
+                                                    <br />
+                                                    <br />
+                                                    Completa tu perfil ahora y desbloquea tu monto disponible en unos minutos.
+                                                    <br />
+                                                    <Link to="/perfil" style={styles.linkOk}>Completar mi perfil</Link>
+                                                </Typography>
+                                            </div>
+                                        );
+                                    }
+
+                                    // Resto de errores (mantener estilo rojo)
+                                    return (
+                                        <div style={styles.container}>
                                             <Typography
                                                 style={styles.text}
                                                 dangerouslySetInnerHTML={{
-                                                    __html: mensajesErrores[usuarioDetalle.errores_perfil] || usuarioDetalle.errores_perfil,
+                                                    __html: mensajesErrores[errorKey] || errorPerfil,
                                                 }}
                                             />
-                                        );
-                                    }
-                                    // Si no hay error o la fecha no es un día antes, muestra el mensaje normal
-                                    return (
-                                        <>
-                                            <Typography style={styles.text}>
-                                                Hemos recibido los cambios y estamos validando tus datos. Te estaremos respondiendo dentro de 48 horas hábiles, gracias por tu paciencia!
-                                            </Typography>
-                                            <Typography style={{ ...styles.text, marginTop: '8px' }}>
-                                                <a href="https://app.arani.hn/#/perfil" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db', textDecoration: 'none' }}>
-                                                    Ir a mi perfil
-                                                </a>
-                                            </Typography>
-                                        </>
+                                        </div>
                                     );
-                                })()}
-                        </div>
+                                }
+
+                                // Si no hay error o la fecha no es un día antes, muestra el mensaje normal
+                                return (
+                                    <div style={styles.container}>
+                                        <Typography style={styles.text}>
+                                            Hemos recibido los cambios y estamos validando tus datos. Te estaremos respondiendo dentro de 48 horas hábiles, gracias por tu paciencia!
+                                        </Typography>
+                                        <Typography style={{ ...styles.text, marginTop: '8px' }}>
+                                            <a href="https://app.arani.hn/#/perfil" target="_blank" rel="noopener noreferrer" style={{ color: '#3498db', textDecoration: 'none' }}>
+                                                Ir a mi perfil
+                                            </a>
+                                        </Typography>
+                                    </div>
+                                );
+                            })()}
+                        </>
                     )}
 
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
@@ -518,7 +567,7 @@ function Main() {
                             // Caso normal
                             return showAplicarLink ? (
                                 <Link
-                                    to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per) ? "#" : "/aplicar"}
+                                    to={(!usuarioDetalle.ref_tipo_per || !usuarioDetalle.ref_nom_per || !usuarioDetalle.ref_tel_per) ? "#" : "/aplicar2"}
                                     className="tilebotonpri"
                                     onClick={async (e) => {
                                         if (
@@ -569,6 +618,7 @@ function Main() {
                                                     token: tokenPriceList,
                                                     dias: dias,
                                                     salario: Number(usuarioDetalle.income ?? 0),
+                                                    lastLoanDaysLate: dias,
                                                 };
 
                                                 console.log("[Aplicar] postPriceList -> URL:", "https://app.aranih.com/api/DecisionRules/postPriceList.php");
@@ -636,11 +686,46 @@ function Main() {
                                                     console.error("[Aplicar] modeloClienteExistente -> Error al realizar la solicitud:", error);
                                                 }
 
-                                                // Ahora sí: avanzar a /aplicar (hash router)
-                                                window.location.hash = "#/aplicar";
+                                                // Consultar tipo de cliente para decidir ruta
+                                                const tipoClientePayload = {
+                                                    customerId: String(usuarioDetalle.customer_id ?? ""),
+                                                    token: "I25WlOdFy0yayTP3FAJe6JQZTmidHJm5M711zTdCtihlkgl4ZcC0tfKqXXatKqbZ",
+                                                };
+
+                                                console.log("[Aplicar] getTipoCliente -> payload:", tipoClientePayload);
+
+                                                const tipoClienteResponse = await fetch("https://app.aranih.com/api/app/getTipoCliente.php", {
+                                                    method: "POST",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify(tipoClientePayload),
+                                                });
+
+                                                if (!tipoClienteResponse.ok) {
+                                                    const errText = await tipoClienteResponse.text();
+                                                    console.error("[Aplicar] getTipoCliente -> ERROR:", errText);
+                                                    return; // NO avanzar
+                                                }
+
+                                                const tipoClienteRaw = (await tipoClienteResponse.text()).trim();
+                                                console.log("[Aplicar] getTipoCliente -> respuesta cruda:", tipoClienteRaw);
+
+                                                // Quitar comillas si vienen en formato JSON string
+                                                let tipoClienteResult = tipoClienteRaw;
+                                                try { tipoClienteResult = JSON.parse(tipoClienteRaw); } catch(e) {}
+                                                tipoClienteResult = String(tipoClienteResult).trim();
+
+                                                console.log("[Aplicar] getTipoCliente -> resultado parseado:", tipoClienteResult);
+
+                                                if (tipoClienteResult === "nuevo") {
+                                                    console.log("[Aplicar] -> Redirigiendo a /aplicar (cliente nuevo)");
+                                                    window.location.hash = "#/aplicar";
+                                                } else {
+                                                    console.log("[Aplicar] -> Redirigiendo a /aplicar2 (cliente existente:", tipoClienteResult, ")");
+                                                    window.location.hash = "#/aplicar2";
+                                                }
                                             } catch (error) {
                                                 console.error("[Aplicar] Error general (postPriceList/modeloClienteExistente):", error);
-                                                // NO avanzar a /aplicar
+                                                // NO avanzar a /aplicar2
                                             } finally {
                                                 // Si no navegó (por return/error), quitar loader aquí
                                                 // Si ya navegó, este setLoading podría no ejecutarse antes del unmount, pero no afecta.
