@@ -586,7 +586,47 @@ function Main() {
                                             e.preventDefault();
 
                                             try {
-                                                // --- NUEVA REQUEST ANTES DE IR A /aplicar ---
+                                                // --- 1) Consultar tipo de cliente PRIMERO para obtener lastLoanDaysLate ---
+                                                const tipoClientePayload = {
+                                                    customerId: String(usuarioDetalle.customer_id ?? ""),
+                                                    token: "I25WlOdFy0yayTP3FAJe6JQZTmidHJm5M711zTdCtihlkgl4ZcC0tfKqXXatKqbZ",
+                                                };
+
+                                                console.log("[Aplicar] getTipoCliente -> payload:", tipoClientePayload);
+
+                                                const tipoClienteResponse = await fetch("https://app.aranih.com/api/app/getTipoCliente.php", {
+                                                    method: "POST",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify(tipoClientePayload),
+                                                });
+
+                                                if (!tipoClienteResponse.ok) {
+                                                    const errText = await tipoClienteResponse.text();
+                                                    console.error("[Aplicar] getTipoCliente -> ERROR:", errText);
+                                                    return; // NO avanzar
+                                                }
+
+                                                const tipoClienteRaw = (await tipoClienteResponse.text()).trim();
+                                                console.log("[Aplicar] getTipoCliente -> respuesta cruda:", tipoClienteRaw);
+
+                                                // Intentar parsear como JSON para extraer lastLoanDaysLate
+                                                let tipoClienteParsed = tipoClienteRaw;
+                                                try { tipoClienteParsed = JSON.parse(tipoClienteRaw); } catch(e) {}
+
+                                                // Extraer lastLoanDaysLate de la respuesta
+                                                const lastLoanDaysLate = (tipoClienteParsed && typeof tipoClienteParsed === 'object')
+                                                    ? Number(tipoClienteParsed.lastLoanDaysLate ?? 0)
+                                                    : 0;
+                                                console.log("[Aplicar] getTipoCliente -> lastLoanDaysLate extraído:", lastLoanDaysLate);
+
+                                                // Determinar tipo de cliente para la redirección
+                                                let tipoClienteResult = (typeof tipoClienteParsed === 'object')
+                                                    ? String(tipoClienteParsed.tipo ?? tipoClienteParsed).trim()
+                                                    : String(tipoClienteParsed).trim();
+
+                                                console.log("[Aplicar] getTipoCliente -> resultado parseado:", tipoClienteResult);
+
+                                                // --- 2) postPriceList (ahora con lastLoanDaysLate de getTipoCliente) ---
                                                 const tokenPriceList = "d4d0YcB89pFZB4qYQALfQiqpTGaDY4VrsZrFSy8OomiVfe2pbOxk9TxbTFOTULTJ";
 
                                                 const parseFechaSQL = (value) => {
@@ -618,7 +658,7 @@ function Main() {
                                                     token: tokenPriceList,
                                                     dias: dias,
                                                     salario: Number(usuarioDetalle.income ?? 0),
-                                                    lastLoanDaysLate: dias,
+                                                    lastLoanDaysLate: lastLoanDaysLate,
                                                 };
 
                                                 console.log("[Aplicar] postPriceList -> URL:", "https://app.aranih.com/api/DecisionRules/postPriceList.php");
@@ -630,6 +670,7 @@ function Main() {
                                                 console.log("[Aplicar] postPriceList -> hoy:", hoy);
                                                 console.log("[Aplicar] postPriceList -> dias calculados:", dias);
                                                 console.log("[Aplicar] postPriceList -> usuarioDetalle.income:", usuarioDetalle.income);
+                                                console.log("[Aplicar] postPriceList -> lastLoanDaysLate (de getTipoCliente):", lastLoanDaysLate);
                                                 console.log("[Aplicar] postPriceList -> payload:", payloadPriceList);
 
                                                 const priceListResponse = await fetch("https://app.aranih.com/api/DecisionRules/postPriceList.php", {
@@ -647,16 +688,11 @@ function Main() {
                                                     console.error("[Aplicar] postPriceList -> ERROR body:", errText);
                                                     return; // NO avanzar a /aplicar
                                                 } else {
-                                                    // Si el endpoint devuelve JSON y quieres verlo:
-                                                    // const okJson = await priceListResponse.json();
-                                                    // console.log("[Aplicar] postPriceList -> OK JSON:", okJson);
-
-                                                    // Si no estás seguro si es JSON:
                                                     const okText = await priceListResponse.text();
                                                     console.log("[Aplicar] postPriceList -> OK body:", okText);
                                                 }
 
-                                                // --- TU CÓDIGO ANTERIOR (SIN CAMBIOS, solo agrego logs) ---
+                                                // --- 3) modeloClienteExistente ---
                                                 try {
                                                     const payloadModeloCliente = {
                                                         codigo: "f7a6d3b4-5c29-4e7f-92a4-28e5d39c3a8e",
@@ -686,36 +722,7 @@ function Main() {
                                                     console.error("[Aplicar] modeloClienteExistente -> Error al realizar la solicitud:", error);
                                                 }
 
-                                                // Consultar tipo de cliente para decidir ruta
-                                                const tipoClientePayload = {
-                                                    customerId: String(usuarioDetalle.customer_id ?? ""),
-                                                    token: "I25WlOdFy0yayTP3FAJe6JQZTmidHJm5M711zTdCtihlkgl4ZcC0tfKqXXatKqbZ",
-                                                };
-
-                                                console.log("[Aplicar] getTipoCliente -> payload:", tipoClientePayload);
-
-                                                const tipoClienteResponse = await fetch("https://app.aranih.com/api/app/getTipoCliente.php", {
-                                                    method: "POST",
-                                                    headers: { "Content-Type": "application/json" },
-                                                    body: JSON.stringify(tipoClientePayload),
-                                                });
-
-                                                if (!tipoClienteResponse.ok) {
-                                                    const errText = await tipoClienteResponse.text();
-                                                    console.error("[Aplicar] getTipoCliente -> ERROR:", errText);
-                                                    return; // NO avanzar
-                                                }
-
-                                                const tipoClienteRaw = (await tipoClienteResponse.text()).trim();
-                                                console.log("[Aplicar] getTipoCliente -> respuesta cruda:", tipoClienteRaw);
-
-                                                // Quitar comillas si vienen en formato JSON string
-                                                let tipoClienteResult = tipoClienteRaw;
-                                                try { tipoClienteResult = JSON.parse(tipoClienteRaw); } catch(e) {}
-                                                tipoClienteResult = String(tipoClienteResult).trim();
-
-                                                console.log("[Aplicar] getTipoCliente -> resultado parseado:", tipoClienteResult);
-
+                                                // --- 4) Redirigir según tipo de cliente ---
                                                 if (tipoClienteResult === "nuevo") {
                                                     console.log("[Aplicar] -> Redirigiendo a /aplicar (cliente nuevo)");
                                                     window.location.hash = "#/aplicar";

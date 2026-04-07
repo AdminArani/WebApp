@@ -10,6 +10,7 @@ import Registro from './Registro.js';
 import Perfil from './Perfil.js';
 import Login from './Login.js';
 import Aplicar from './Aplicar.js';
+import Aplicar2 from './Aplicar2.js';
 import Plan from './Plan.js';
 import NoExiste from './NoExiste.js';
 import Historial from './Historial.js';
@@ -96,6 +97,7 @@ function App() {
                             <Route path="/" element={(logeado.estado)?<Main />:<Login />} />
                             <Route path="/perfil" element={(logeado.estado)?<Perfil />:<Login />} />
                             <Route path="/aplicar" element={(logeado.estado)?<Aplicar />:<Login />} />
+                            <Route path="/aplicar2" element={(logeado.estado)?<Aplicar2 />:<Login />} />
                             <Route path="/plan" element={(logeado.estado)?<Plan />:<Login />} />
                             <Route path="/plan/:idprestamoparam" element={(logeado.estado)?<Plan />:<Login />} />
                             <Route path="/historial" element={(logeado.estado)?<Historial />:<Login />} />
