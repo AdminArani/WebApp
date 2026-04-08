@@ -278,7 +278,7 @@ function Main() {
         fetchUbicacion();
     }, []);
 
-    const mensajesErrores = {
+   const mensajesErrores = {
         0: "Vas muy bien! Ya pasaste a la segunda etapa",
         1: "No pudimos confirmar tu foto selfie en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
         2: "Tu recibo público no es válido en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
@@ -399,11 +399,10 @@ function Main() {
                         <>
                             {(() => {
                                 const errorPerfil = usuarioDetalle.errores_perfil;
-                                const errorKey = errorPerfil != null ? String(errorPerfil) : "";
+                                const errorKey = (errorPerfil != null && String(errorPerfil).trim() !== "") ? String(errorPerfil) : "0";
 
-                                // Si existe errores_perfil, mostrarlo siempre (sin importar cuántos días hayan pasado)
-                                // Nota: `0` es un valor válido pero es falsy, por eso se valida contra null/undefined.
-                                if (errorPerfil != null && errorKey !== "" && errorKey !== "20") {
+                                // Si errores_perfil está vacío/null/undefined se trata como "0" (mensaje verde).
+                                if (errorKey !== "20") {
                                     // Caso especial: errores_perfil = 0 (mostrar en verde + link interno)
                                     if (errorKey === "0") {
                                         return (
