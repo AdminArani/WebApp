@@ -1259,7 +1259,7 @@ function Plan() {
                 ).toString();
 
                 const resB = await fetch(
-                    "https://app.aranih.com/api/chatbot/pagosBac/postNicoPago.php",
+                    "https://app.aranih.com/api/chatbot/pagosBac/postNicoPago2.php",
                     {
                         method: "POST",
                         headers: {
@@ -1330,7 +1330,7 @@ function Plan() {
             await logRepeated("payload", payload);
 
             const res = await fetch(
-                "https://app.aranih.com/api/chatbot/pagosBac/postNicoPago.php",
+                "https://app.aranih.com/api/chatbot/pagosBac/postNicoPago2.php",
                 {
                     method: "POST",
                     headers: {
