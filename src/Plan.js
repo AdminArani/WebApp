@@ -602,6 +602,26 @@ function Plan() {
         return Number.isFinite(sp) ? sp + 1 : null;
     };
 
+    const prepararPagoN1coUI = (pagoObjetivo) => {
+        set_pagoseleccionado(pagoObjetivo);
+
+        const idx = listaPagos.findIndex((p) => p.id === pagoObjetivo.id);
+        setN1coPagoLabel(`Pago ${idx + 1} de ${listaPagos.length}`);
+        setN1coAmount(Number(calcMontoCuotaN1co(pagoObjetivo)).toFixed(2));
+
+        setN1coLink("");
+        setN1coOrderCode("");
+        setN1coOrderStatus("");
+        setN1coPaso("idle");
+        setN1coInsertado(false);
+        setErrorLinkN1co("");
+        setN1coForzarNuevoLink(false);
+        limpiarTimersN1co();
+
+        setOpenModalN1co(true);
+    };
+
+
     const handleOpenModalN1co = async () => {
             let c = null;
 
@@ -620,98 +640,56 @@ function Plan() {
                 return;
             }
 
-            const siguientePago = listaPagos.find((p) => {
+            const pagosPendientesCore = listaPagos.filter((p) => {
                 const st = parseInt(p.status, 10);
                 return st !== 1 && st !== 6;
             });
 
-            if (!siguientePago) {
+            if (!pagosPendientesCore.length) {
                 setErrorLinkN1co("Ya ha pagado todas las cuotas.");
                 setOpenModalN1co(true);
                 return;
             }
 
-            const identificadorPagoCuota = getIdentificadorPagoCuota(siguientePago);
-
-            if (!identificadorPagoCuota) {
-                setErrorLinkN1co("No se pudo determinar la cuota a pagar.");
-                setOpenModalN1co(true);
-                return;
-            }
-
             try {
-                const estadoPagoDB = await consultarPagoActualN1co({
-                    idCliente: c?.customer_id,
-                    identificadorPrestamo: siguientePago?.container_id,
-                    identificadorPago: identificadorPagoCuota,
-                });
+                for (const pago of pagosPendientesCore) {
+                    const identificadorPagoCuota = getIdentificadorPagoCuota(pago);
 
-                // Si ya existe un pendiente para esta misma cuota, pedir confirmación
-                if (estadoPagoDB?.existePendiente) {
-                    set_pagoseleccionado(siguientePago);
-                    setN1coPendienteInfo({
-                        ...estadoPagoDB,
-                        pago: siguientePago,
-                        pagoLabel: `Pago ${listaPagos.findIndex((p) => p.id === siguientePago.id) + 1} de ${listaPagos.length}`,
-                        monto: Number(calcMontoCuotaN1co(siguientePago)).toFixed(2),
-                    });
-                    setOpenModalReintentoN1co(true);
-                    return;
-                }
+                    if (!identificadorPagoCuota) {
+                        continue;
+                    }
 
-                // Si la cuota ya está aprobada en DB, buscar la siguiente realmente pendiente
-                if (estadoPagoDB?.existeAprobado) {
-                    const siguientesPagos = listaPagos.filter((p) => {
-                        const st = parseInt(p.status, 10);
-                        return st !== 1 && st !== 6;
+                    const estadoPagoDB = await consultarPagoActualN1co({
+                        idCliente: c?.customer_id,
+                        identificadorPrestamo: pago?.container_id,
+                        identificadorPago: identificadorPagoCuota,
                     });
 
-                    const pagoObjetivo = siguientesPagos.find((p) => {
-                        const idp = getIdentificadorPagoCuota(p);
-                        return idp !== identificadorPagoCuota;
-                    });
-
-                    if (!pagoObjetivo) {
-                        setErrorLinkN1co("Ya no hay más cuotas pendientes por pagar.");
-                        setOpenModalN1co(true);
+                    // 1) Si hay pendiente, mostrar advertencia y detener
+                    if (estadoPagoDB?.existePendiente) {
+                        set_pagoseleccionado(pago);
+                        setN1coPendienteInfo({
+                            ...estadoPagoDB,
+                            pago,
+                            pagoLabel: `Pago ${listaPagos.findIndex((p) => p.id === pago.id) + 1} de ${listaPagos.length}`,
+                            monto: Number(calcMontoCuotaN1co(pago)).toFixed(2),
+                        });
+                        setOpenModalReintentoN1co(true);
                         return;
                     }
 
-                    set_pagoseleccionado(pagoObjetivo);
+                    // 2) Si ya está aprobado o cerrado, saltar a la siguiente cuota
+                    if (estadoPagoDB?.existeAprobado || estadoPagoDB?.existeCerrado) {
+                        continue;
+                    }
 
-                    const idx = listaPagos.findIndex((p) => p.id === pagoObjetivo.id);
-                    setN1coPagoLabel(`Pago ${idx + 1} de ${listaPagos.length}`);
-                    setN1coAmount(Number(calcMontoCuotaN1co(pagoObjetivo)).toFixed(2));
-
-                    setN1coLink("");
-                    setN1coOrderCode("");
-                    setN1coOrderStatus("");
-                    setN1coPaso("idle");
-                    setN1coInsertado(false);
-                    setErrorLinkN1co("");
-                    setN1coForzarNuevoLink(false);
-                    limpiarTimersN1co();
-
-                    setOpenModalN1co(true);
+                    // 3) Si no existe nada en DB para esa cuota, esa es la cuota correcta
+                    prepararPagoN1coUI(pago);
                     return;
                 }
 
-                // Caso normal
-                set_pagoseleccionado(siguientePago);
-
-                const idx = listaPagos.findIndex((p) => p.id === siguientePago.id);
-                setN1coPagoLabel(`Pago ${idx + 1} de ${listaPagos.length}`);
-                setN1coAmount(Number(calcMontoCuotaN1co(siguientePago)).toFixed(2));
-
-                setN1coLink("");
-                setN1coOrderCode("");
-                setN1coOrderStatus("");
-                setN1coPaso("idle");
-                setN1coInsertado(false);
-                setErrorLinkN1co("");
-                setN1coForzarNuevoLink(false);
-                limpiarTimersN1co();
-
+                // Si recorrió todas y ninguna quedó disponible
+                setErrorLinkN1co("Ya no hay más cuotas pendientes por pagar.");
                 setOpenModalN1co(true);
             } catch (err) {
                 setErrorLinkN1co(err?.message || "No se pudo validar el estado actual del pago.");
