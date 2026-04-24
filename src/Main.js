@@ -455,8 +455,8 @@ function Main() {
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
                     {(() => {
                         const fechaActual = new Date();
-                        const inicioFeriado = new Date('2026-04-18'); // Inicio del feriado
-                        const finFeriado = new Date('2026-04-19'); // Fin del feriado
+                        const inicioFeriado = new Date('2026-04-25'); // Inicio del feriado
+                        const finFeriado = new Date('2026-04-26'); // Fin del feriado
 
                         if (usuarioDetalle.status === "1" && fechaActual >= inicioFeriado && fechaActual <= finFeriado) {
                             return (
@@ -513,7 +513,7 @@ function Main() {
 
                             // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
                             const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-                            const fechasFeriado = new Set(["2026-04-18", "2026-04-19"]);
+                            const fechasFeriado = new Set(["2026-04-25", "2026-04-26"]);
                             const esFeriado = fechasFeriado.has(claveFecha);
 
                             if (esFeriado) {
