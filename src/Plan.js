@@ -590,11 +590,29 @@ function Plan() {
         };
 
         const confirmarGeneracionLinkN1co = async () => {
+            let openedWindow = null;
+            let shouldCloseOpenedWindow = false;
+
             try {
                 setAccionPendienteN1co(true);
                 setOpenModalAvisoConfirmacionN1co(false);
-                await generarLinkN1co();
+
+                // En iOS/Safari el popup debe abrirse dentro del gesto del usuario.
+                openedWindow = window.open("", "_blank");
+                popupRef.current = openedWindow || null;
+                shouldCloseOpenedWindow = Boolean(openedWindow);
+
+                if (popupRef.current && popupRef.current.document) {
+                    popupRef.current.document.write("<html><head><title>Redirigiendo...</title></head><body style='font-family:sans-serif;padding:24px;'>Redirigiendo al enlace de pago...</body></html>");
+                    popupRef.current.document.close();
+                }
+
+                shouldCloseOpenedWindow = !(await generarLinkN1co());
             } finally {
+                if (shouldCloseOpenedWindow && popupRef.current && !popupRef.current.closed) {
+                    popupRef.current.close();
+                    popupRef.current = null;
+                }
                 setAccionPendienteN1co(false);
             }
         };
@@ -958,11 +976,15 @@ function Plan() {
                     console.error("Error registrando pago pendiente N1co:", e);
                     setN1coPaso("error");
                     setErrorLinkN1co(e?.message || "Error registrando pago pendiente N1co");
-                    return;
+                    return false;
                 }
 
-                // Abrir popup solo después de haber guardado el pendiente
-                popupRef.current = window.open(link, "_blank", "noopener,noreferrer");
+                // Reutiliza la ventana abierta por el gesto del usuario para evitar bloqueos en iPhone/Safari.
+                if (popupRef.current && !popupRef.current.closed) {
+                    popupRef.current.location.href = link;
+                } else {
+                    popupRef.current = window.open(link, "_blank");
+                }
 
                 setN1coPaso("esperando");
                 iniciarTimersN1co();
@@ -989,13 +1011,14 @@ function Plan() {
                             console.error("Error actualizando pago N1co:", e);
                             setN1coPaso("error");
                             setErrorLinkN1co(e?.message || "Error actualizando pago N1co");
+                            return false;
                         }
-                        return;
+                        return true;
                     }
 
                     setN1coPaso("error");
                     setErrorLinkN1co(`El pago no se completó. Estado: ${st1}`);
-                    return;
+                    return true;
                 }
 
                 // Polling cada 8 segundos
@@ -1044,10 +1067,13 @@ function Plan() {
                         setErrorLinkN1co(e?.message || "Error consultando status");
                     }
                 }, 8000);
+
+                return true;
             } catch (err) {
                 console.error(err);
                 setN1coPaso("error");
                 setErrorLinkN1co(err.message || "No se pudo generar el link de pago N1co.");
+                return false;
             } finally {
                 setCargandoLinkN1co(false);
             }
@@ -1553,7 +1579,7 @@ function Plan() {
 
                 {n1coLink && (
                     <Typography sx={{ mt: 2, wordBreak: "break-all" }}>
-                    Link generado: {n1coLink}
+                    Link generado: <a href={n1coLink} target="_blank" rel="noreferrer">Abrir enlace de pago</a>
                     </Typography>
                 )}
 
