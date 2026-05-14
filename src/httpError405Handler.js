@@ -15,6 +15,25 @@ let currentUserContext = null;
 
 const NOTIFICATION_COOLDOWN_MS = 15000;
 
+function getAllowedErrorReportHosts() {
+    const hosts = new Set([
+        window.location.hostname,
+        "app.aranih.com",
+        "aranih-com.creditonline.eu",
+    ]);
+
+    const apiUrl = safeString(process.env.REACT_APP_API_URL);
+    if (apiUrl) {
+        try {
+            hosts.add(new URL(apiUrl).hostname);
+        } catch (_) {
+            // Ignore malformed API URL configuration.
+        }
+    }
+
+    return hosts;
+}
+
 function getRequestUrl(input) {
     if (typeof input === "string") {
         return input;
@@ -29,6 +48,20 @@ function getRequestUrl(input) {
 
 function isErrorStatus(statusCode) {
     return typeof statusCode === "number" && statusCode >= 400;
+}
+
+function shouldReportRequestError(requestUrl) {
+    const normalizedUrl = safeString(requestUrl);
+    if (!normalizedUrl || normalizedUrl === "desconocida") {
+        return true;
+    }
+
+    try {
+        const parsedUrl = new URL(normalizedUrl, window.location.origin);
+        return getAllowedErrorReportHosts().has(parsedUrl.hostname);
+    } catch (_) {
+        return true;
+    }
 }
 
 function safeString(value) {
@@ -395,6 +428,10 @@ async function showErrorFlow({ supportEmail, statusCode, requestUrl }) {
     const now = Date.now();
 
     hydrateUserContextFromLocalStorage();
+
+    if (!shouldReportRequestError(requestUrl)) {
+        return;
+    }
 
     if (isModalOpen || now - lastNotificationAt < NOTIFICATION_COOLDOWN_MS) {
         return;
