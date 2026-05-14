@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import config from './config';
+import { installHttp405Handler } from './httpError405Handler';
+
+installHttp405Handler({ supportEmail: config.supportEmail });
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

@@ -457,7 +457,7 @@ function Main() {
                         const fechaActual = new Date();
                         const fechaHN = new Date(fechaActual.toLocaleString("en-US", { timeZone: "America/Tegucigalpa" }));
                         const claveHoy = `${fechaHN.getFullYear()}-${String(fechaHN.getMonth() + 1).padStart(2, '0')}-${String(fechaHN.getDate()).padStart(2, '0')}`;
-                        const fechasFeriadoAnuncio = new Set(["2026-05-09", "2026-05-10"]);
+                        const fechasFeriadoAnuncio = new Set(["2026-05-16", "2026-05-17"]);
                         const esFeriadoAnuncio = fechasFeriadoAnuncio.has(claveHoy);
 
                         if (usuarioDetalle.status === "1" && esFeriadoAnuncio) {
@@ -515,7 +515,7 @@ function Main() {
 
                             // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
                             const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-                            const fechasFeriado = new Set(["2026-05-09", "2026-05-10"]);
+                            const fechasFeriado = new Set(["2026-05-16", "2026-05-17"]);
                             const esFeriado = fechasFeriado.has(claveFecha);
 
                             if (esFeriado) {
