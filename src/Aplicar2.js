@@ -15,7 +15,10 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
+    FormControl,
+    MenuItem,
     Paper,
+    Select,
     Typography,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
@@ -46,6 +49,7 @@ function Aplicar2() {
     const [loadingCondiciones, set_loadingCondiciones] = useState(false);
 
     const [defaultPurposeId, set_defaultPurposeId] = useState(null);
+    const [purposeListaObj, set_purposeListaObj] = useState({});
     const [defaultProductId, set_defaultProductId] = useState(null);
     const [postingOffer, set_postingOffer] = useState(false);
     const [openResumen, set_openResumen] = useState(false);
@@ -460,6 +464,7 @@ function Aplicar2() {
                 if (res?.data?.status !== "OK") return;
 
                 const payload = res.data.payload;
+                set_purposeListaObj(payload ?? {});
                 const firstKey = payload && typeof payload === "object" ? Object.keys(payload)[0] : null;
                 const firstId = firstKey ? payload?.[firstKey]?.id : null;
                 if (firstId !== null && firstId !== undefined && String(firstId).trim() !== "") {
@@ -1088,12 +1093,14 @@ function Aplicar2() {
                         ))}
                     </Box>
 
+                    
+
                     <Box
                         sx={{
                             width: "100%",
                             maxWidth: 520,
                             mx: "auto",
-                            mt: { xs: 2, sm: 3 },
+                            mt: 0,
                             backgroundColor: "background.paper",
                             color: "text.primary",
                             borderRadius: 2,
@@ -1121,6 +1128,36 @@ function Aplicar2() {
                             <Typography variant="body2">Total</Typography>
                             <Typography>{formatL(selectedPlan?.total)}</Typography>
                             <Box />
+                        </Box>
+                    </Box>
+
+                    <Box
+                        sx={{
+                            width: "100%",
+                            maxWidth: 520,
+                            mx: "auto",
+                            mt: { xs: 2, sm: 3 },
+                            backgroundColor: "background.paper",
+                            color: "text.primary",
+                            borderRadius: 2,
+                            boxShadow: 3,
+                            p: { xs: 2, sm: 3 },
+                        }}
+                    >
+                        <Box>
+                            <Typography sx={{ fontWeight: 700, mb: 1 }}>Proposito del préstamo</Typography>
+                            <FormControl fullWidth>
+                                <Select
+                                    value={defaultPurposeId ?? ""}
+                                    onChange={(e) => set_defaultPurposeId(String(e.target.value))}
+                                >
+                                    {Object.keys(purposeListaObj).map((key) => (
+                                        <MenuItem key={key} value={String(purposeListaObj[key].id)}>
+                                            {purposeListaObj[key].title}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </Box>
                     </Box>
 

@@ -114,15 +114,44 @@ function Main() {
     async function guardarUbicacion(customerId) {
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
-            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
+            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=es`;
             
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
-    
-                const ciudad = data.address.city || data.address.town || data.address.village || '';
-                const pais = data.address.country || '';
-                setUbicacion(`${ciudad}, ${pais}`);
+
+                const normalizarTexto = (valor = '') =>
+                    valor
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .toLowerCase()
+                        .trim();
+
+                const address = data.address || {};
+                const localidadCruda =
+                    address.city ||
+                    address.town ||
+                    address.village ||
+                    address.municipality ||
+                    address.county ||
+                    address.suburb ||
+                    address.neighbourhood ||
+                    '';
+
+                const localidadCrudaNormalizada = normalizarTexto(localidadCruda);
+
+                // Nominatim a veces retorna zonas (ej. "Centro Historico de Tegucigalpa y Comayaguela")
+                // en lugar del municipio, por lo que se mapea a una ciudad permitida.
+                let ciudad = localidadCruda;
+                if (localidadCrudaNormalizada.includes('tegucigalpa')) {
+                    ciudad = 'Tegucigalpa';
+                } else if (localidadCrudaNormalizada.includes('comayaguela')) {
+                    ciudad = 'Comayagüela';
+                }
+
+                const pais = address.country || '';
+                const ubicacionTexto = `${ciudad}, ${pais}`;
+                setUbicacion(ubicacionTexto);
         
                 // Lista de ubicaciones permitidas
                 const ubicacionesPermitidas = [
@@ -151,9 +180,12 @@ function Main() {
                     "Santa Rosa, Honduras",
                     "Intibucá, Honduras",
                 ];
+
+                const ubicacionesPermitidasNormalizadas = ubicacionesPermitidas.map(normalizarTexto);
+                const ubicacionTextoNormalizada = normalizarTexto(ubicacionTexto);
         
                 // Verificar si la ubicación coincide con alguna de las ubicaciones permitidas
-                if (ubicacionesPermitidas.includes(`${ciudad}, ${pais}`)) {
+                if (ubicacionesPermitidasNormalizadas.includes(ubicacionTextoNormalizada)) {
                     setShowAplicarLink(true);
                 }
         
@@ -457,7 +489,7 @@ function Main() {
                         const fechaActual = new Date();
                         const fechaHN = new Date(fechaActual.toLocaleString("en-US", { timeZone: "America/Tegucigalpa" }));
                         const claveHoy = `${fechaHN.getFullYear()}-${String(fechaHN.getMonth() + 1).padStart(2, '0')}-${String(fechaHN.getDate()).padStart(2, '0')}`;
-                        const fechasFeriadoAnuncio = new Set(["2026-05-16", "2026-05-17"]);
+                        const fechasFeriadoAnuncio = new Set(["2026-06-06", "2026-06-07"]);
                         const esFeriadoAnuncio = fechasFeriadoAnuncio.has(claveHoy);
 
                         if (usuarioDetalle.status === "1" && esFeriadoAnuncio) {
@@ -515,7 +547,7 @@ function Main() {
 
                             // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
                             const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-                            const fechasFeriado = new Set(["2026-05-16", "2026-05-17"]);
+                            const fechasFeriado = new Set(["2026-06-06", "2026-06-07"]);
                             const esFeriado = fechasFeriado.has(claveFecha);
 
                             if (esFeriado) {
