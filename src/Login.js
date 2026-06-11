@@ -19,6 +19,10 @@ import axios from "axios";
 function Login(){
     const gContext = useContext(AppContext);
 
+    const CLIENTES_CASTIGADOS_GET_CUSTOMER_ID_URL = "https://app.aranih.com/api/clientesCastigados/getCustomerId.php";
+    const CLIENTES_CASTIGADOS_VALIDAR_CASTIGO_URL = "https://app.aranih.com/api/clientesCastigados/validarCastigo.php";
+    const CLIENTES_CASTIGADOS_TOKEN = "KZGBTGPQIGYCOUWNRHWBZRSDVJITBHKQ";
+
     const [msgErrorForm, set_msgErrorForm] = useState(false);
     const [cargando, set_cargando] = useState(false);
 
@@ -30,17 +34,82 @@ function Login(){
     const [guardarDatos, set_guardarDatos] = useState(false);
 
     const [showContador, set_showContador] = useState(false);
+    const [redirigirPlanPorCastigo, set_redirigirPlanPorCastigo] = useState(false);
     
     const [inputUser, set_inputUser] = useState("");
     const [inputPass, set_inputPass] = useState("");
 
     const navigate = useNavigate();
 
+    function validarCastigoPorCorreo(correo) {
+        if (!correo) {
+            return;
+        }
+
+        axios.request({
+            url: CLIENTES_CASTIGADOS_GET_CUSTOMER_ID_URL,
+            method: "post",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            data: {
+                correo: correo,
+                token: CLIENTES_CASTIGADOS_TOKEN,
+            },
+        }).then((resCustomer) => {
+            const statusCustomer = String(resCustomer?.data?.status || "").toLowerCase();
+            const customerId = resCustomer?.data?.customerId;
+
+            if (statusCustomer !== "ok" || !customerId) {
+                console.log("[clientesCastigados] getCustomerId sin customerId válido", resCustomer?.data);
+                return;
+            }
+
+            const clientId = Number(customerId);
+
+            return axios.request({
+                url: CLIENTES_CASTIGADOS_VALIDAR_CASTIGO_URL,
+                method: "post",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                data: {
+                    client_id: Number.isNaN(clientId) ? customerId : clientId,
+                    token: CLIENTES_CASTIGADOS_TOKEN,
+                },
+            }).then((resCastigo) => {
+                const resultadoCastigo = String(resCastigo?.data?.resultado || "").toLowerCase();
+                set_redirigirPlanPorCastigo(resultadoCastigo === "castigado");
+
+                if (resultadoCastigo === "castigado") {
+                    localStorage.setItem("arani_castigo_resultado", "castigado");
+                    localStorage.setItem("arani_castigo_data", JSON.stringify(resCastigo?.data?.data || {}));
+                } else {
+                    localStorage.removeItem("arani_castigo_resultado");
+                    localStorage.removeItem("arani_castigo_data");
+                }
+
+                console.log("[clientesCastigados] validarCastigo", {
+                    correo,
+                    customerId,
+                    respuesta: resCastigo?.data,
+                });
+            });
+        }).catch((err) => {
+            console.error("Error en validación de castigo por correo:", err);
+        });
+    }
+
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
+        const email = (data.get("email") || "").trim();
+        const password = data.get("password") || "";
+
+        validarCastigoPorCorreo(email);
+
         set_cargando(true);
-        procesar_login(data.get("email"), data.get("password"), function(rs){
+        procesar_login(email, password, function(rs){
             set_cargando(false);
             set_openVentanaSMS(true);
             set_showContador(true);
@@ -57,8 +126,8 @@ function Login(){
 
             if(guardarDatos){
                 localStorage.setItem('recuerdame', data.get("si"));
-                localStorage.setItem('email', data.get("email"));
-                localStorage.setItem('password', data.get("password"));
+                localStorage.setItem('email', email);
+                localStorage.setItem('password', password);
 
             }else{
                 localStorage.removeItem('recuerdame');
@@ -145,6 +214,10 @@ function Login(){
                 gContext.set_logeado({estado: true, token: sidTemp});
                 localStorage.setItem('arani_session_id', sidTemp);
                 set_errorMessageSMS("");
+                const resultadoCastigoGuardado = localStorage.getItem("arani_castigo_resultado");
+                if(redirigirPlanPorCastigo || resultadoCastigoGuardado === "castigado"){
+                    navigate('/pagosdirectos');
+                }
             }
             if(res.data.status === "ERS"){
                 window.location.reload();

@@ -186,6 +186,70 @@ function Aplicar2() {
         return Number.isFinite(num) ? num : null;
     };
 
+    const parseJsonObject = (value) => {
+        if (typeof value !== "string") return null;
+        try {
+            const parsed = JSON.parse(value);
+            return parsed && typeof parsed === "object" ? parsed : null;
+        } catch {
+            return null;
+        }
+    };
+
+    const hasAnyOwnKey = (obj, keys) => {
+        if (!obj || typeof obj !== "object") return false;
+        const ownKeys = Object.keys(obj).map((k) => String(k).toLowerCase());
+        return keys.some((k) => ownKeys.includes(String(k).toLowerCase()));
+    };
+
+    const normalizeOfferDr = (apiBody) => {
+        if (!apiBody || typeof apiBody !== "object") return null;
+
+        const parsedPayloadApi = parseJsonObject(apiBody?.payload?.api);
+        const candidates = [
+            apiBody?.offer,
+            apiBody?.data,
+            apiBody?.payload?.offer,
+            apiBody?.payload?.data,
+            parsedPayloadApi?.data,
+            parsedPayloadApi,
+            apiBody?.payload,
+            apiBody,
+        ].filter((item) => item && typeof item === "object");
+
+        const hintKeys = [
+            "outLoanAmount1M",
+            "output1M",
+            "outInterest1M",
+            "outadminFee1M",
+            "interest_anual",
+            "interestAnual",
+            "interes_anual",
+            "interesAnual",
+        ];
+
+        return candidates.find((c) => hasAnyOwnKey(c, hintKeys)) ?? candidates[0] ?? null;
+    };
+
+    const getOfferValue = (source, keys) => {
+        if (!source || typeof source !== "object") return null;
+
+        const sourceKeys = Object.keys(source);
+        for (const rawKey of keys) {
+            const key = String(rawKey);
+            const direct = source[key];
+            if (direct !== undefined && direct !== null && String(direct).trim() !== "") return direct;
+
+            const insensitive = sourceKeys.find((k) => String(k).toLowerCase() === key.toLowerCase());
+            if (insensitive) {
+                const value = source[insensitive];
+                if (value !== undefined && value !== null && String(value).trim() !== "") return value;
+            }
+        }
+
+        return null;
+    };
+
     const aplicarVariablesDocumento = (rawHtml) => {
         if (!rawHtml) return "";
 
@@ -212,19 +276,44 @@ function Aplicar2() {
 
         const fechaFinal = period ? formatDateDDMMYYYY(addMonths(now, period)) : "";
 
-        const interestAnualFromOffer =
-            parsePercent(offerDr?.interest_anual) ??
-            parsePercent(offerDr?.interestAnual) ??
-            parsePercent(offerDr?.interes_anual) ??
-            parsePercent(offerDr?.interesAnual) ??
-            null;
+        const interestAnualFromOffer = parsePercent(
+            getOfferValue(offerDr, ["interest_anual", "interestAnual", "interes_anual", "interesAnual"])
+        );
+
+        const interestMensualFromOffer = parseMoney(
+            getOfferValue(offerDr, [`outInterest${Number(period) || 0}M`])
+        );
+
+            // DEBUG: Ver qué viene del API
+            console.log("[Aplicar2] DEBUG interestAnual - offerDr:", {
+                interest_anual: offerDr?.interest_anual,
+                interestAnual: offerDr?.interestAnual,
+                interes_anual: offerDr?.interes_anual,
+                interesAnual: offerDr?.interesAnual,
+                outInterestPeriod: getOfferValue(offerDr, [`outInterest${Number(period) || 0}M`]),
+                interestMensualFromOffer,
+                keys: Object.keys(offerDr ?? {}),
+                parsed: interestAnualFromOffer
+            });
+
+        const annualRateFromMonthlyInterest = (() => {
+            const p = parseMoney(principal);
+            const monthlyInterestAmount = parseMoney(interestMensualFromOffer);
+            if (!p || !monthlyInterestAmount) return null;
+            const monthlyRate = (monthlyInterestAmount / p) * 100;
+            const annual = monthlyRate * 12;
+            return Number.isFinite(annual) ? Math.max(0, annual) : null;
+        })();
 
         const derivedAnnualRate = (() => {
             const p = parseMoney(principal);
             const t = parseMoney(total);
             const n = Number(period);
             if (!p || !t || !n) return null;
-            const annual = ((t / p - 1) * (12 / n)) * 100;
+            // Tasa de interés mensual simple: (total - principal) / principal / meses
+            const monthlyRate = ((t - p) / p) / n;
+            // Tasa anual: mensual * 12
+            const annual = monthlyRate * 12 * 100;
             return Number.isFinite(annual) ? Math.max(0, annual) : null;
         })();
 
@@ -233,11 +322,11 @@ function Aplicar2() {
             const t = parseMoney(total);
             const n = Number(period);
             if (!p || !t || !n) return null;
-            const per = ((t / p - 1) / n) * 100;
+            const per = ((t - p) / p) / n * 100;
             return Number.isFinite(per) ? Math.max(0, per) : null;
         })();
 
-        const interestAnual = interestAnualFromOffer ?? derivedAnnualRate;
+        const interestAnual = annualRateFromMonthlyInterest ?? derivedAnnualRate ?? interestAnualFromOffer;
 
         const totalPago = selectedPlan?.total ?? null;
 
@@ -584,7 +673,9 @@ function Aplicar2() {
             .then((res) => {
                 console.log("[Aplicar2] getOfferDrClient -> response", res?.data);
                 if (res?.data?.success) {
-                    set_offerDr(res.data);
+                    const normalizedOffer = normalizeOfferDr(res.data);
+                    console.log("[Aplicar2] getOfferDrClient -> normalized keys", Object.keys(normalizedOffer ?? {}));
+                    set_offerDr(normalizedOffer);
                     set_offerRechazado(false);
                 } else {
                     set_offerDr(null);
@@ -605,10 +696,10 @@ function Aplicar2() {
     const buildPlanFromOffer = (meses) => {
         const m = Number(meses);
 
-        const recibes = parseMoney(offerDr?.[`outLoanAmount${m}M`]) ?? 0;
-        const cuotaMensual = parseMoney(offerDr?.[`output${m}M`]) ?? 0;
-        const interes = parseMoney(offerDr?.[`outInterest${m}M`]) ?? 0;
-        const adminFee = parseMoney(offerDr?.[`outadminFee${m}M`]) ?? 0;
+        const recibes = parseMoney(getOfferValue(offerDr, [`outLoanAmount${m}M`])) ?? 0;
+        const cuotaMensual = parseMoney(getOfferValue(offerDr, [`output${m}M`])) ?? 0;
+        const interes = parseMoney(getOfferValue(offerDr, [`outInterest${m}M`])) ?? 0;
+        const adminFee = parseMoney(getOfferValue(offerDr, [`outadminFee${m}M`])) ?? 0;
 
         return {
             meses: m,

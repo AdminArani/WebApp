@@ -12,6 +12,7 @@ import Login from './Login.js';
 import Aplicar from './Aplicar.js';
 import Aplicar2 from './Aplicar2.js';
 import Plan from './Plan.js';
+import PagosDirectos from './PagosDirectos.js';
 import NoExiste from './NoExiste.js';
 import Historial from './Historial.js';
 import ValidarMail from './ValidarMail.js';
@@ -99,6 +100,7 @@ function App() {
                             <Route path="/aplicar" element={(logeado.estado)?<Aplicar />:<Login />} />
                             <Route path="/aplicar2" element={(logeado.estado)?<Aplicar2 />:<Login />} />
                             <Route path="/plan" element={(logeado.estado)?<Plan />:<Login />} />
+                            <Route path="/pagosdirectos" element={(logeado.estado)?<PagosDirectos />:<Login />} />
                             <Route path="/plan/:idprestamoparam" element={(logeado.estado)?<Plan />:<Login />} />
                             <Route path="/historial" element={(logeado.estado)?<Historial />:<Login />} />
                             <Route path="/validarmail/:token" element={<ValidarMail />} />

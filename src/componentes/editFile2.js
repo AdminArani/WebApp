@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../App';
 import { Button, Typography, Box, Grid} from "@mui/material";
-import logoArani from '../images/identidadtrasera.jpg';
+import logoArani from '../images/identidadfrontal.jpg';
 
 //Editar Archivo 2
 function FormEditFile2({reiniciarpantalla, usuarioFiles}){
