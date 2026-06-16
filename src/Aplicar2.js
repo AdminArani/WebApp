@@ -68,7 +68,6 @@ function Aplicar2() {
     const set_logeado = gContext.set_logeado;
 
     useEffect(() => {
-        console.log("[Aplicar2] sid:", token);
     }, [token]);
 
     useEffect(() => {
@@ -90,7 +89,6 @@ function Aplicar2() {
         .then((res) => {
             set_estaCargandoValidacionPrestamo(false);
             if (res.data.status === "ER") {
-                console.log(res.data.payload.message);
             }
             if (res.data.status === "ERS") {
                 localStorage.removeItem("arani_session_id");
@@ -112,7 +110,7 @@ function Aplicar2() {
                 }
             }
         }).catch((err) => {
-            console.log("[Aplicar2] getCustomerOfferList.php -> error", err);
+            
             set_estaCargandoValidacionPrestamo(false);
         });
     }
@@ -284,18 +282,6 @@ function Aplicar2() {
             getOfferValue(offerDr, [`outInterest${Number(period) || 0}M`])
         );
 
-            // DEBUG: Ver qué viene del API
-            console.log("[Aplicar2] DEBUG interestAnual - offerDr:", {
-                interest_anual: offerDr?.interest_anual,
-                interestAnual: offerDr?.interestAnual,
-                interes_anual: offerDr?.interes_anual,
-                interesAnual: offerDr?.interesAnual,
-                outInterestPeriod: getOfferValue(offerDr, [`outInterest${Number(period) || 0}M`]),
-                interestMensualFromOffer,
-                keys: Object.keys(offerDr ?? {}),
-                parsed: interestAnualFromOffer
-            });
-
         const annualRateFromMonthlyInterest = (() => {
             const p = parseMoney(principal);
             const monthlyInterestAmount = parseMoney(interestMensualFromOffer);
@@ -423,7 +409,6 @@ function Aplicar2() {
                 }
             })
             .catch((err) => {
-                console.log("[Aplicar2] get_contractPre.php -> error", err);
             });
     };
 
@@ -452,7 +437,6 @@ function Aplicar2() {
                 }
             })
             .catch((err) => {
-                console.log("[Aplicar2] get_pagarePre.php -> error", err);
             });
     };
 
@@ -483,7 +467,6 @@ function Aplicar2() {
                 },
             })
             .then((res) => {
-                console.log("[Aplicar2] getProfile.php -> status:", res?.data?.status);
                 if (res.data.status === "ERS") {
                     localStorage.removeItem("arani_session_id");
                     if (typeof set_logeado === "function") set_logeado({ estado: false, token: "" });
@@ -491,12 +474,10 @@ function Aplicar2() {
                 }
 
                 if (res.data.status === "OK") {
-                    console.log("[Aplicar2] usuarioDetalle", res.data.payload?.data);
                     set_usuarioDetalle(res.data.payload?.data ?? {});
                 }
             })
             .catch((err) => {
-                console.log("[Aplicar2] getProfile.php -> error", err);
             })
             .finally(() => {
                 set_loadingPerfil(false);
@@ -525,7 +506,6 @@ function Aplicar2() {
                 }
             })
             .catch((err) => {
-                console.log("[Aplicar2] getFieldConstructor.php -> error", err);
             });
     }, [token]);
 
@@ -561,7 +541,6 @@ function Aplicar2() {
                 }
             })
             .catch((err) => {
-                console.log("[Aplicar2] getPurposeList.php -> error", err);
             });
     }, [token, set_logeado]);
 
@@ -603,7 +582,6 @@ function Aplicar2() {
                 }
             })
             .catch((err) => {
-                console.log("[Aplicar2] getApplicationProfilev2.php -> error", err);
             });
     }, [token, set_logeado]);
 
@@ -621,8 +599,6 @@ function Aplicar2() {
                 },
             })
             .then((res) => {
-                console.log("[Aplicar2] get_bankaccount.php -> status:", res?.data?.status);
-
                 if (res?.data?.status !== "OK") {
                     set_bankAccount(null);
                     return;
@@ -633,7 +609,6 @@ function Aplicar2() {
                 const current = values.find((e) => String(e?.current) === "1") ?? null;
 
                 if (current) {
-                    console.log("[Aplicar2] bankAccount (current)", current);
                     set_bankAccount({
                         bank: current.bank,
                         account_number: current.account_number,
@@ -643,7 +618,6 @@ function Aplicar2() {
                 }
             })
             .catch((err) => {
-                console.log("[Aplicar2] get_bankaccount.php -> error", err);
                 set_bankAccount(null);
             })
             .finally(() => {
@@ -671,10 +645,8 @@ function Aplicar2() {
                 },
             })
             .then((res) => {
-                console.log("[Aplicar2] getOfferDrClient -> response", res?.data);
                 if (res?.data?.success) {
                     const normalizedOffer = normalizeOfferDr(res.data);
-                    console.log("[Aplicar2] getOfferDrClient -> normalized keys", Object.keys(normalizedOffer ?? {}));
                     set_offerDr(normalizedOffer);
                     set_offerRechazado(false);
                 } else {
@@ -685,7 +657,6 @@ function Aplicar2() {
                 }
             })
             .catch((err) => {
-                console.log("[Aplicar2] getOfferDrClient -> error", err);
                 set_offerDr(null);
             })
             .finally(() => {
@@ -774,7 +745,6 @@ function Aplicar2() {
                 return res.data;
             })
             .catch((err) => {
-                console.log("[Aplicar2] getFacturaV2.php -> error", err);
                 return null;
             });
     };
@@ -865,16 +835,6 @@ function Aplicar2() {
         productId: defaultProductId,
     };
 
-    const maskedSid =
-        typeof token === "string" && token.length >= 8
-            ? `${token.slice(0, 4)}...${token.slice(-4)}`
-            : token;
-
-    console.log("[Aplicar2] postOffer.php -> request", {
-        ...postOfferBody,
-        sid: maskedSid,
-    });
-
     set_postingOffer(true);
     try {
         const res = await axios.request({
@@ -883,8 +843,6 @@ function Aplicar2() {
             withCredentials: true,
             data: postOfferBody,
         });
-
-        console.log("[Aplicar2] postOffer.php -> response", res?.data);
 
         const safeJsonParse = (value) => {
             if (typeof value !== "string") return null;
@@ -990,10 +948,7 @@ function Aplicar2() {
             deepFindContainerId(maybeParsedApi) ?? // 👈 FIX
             null;
 
-        console.log("[Aplicar2] postOffer.php -> extracted containerId", containerId);
-
         if (!containerId) {
-            console.log("[Aplicar2] postOffer.php -> missing container_id", resBody);
             set_recibirError("Se registró la solicitud, pero no recibimos el identificador del préstamo (container_id). ");
             return;
         }
@@ -1002,7 +957,6 @@ function Aplicar2() {
         startFacturaPolling(String(containerId));
 
     } catch (err) {
-        console.log("[Aplicar2] postOffer.php -> error", err);
         set_recibirError("Ocurrió un error al enviar tu solicitud.");
     } finally {
         set_postingOffer(false);
