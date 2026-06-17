@@ -14,7 +14,6 @@ import parse from "html-react-parser";
 import config from "../config";
 
 function Contrato({open, onClose}){
-    console.log('Componente Contrato montado');
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
     const [dataContrato, set_dataContrato] = useState(false);
@@ -23,20 +22,11 @@ function Contrato({open, onClose}){
 
     // Dispara getContrato() cuando el modal se abre
     useEffect(()=>{
-        console.log('useEffect disparado - open:', open);
         if(open){
-            console.log('open es true, llamando getContrato()');
             getContrato();
-        }else{
-            console.log('open es false');
         }
         // eslint-disable-next-line
     }, [open]);
-
-    useEffect(()=>{
-
-        console.log('dataContrato', dataContrato);
-    }, [dataContrato]);
 
     function getProfile(){
         // Primero obtener el perfil para conseguir customer_id
@@ -48,7 +38,6 @@ function Contrato({open, onClose}){
             },
         })
         .then((res) => {
-            console.log('Profile cargado:', res.data.payload?.data);
             if(res.data.status === "OK"){
                 return res.data.payload?.data;
             }else{
@@ -58,16 +47,12 @@ function Contrato({open, onClose}){
     }
 
     function getContrato(){
-        console.log('getContrato llamada');
-        
         // Primero obtener el perfil para conseguir customer_id
         getProfile()
         .then((profileData) => {
             const customerId = profileData?.customer_id;
-            console.log('customerId obtenido:', customerId);
             
             if(!customerId){
-                console.error('No se pudo obtener customer_id');
                 set_dataContrato(false);
                 return;
             }
@@ -81,48 +66,21 @@ function Contrato({open, onClose}){
                 },
             })
             .then((res) => {
-                console.log('Response getContrato:', res);
-                if(res.data.status === "ER"){
-                    console.log('Error en response:', res.data);
-                }
                 if(res.data.status === "OK"){
-                    console.log('OK - payload:', res.data.payload);
                     if(res.data.payload?.document_content){
                         set_dataContrato(res.data.payload);
                     }else{
                         set_dataContrato(false);
                     }
+                }else{
+                    set_dataContrato(false);
                 }
             }).catch(err => {
-                console.log('Error en axios:', err.message);
-                console.log('Error completo:', err);
+                set_dataContrato(false);
             });
         })
         .catch(err => {
-            console.log('Error al cargar perfil:', err.message);
             set_dataContrato(false);
-        });
-    }
-
-    const firmarContrato = ()=>{
-        set_cargandoC(true);
-        axios.request({
-            url: `${config.apiUrl}/api/app/post_contract_sign.php`,
-            method: "post",
-            data: {
-                sid: gContext.logeado.token,
-                document_id: dataContrato.id,
-                },
-        })
-        .then((res) => {
-            set_cargandoC(false);
-            onClose();
-            if(res.data.status === "ER"){
-            }
-            if(res.data.status === "OK"){
-            }
-        }).catch(err => {
-            console.log(err.message);
         });
     }
 

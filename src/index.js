@@ -6,6 +6,15 @@ import reportWebVitals from './reportWebVitals';
 import config from './config';
 import { installHttp405Handler } from './httpError405Handler';
 
+// Seguridad: en producción, evita exponer información sensible en consola.
+if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined' && window.console) {
+  window.console.log = () => {};
+  window.console.info = () => {};
+  window.console.debug = () => {};
+  window.console.warn = () => {};
+  window.console.error = () => {};
+}
+
 installHttp405Handler({ supportEmail: config.supportEmail });
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
