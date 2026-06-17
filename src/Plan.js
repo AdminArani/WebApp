@@ -9,6 +9,7 @@ import config from "./config";
 import { AppContext } from "./App";
 import BarraApp from "./componentes/BarraApp";
 import BarraFinal from "./componentes/BarraFinal";
+import Contrato from "./componentes/Contrato";
 import { nombreEstadoPrestamo, nombreEstadoPago } from "./componentes/utilidades.js";
 import logobac from "./images/logoBaccuadro.jpg";
 
@@ -69,7 +70,9 @@ function Plan() {
     const n1coExpireTimeoutRef = useRef(null);
     const n1coCloseCountdownRef = useRef(null);
 
-    
+    useEffect(() => {
+        console.log('sid (token):', gContext.logeado?.token);
+    }, [gContext.logeado?.token]);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(async (position) => {
@@ -1237,7 +1240,7 @@ function Plan() {
         
     return (
         <Container disableGutters sx={{ minHeight: '100vh', display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"  }} component="main" maxWidth="md">
-            {/* <Contrato /> */}
+            <Contrato open={ventanaContrato} onClose={()=>{set_ventanaContrato(false)}} />
             <Box sx={{p: '4px', width: '100%'}}>
                 <Paper elevation={6} sx={{p: 4}}>
                     <BarraApp />
@@ -1811,15 +1814,7 @@ function Plan() {
                 <BarraFinal />
 
 
-                <Dialog open={ventanaContrato} onClose={()=>{set_ventanaContrato(false)}} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" >
-                    {/* <DialogTitle id="alert-dialog-title">Contrato de préstamo Arani</DialogTitle> */}
-                    <DialogContent>
-                        {parse(contratoPrestamo||"<br><br>No hay contrato generado<br><br>")}
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={()=>{set_ventanaContrato(false)}}>Cerrar</Button>
-                    </DialogActions>
-                </Dialog>
+                {/* Dialog reemplazado por componente Contrato */}
 
             </Box>
         </Container>
