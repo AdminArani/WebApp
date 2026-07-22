@@ -39,6 +39,7 @@ function Login() {
     axios.request({
       url: CLIENTES_CASTIGADOS_GET_CUSTOMER_ID_URL,
       method: "post",
+      suppressHttpErrorModal: true,
       headers: {
         "Content-Type": "application/json"
       },
@@ -75,6 +76,22 @@ function Login() {
         }
       });
     }).catch(err => {
+      const httpStatus = err?.response?.status;
+      const apiStatus = String(err?.response?.data?.status || "").toLowerCase();
+      const apiMessage = String(err?.response?.data?.message || "").toLowerCase();
+      if (httpStatus === 404 && apiStatus === "error" && apiMessage.includes("no se encontró usuario para el correo enviado")) {
+        set_msgErrorForm(<Typography variant="body2" sx={{
+          color: "red",
+          pt: 0,
+          textAlign: "center",
+          fontSize: "0.9rem",
+          mt: 2,
+          mb: 0
+        }}>
+                        Ups, no logramos validar tu acceso con los datos ingresados. Te invitamos a revisar tus credenciales o solicitar su actualización mediante Recuperar contraseña.
+                    </Typography>);
+        return;
+      }
       console.error("Error en validación de castigo por correo:", err);
     });
   }

@@ -36,6 +36,22 @@ function getRequestUrl(input) {
 function isErrorStatus(statusCode) {
   return typeof statusCode === "number" && statusCode >= 400;
 }
+function shouldSkipHttpErrorModal(config, statusCode, responseData) {
+  if (config?.suppressHttpErrorModal === true) {
+    return true;
+  }
+  if (statusCode !== 404) {
+    return false;
+  }
+  const requestUrl = safeString(config?.url);
+  const endpoint = "https://app.aranih.com/api/clientesCastigados/getCustomerId.php";
+  if (requestUrl !== endpoint) {
+    return false;
+  }
+  const status = safeString(responseData?.status).toLowerCase();
+  const message = safeString(responseData?.message).toLowerCase();
+  return status === "error" && message.includes("no se encontró usuario para el correo enviado");
+}
 function shouldReportRequestError(requestUrl) {
   const normalizedUrl = safeString(requestUrl);
   if (!normalizedUrl || normalizedUrl === "desconocida") {
@@ -328,6 +344,9 @@ export function installHttp405Handler({
   axios.interceptors.response.use(response => {
     hydrateUserContextFromRequestData(response?.config?.data);
     hydrateUserContextFromResponseData(response?.data);
+    if (shouldSkipHttpErrorModal(response?.config, response?.status, response?.data)) {
+      return response;
+    }
     if (isErrorStatus(response?.status)) {
       void showErrorFlow({
         supportEmail,
@@ -339,6 +358,9 @@ export function installHttp405Handler({
   }, error => {
     hydrateUserContextFromRequestData(error?.config?.data);
     hydrateUserContextFromResponseData(error?.response?.data);
+    if (shouldSkipHttpErrorModal(error?.config, error?.response?.status, error?.response?.data)) {
+      return Promise.reject(error);
+    }
     if (isErrorStatus(error?.response?.status)) {
       void showErrorFlow({
         supportEmail,
