@@ -418,7 +418,7 @@ function Main() {
             timeZone: "America/Tegucigalpa"
           }));
           const claveHoy = `${fechaHN.getFullYear()}-${String(fechaHN.getMonth() + 1).padStart(2, '0')}-${String(fechaHN.getDate()).padStart(2, '0')}`;
-          const fechasFeriadoAnuncio = new Set(["2026-07-25", "2026-07-26"]);
+          const fechasFeriadoAnuncio = new Set(["2026-08-08", "2026-08-09"]);
           const esFeriadoAnuncio = fechasFeriadoAnuncio.has(claveHoy);
           if (usuarioDetalle.status === "1" && esFeriadoAnuncio) {
             return <div style={styles.container}>
@@ -474,7 +474,7 @@ function Main() {
 
             // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
             const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-            const fechasFeriado = new Set(["2026-07-25", "2026-07-26"]);
+            const fechasFeriado = new Set(["2026-08-08", "2026-08-09"]);
             const esFeriado = fechasFeriado.has(claveFecha);
             if (esFeriado) {
               return <Link className="tilebotonpri disabled" style={{
