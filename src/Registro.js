@@ -61,6 +61,12 @@ function VerticalLinearStepper2() {
     textoAyuda: "",
     blur: false
   });
+  const [inputCorreoConfirmacion, set_inputCorreoConfirmacion] = useState({
+    valor: '',
+    validado: false,
+    textoAyuda: "Vuelva a escribir su correo para confirmarlo.",
+    blur: false
+  });
   const [inputGenero, set_inputGenero] = useState({
     valor: '',
     validado: false,
@@ -315,11 +321,52 @@ function VerticalLinearStepper2() {
     } else if (atCount > 1) {
       textoAyuda = "El correo solo puede contener una arroba (@)";
     }
+
     set_inputCorreo({
       valor: valor,
       validado: validado,
       textoAyuda: textoAyuda,
       blur: inputCorreo.blur
+    });
+
+    if (inputCorreoConfirmacion.valor) {
+      const correoConfirmado = inputCorreoConfirmacion.valor.toLowerCase();
+      if (correoConfirmado === valor && validado) {
+        set_inputCorreoConfirmacion({
+          ...inputCorreoConfirmacion,
+          validado: true,
+          textoAyuda: "Este correo no podrá cambiarse después.",
+          blur: inputCorreoConfirmacion.blur
+        });
+      } else {
+        set_inputCorreoConfirmacion({
+          ...inputCorreoConfirmacion,
+          validado: false,
+          textoAyuda: "Los correos no coinciden.",
+          blur: inputCorreoConfirmacion.blur
+        });
+      }
+    }
+  }
+  function handleChange_inputCorreoConfirmacion(event) {
+    let valor = event.target.value.toLowerCase();
+    let validado = false;
+    let textoAyuda = "Vuelva a escribir su correo para confirmarlo.";
+
+    if (valor.length > 0) {
+      if (valor === inputCorreo.valor) {
+        validado = true;
+        textoAyuda = "Este correo no podrá cambiarse después.";
+      } else {
+        textoAyuda = "Los correos no coinciden.";
+      }
+    }
+
+    set_inputCorreoConfirmacion({
+      valor: valor,
+      validado: validado,
+      textoAyuda: textoAyuda,
+      blur: inputCorreoConfirmacion.blur
     });
   }
   function handleChange_inputFechaNac(nuevoValor) {
@@ -656,7 +703,7 @@ function VerticalLinearStepper2() {
 
   // Validar grupo1
   const validardorGrupo1 = () => {
-    if (inputFechaNac?.validado && inputGenero?.validado && inputTelefono?.validado && telefonoValidadoPorSMS && inputCorreo.validado) {
+    if (inputFechaNac?.validado && inputGenero?.validado && inputTelefono?.validado && telefonoValidadoPorSMS && inputCorreo.validado && inputCorreoConfirmacion.validado) {
       set_pasoValidacionGrupo1(true);
     } else {
       set_pasoValidacionGrupo1(false);
@@ -869,6 +916,19 @@ function VerticalLinearStepper2() {
                 });
               }} value={inputCorreo.valor} onChange={handleChange_inputCorreo} error={!inputCorreo.validado && inputCorreo.blur} helperText={inputCorreo.textoAyuda} />
                 
+                            </Grid>
+                            <Grid item xs={12} sm={12}>
+                                <TextField autoComplete="off" fullWidth label="Confirmar correo electrónico" required onBlur={() => {
+                set_inputCorreoConfirmacion({
+                  ...inputCorreoConfirmacion,
+                  blur: true
+                });
+              }} value={inputCorreoConfirmacion.valor} onChange={handleChange_inputCorreoConfirmacion} error={!inputCorreoConfirmacion.validado && inputCorreoConfirmacion.blur} helperText={inputCorreoConfirmacion.textoAyuda} />
+                                {inputCorreoConfirmacion.validado && inputCorreoConfirmacion.valor && (
+                                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
+                                        Este correo no podrá cambiarse después.
+                                    </Typography>
+                                )}
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <FormControl fullWidth>
