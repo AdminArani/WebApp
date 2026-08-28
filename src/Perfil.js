@@ -578,6 +578,11 @@ function Perfil() {
                 color: 'silver'
               }}>Para poder solicitar préstamos, primero debes llenar todos los campos obligatorios, despues se hara una revisión y se aprobara tu cuenta para poder hacer esa solicitud.</Typography>
                             </Grid>
+                            <Grid item xs={12}>
+                                <Divider textAlign="left" sx={{
+                m: '1rem 0 0'
+              }}>Información bancaria y de ingresos</Divider>
+                            </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
                             <ListItemButton id="campo-Tipo de ingreso" sx={estiloCampoFaltante('Tipo de ingreso')} onClick={() => {
@@ -683,9 +688,14 @@ function Perfil() {
                             </List>
 
                             </Grid>
+                            <Grid item xs={12}>
+                              <Divider textAlign="left" sx={{
+                      m: '1rem 0 0'
+                      }}>Situación personal y vivienda</Divider>
+                            </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton id="campo-Casa" sx={estiloCampoFaltante('Casa')} onClick={() => {
+                              <ListItemButton id="campo-Casa" sx={estiloCampoFaltante('Casa')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('vivienda');
                     set_openEditarCampos(true);
@@ -803,9 +813,14 @@ function Perfil() {
                             {/** FIN Bloquea la edicion en tipo de dependientes si numero de dependientes es 0 **/}
 
                             
+                            <Grid item xs={12}>
+                              <Divider textAlign="left" sx={{
+                      m: '1rem 0 0'
+                      }}>Formación y empleo</Divider>
+                            </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton id="campo-Grado educativo" sx={estiloCampoFaltante('Grado educativo')} onClick={() => {
+                              <ListItemButton id="campo-Grado educativo" sx={estiloCampoFaltante('Grado educativo')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('gradoeducativo');
                     set_openEditarCampos(true);
