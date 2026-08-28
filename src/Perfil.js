@@ -6,7 +6,7 @@ import { AppContext } from "./App";
 import BarraFinal from "./componentes/BarraFinal";
 import { Link, useNavigate } from "react-router-dom";
 import BarraApp from "./componentes/BarraApp";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import TerminarRegistro from "./componentes/TerminarRegistro";
 import { nombreGeneros } from "./componentes/utilidades";
@@ -56,6 +56,8 @@ function Perfil() {
   const [usuarioAprobadoManual, set_usuarioAprobadoManual] = useState(false);
   const [urlImagenPerfilTerminada, set_urlImagenPerfilTerminada] = useState(false);
   const [datosEnviadosArevision, set_datosEnviadosArevision] = useState(false);
+  const datosPerfilIniciales = useRef(null);
+  const [perfilModificado, set_perfilModificado] = useState(false);
   // const [cargandoDatosPerfil, set_cargandoDatosPerfil] = useState(false);
 
   const navigate = useNavigate();
@@ -118,6 +120,9 @@ function Perfil() {
         });
       } else if (status === "OK") {
         set_usuarioDetalleFullR(res.data);
+        if (datosPerfilIniciales.current === null) {
+          datosPerfilIniciales.current = JSON.stringify(payload.data);
+        }
         set_usuarioDetalle(payload.data);
         set_usuarioFiles(files);
         set_clasificacion(csas);
@@ -313,6 +318,28 @@ function Perfil() {
     }
     } : {};
   };
+  const irAlPrimerCampoFaltante = () => {
+    const primerCampo = obtenerCamposFaltantes()[0];
+    const gruposDeCampos = {
+      'Departamento domicilio': 'Ubicación domicilio',
+      'Municipio domicilio': 'Ubicación domicilio',
+      'Ciudad domicilio': 'Ubicación domicilio',
+      'Departamento del trabajo': 'Ubicación empleo',
+      'Municipio del trabajo': 'Ubicación empleo',
+      'Dirección del trabajo': 'Ubicación empleo'
+    };
+    const nombreCampo = gruposDeCampos[primerCampo] || primerCampo;
+    const campo = document.getElementById(`campo-${nombreCampo}`);
+    if (campo) {
+      campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      campo.focus({ preventScroll: true });
+    }
+  };
+  useEffect(() => {
+    if (datosPerfilIniciales.current !== null) {
+      set_perfilModificado(JSON.stringify(usuarioDetalle) !== datosPerfilIniciales.current);
+    }
+  }, [usuarioDetalle]);
   useEffect(() => {}, [cargando, cargando2, apiCamposConstructor, faltaTerminarRegistro]);
   return <Container disableGutters sx={{
     minHeight: '100vh',
@@ -553,7 +580,7 @@ function Perfil() {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
-                            <ListItemButton sx={estiloCampoFaltante('Tipo de ingreso')} onClick={() => {
+                            <ListItemButton id="campo-Tipo de ingreso" sx={estiloCampoFaltante('Tipo de ingreso')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('tipoingreso');
                     set_openEditarCampos(true);
@@ -581,7 +608,7 @@ function Perfil() {
                             
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Banco')} onClick={() => {
+                                <ListItemButton id="campo-Banco" sx={estiloCampoFaltante('Banco')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('banco');
                     set_openEditarCampos(true);
@@ -607,7 +634,7 @@ function Perfil() {
 
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Estado civil')} onClick={() => {
+                                <ListItemButton id="campo-Estado civil" sx={estiloCampoFaltante('Estado civil')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('estadocivil');
                     set_openEditarCampos(true);
@@ -633,7 +660,7 @@ function Perfil() {
 
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Ingreso mensual')} onClick={() => {
+                                <ListItemButton id="campo-Ingreso mensual" sx={estiloCampoFaltante('Ingreso mensual')} onClick={() => {
                   if (usuarioDetalle.status === "0" && (!usuarioDetalle.income || parseInt(usuarioDetalle.income) <= 0)) {
                     set_moduloEditarActivo('income');
                     set_openEditarCampos(true);
@@ -658,7 +685,7 @@ function Perfil() {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Casa')} onClick={() => {
+                                <ListItemButton id="campo-Casa" sx={estiloCampoFaltante('Casa')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('vivienda');
                     set_openEditarCampos(true);
@@ -686,7 +713,7 @@ function Perfil() {
                             
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Ubicación domicilio')} onClick={() => {
+                                <ListItemButton id="campo-Ubicación domicilio" sx={estiloCampoFaltante('Ubicación domicilio')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('ubicacion');
                     set_openEditarCampos(true);
@@ -715,7 +742,7 @@ function Perfil() {
                             {/** INICIO Bloquea la edicion en tipo de dependientes si numero de dependientes es 0 **/}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Número de dependientes')} onClick={() => {
+                                <ListItemButton id="campo-Número de dependientes" sx={estiloCampoFaltante('Número de dependientes')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('numerodependientes');
                     set_openEditarCampos(true);
@@ -743,7 +770,7 @@ function Perfil() {
 
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Tipo de dependientes')} onClick={() => {
+                                <ListItemButton id="campo-Tipo de dependientes" sx={estiloCampoFaltante('Tipo de dependientes')} onClick={() => {
                   if (usuarioDetalle.status === "0" && usuarioDetalle.dependents > 0) {
                     set_moduloEditarActivo('dependendeti');
                     set_openEditarCampos(true);
@@ -778,7 +805,7 @@ function Perfil() {
                             
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Grado educativo')} onClick={() => {
+                                <ListItemButton id="campo-Grado educativo" sx={estiloCampoFaltante('Grado educativo')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('gradoeducativo');
                     set_openEditarCampos(true);
@@ -806,7 +833,7 @@ function Perfil() {
 
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Lugar de trabajo')} onClick={() => {
+                                <ListItemButton id="campo-Lugar de trabajo" sx={estiloCampoFaltante('Lugar de trabajo')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('lugartrabajo');
                     set_openEditarCampos(true);
@@ -833,7 +860,7 @@ function Perfil() {
                             {/* posicion de trabajo  */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Posición de trabajo')} onClick={() => {
+                                <ListItemButton id="campo-Posición de trabajo" sx={estiloCampoFaltante('Posición de trabajo')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('posiciontrabajo');
                     set_openEditarCampos(true);
@@ -860,7 +887,7 @@ function Perfil() {
                             {/* Departamento donde se ubica el trabajo */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Ubicación empleo')} onClick={() => {
+                                <ListItemButton id="campo-Ubicación empleo" sx={estiloCampoFaltante('Ubicación empleo')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('ubicaciontrabajo');
                     set_openEditarCampos(true);
@@ -888,7 +915,7 @@ function Perfil() {
                             
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Antigüedad laboral')} onClick={() => {
+                                <ListItemButton id="campo-Antigüedad laboral" sx={estiloCampoFaltante('Antigüedad laboral')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('antiguedadlaboral');
                     set_openEditarCampos(true);
@@ -928,7 +955,7 @@ function Perfil() {
                             {/* Tipo Referencia personal */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Tipo de referencia personal')} onClick={() => {
+                                <ListItemButton id="campo-Tipo de referencia personal" sx={estiloCampoFaltante('Tipo de referencia personal')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('tiporeferenciapersonal');
                     set_openEditarCampos(true);
@@ -956,7 +983,7 @@ function Perfil() {
                             {/* Referencia personal */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Nombre de referencia personal')} onClick={() => {
+                                <ListItemButton id="campo-Nombre de referencia personal" sx={estiloCampoFaltante('Nombre de referencia personal')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('referenciapersonal');
                     set_openEditarCampos(true);
@@ -984,7 +1011,7 @@ function Perfil() {
                             {/* Numero telefono referencia personal */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Teléfono de referencia personal')} onClick={() => {
+                                <ListItemButton id="campo-Teléfono de referencia personal" sx={estiloCampoFaltante('Teléfono de referencia personal')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('celularreferenciapersonal');
                     set_openEditarCampos(true);
@@ -1012,7 +1039,7 @@ function Perfil() {
                             {/* Correo referencia personal */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Correo de referencia personal')} onClick={() => {
+                                <ListItemButton id="campo-Correo de referencia personal" sx={estiloCampoFaltante('Correo de referencia personal')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('correoreferenciapersonal');
                     set_openEditarCampos(true);
@@ -1052,7 +1079,7 @@ function Perfil() {
                             {/* Tipo Referencia laboral */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Tipo de referencia laboral')} onClick={() => {
+                                <ListItemButton id="campo-Tipo de referencia laboral" sx={estiloCampoFaltante('Tipo de referencia laboral')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('tiporeferencialaboral');
                     set_openEditarCampos(true);
@@ -1080,7 +1107,7 @@ function Perfil() {
                             {/* Referencia laboral nombre */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Nombre de referencia laboral')} onClick={() => {
+                                <ListItemButton id="campo-Nombre de referencia laboral" sx={estiloCampoFaltante('Nombre de referencia laboral')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('referencialaboral');
                     set_openEditarCampos(true);
@@ -1108,7 +1135,7 @@ function Perfil() {
                             {/* Numero telefono referencia laboral */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Teléfono de referencia laboral')} onClick={() => {
+                                <ListItemButton id="campo-Teléfono de referencia laboral" sx={estiloCampoFaltante('Teléfono de referencia laboral')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('celularreferencialaboral');
                     set_openEditarCampos(true);
@@ -1136,7 +1163,7 @@ function Perfil() {
                             {/* Correo referencia laboral */}
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Correo de referencia laboral')} onClick={() => {
+                                <ListItemButton id="campo-Correo de referencia laboral" sx={estiloCampoFaltante('Correo de referencia laboral')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('correoreferencialaboral');
                     set_openEditarCampos(true);
@@ -1176,7 +1203,7 @@ function Perfil() {
                             
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Identidad frontal')} onClick={() => {
+                                <ListItemButton id="campo-Identidad frontal" sx={estiloCampoFaltante('Identidad frontal')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('file1');
                     set_openEditarCampos(true);
@@ -1200,7 +1227,7 @@ function Perfil() {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Identidad trasera')} onClick={() => {
+                                <ListItemButton id="campo-Identidad trasera" sx={estiloCampoFaltante('Identidad trasera')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('file2');
                     set_openEditarCampos(true);
@@ -1224,7 +1251,7 @@ function Perfil() {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Recibo público')} onClick={() => {
+                                <ListItemButton id="campo-Recibo público" sx={estiloCampoFaltante('Recibo público')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('file3');
                     set_openEditarCampos(true);
@@ -1248,7 +1275,7 @@ function Perfil() {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
-                                <ListItemButton sx={estiloCampoFaltante('Foto selfie')} onClick={() => {
+                                <ListItemButton id="campo-Foto selfie" sx={estiloCampoFaltante('Foto selfie')} onClick={() => {
                   if (usuarioDetalle.status === "0") {
                     set_moduloEditarActivo('file4');
                     set_openEditarCampos(true);
@@ -1280,11 +1307,25 @@ function Perfil() {
                 m: '0 0 2rem 0',
                 color: 'silver'
               }}>Una vez finalices de completar tus datos, podrás enviarlos para su validación.</Typography>
-                                {!tieneTodosCamposObligatoriosHechos() && <Typography variant="body2" sx={{
+                                {!tieneTodosCamposObligatoriosHechos() && <Typography component="button" variant="body2" onClick={irAlPrimerCampoFaltante} sx={{
+                mb: 2,
+                color: '#d32f2f',
+                display: 'block',
+                width: '100%',
+                border: 0,
+                padding: 0,
+                background: 'transparent',
+                textAlign: 'left',
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}>
+                                    Para continuar es necesario que completes los campos: {obtenerCamposFaltantes().join(', ')}.
+                                </Typography>}
+                                {tieneTodosCamposObligatoriosHechos() && !perfilModificado && <Typography variant="body2" sx={{
                 mb: 2,
                 color: '#d32f2f'
               }}>
-                                    Para continuar es necesario que completes los campos: {obtenerCamposFaltantes().join(', ')}.
+                                    Debes modificar al menos un campo de tu perfil antes de enviarlo a validar.
                                 </Typography>}
                             </Grid>
 
@@ -1300,7 +1341,7 @@ function Perfil() {
                   backgroundColor: '#45a049'
                 }
               }} onClick={() => setOpenConfirmModal(true)} // Abre el modal al hacer clic
-              disabled={!tieneTodosCamposObligatoriosHechos()}
+              disabled={!tieneTodosCamposObligatoriosHechos() || !perfilModificado}
               >
                                     Enviar a validar mis datos
                                 </Button>
