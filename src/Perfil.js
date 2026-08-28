@@ -1,7 +1,7 @@
 import config from './config';
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import { Button, Dialog, DialogTitle, DialogContentText, DialogActions, DialogContent, Divider, Grid, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, TextField, Typography } from "@mui/material";
+import { Button, Dialog, DialogTitle, DialogContentText, DialogActions, DialogContent, Divider, Grid, LinearProgress, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, TextField, Typography } from "@mui/material";
 import { AppContext } from "./App";
 import BarraFinal from "./componentes/BarraFinal";
 import { Link, useNavigate } from "react-router-dom";
@@ -57,7 +57,10 @@ function Perfil() {
   const [urlImagenPerfilTerminada, set_urlImagenPerfilTerminada] = useState(false);
   const [datosEnviadosArevision, set_datosEnviadosArevision] = useState(false);
   const datosPerfilIniciales = useRef(null);
+  const campoFaltanteDestino = useRef(null);
   const [perfilModificado, set_perfilModificado] = useState(false);
+  const [pasoPerfil, set_pasoPerfil] = useState(0);
+  const [mensajePasoIncompleto, set_mensajePasoIncompleto] = useState('');
   // const [cargandoDatosPerfil, set_cargandoDatosPerfil] = useState(false);
 
   const navigate = useNavigate();
@@ -306,6 +309,34 @@ function Perfil() {
     if (!usuarioDetalle.file4) camposFaltantes.push('Foto selfie');
     return camposFaltantes;
   };
+  const camposObligatoriosTotales = 29 + (usuarioDetalle.dependents > 0 ? 1 : 0);
+  const camposObligatoriosCompletados = camposObligatoriosTotales - obtenerCamposFaltantes().length;
+  const progresoPerfil = Math.round(camposObligatoriosCompletados / camposObligatoriosTotales * 100);
+  const pasosPerfil = ['Datos generales', 'Información bancaria y de ingresos', 'Situación personal y vivienda', 'Formación y empleo', 'Referencias personales', 'Referencias laborales', 'Documentos y validación'];
+  const gruposDeCampos = {
+    'Departamento domicilio': 'Ubicación domicilio',
+    'Municipio domicilio': 'Ubicación domicilio',
+    'Ciudad domicilio': 'Ubicación domicilio',
+    'Departamento del trabajo': 'Ubicación empleo',
+    'Municipio del trabajo': 'Ubicación empleo',
+    'Dirección del trabajo': 'Ubicación empleo'
+  };
+  const pasosPorCampo = {
+    'Tipo de ingreso': 1, 'Banco': 1, 'Estado civil': 1, 'Ingreso mensual': 1,
+    'Casa': 2, 'Ubicación domicilio': 2, 'Número de dependientes': 2, 'Tipo de dependientes': 2,
+    'Grado educativo': 3, 'Lugar de trabajo': 3, 'Posición de trabajo': 3, 'Ubicación empleo': 3, 'Antigüedad laboral': 3,
+    'Tipo de referencia personal': 4, 'Nombre de referencia personal': 4, 'Teléfono de referencia personal': 4, 'Correo de referencia personal': 4,
+    'Tipo de referencia laboral': 5, 'Nombre de referencia laboral': 5, 'Teléfono de referencia laboral': 5, 'Correo de referencia laboral': 5,
+    'Identidad frontal': 6, 'Identidad trasera': 6, 'Recibo público': 6, 'Foto selfie': 6
+  };
+  const estiloTituloSeccion = {
+    m: '2rem 0 1rem 0',
+    '& .MuiDivider-wrapper': {
+      color: '#333333',
+      fontSize: '1rem',
+      fontWeight: 700
+    }
+  };
   const estiloCampoFaltante = campo => {
     const ubicacionDomicilioIncompleta = campo === 'Ubicación domicilio' && (!usuarioDetalle.region || !usuarioDetalle.county || !usuarioDetalle.city);
     const ubicacionTrabajoIncompleta = campo === 'Ubicación empleo' && (!usuarioDetalle.work_region || !usuarioDetalle.work_county || !usuarioDetalle.workplace_address);
@@ -320,26 +351,48 @@ function Perfil() {
   };
   const irAlPrimerCampoFaltante = () => {
     const primerCampo = obtenerCamposFaltantes()[0];
-    const gruposDeCampos = {
-      'Departamento domicilio': 'Ubicación domicilio',
-      'Municipio domicilio': 'Ubicación domicilio',
-      'Ciudad domicilio': 'Ubicación domicilio',
-      'Departamento del trabajo': 'Ubicación empleo',
-      'Municipio del trabajo': 'Ubicación empleo',
-      'Dirección del trabajo': 'Ubicación empleo'
-    };
     const nombreCampo = gruposDeCampos[primerCampo] || primerCampo;
-    const campo = document.getElementById(`campo-${nombreCampo}`);
-    if (campo) {
-      campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      campo.focus({ preventScroll: true });
+    campoFaltanteDestino.current = `campo-${nombreCampo}`;
+    const pasoDestino = pasosPorCampo[nombreCampo] ?? 0;
+    if (pasoPerfil === pasoDestino) {
+      const campo = document.getElementById(campoFaltanteDestino.current);
+      if (campo) {
+        campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        campo.focus({ preventScroll: true });
+        campoFaltanteDestino.current = null;
+      }
+    } else {
+      set_pasoPerfil(pasoDestino);
     }
+  };
+  const cambiarPasoPerfil = nuevoPaso => {
+    set_pasoPerfil(nuevoPaso);
+    set_mensajePasoIncompleto('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const avanzarPasoPerfil = () => {
+    const camposFaltantesPaso = obtenerCamposFaltantes().filter(campo => pasosPorCampo[gruposDeCampos[campo] || campo] === pasoPerfil);
+    if (camposFaltantesPaso.length) {
+      set_mensajePasoIncompleto(`Completa todos los campos obligatorios de esta sección: ${camposFaltantesPaso.join(', ')}.`);
+      return;
+    }
+    cambiarPasoPerfil(pasoPerfil + 1);
   };
   useEffect(() => {
     if (datosPerfilIniciales.current !== null) {
       set_perfilModificado(JSON.stringify(usuarioDetalle) !== datosPerfilIniciales.current);
     }
   }, [usuarioDetalle]);
+  useEffect(() => {
+    if (campoFaltanteDestino.current) {
+      const campo = document.getElementById(campoFaltanteDestino.current);
+      if (campo) {
+        campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        campo.focus({ preventScroll: true });
+        campoFaltanteDestino.current = null;
+      }
+    }
+  }, [pasoPerfil]);
   useEffect(() => {}, [cargando, cargando2, apiCamposConstructor, faltaTerminarRegistro]);
   return <Container disableGutters sx={{
     minHeight: '100vh',
@@ -432,9 +485,6 @@ function Perfil() {
                         <Typography sx={{
             mb: '2rem'
           }}>Información del perfil.</Typography>
-                        {!usuarioAprobadoManual && !tieneTodosCamposObligatoriosHechos() && <Typography variant="body2" sx={{
-            color: '#ff3e3e'
-          }}>Antes de empezar y poder solicitar préstamos es necesario que completes los campos obligatorios de tu perfil.</Typography>}
                         {!usuarioAprobadoManual && tieneTodosCamposObligatoriosHechos() && <Typography variant="body2" sx={{
             color: '#ff8100'
           }}>Tus datos se revisarán pronto, una vez hecho tu cuenta sera aprobada y podras solicitar préstamos.</Typography>}
@@ -449,10 +499,46 @@ function Perfil() {
                                  )} */}
                             </Box>}
                         <Grid container>
+                            <Grid item xs={12}>
+                              <Box sx={{
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 10,
+                      mb: 2,
+                      py: 1.5,
+                      backgroundColor: '#ffffff',
+                      borderBottom: '1px solid #e0e0e0'
+                      }}>
+                                <Typography variant="body2" sx={{ mb: 1, color: '#666666' }}>
+                                  Paso {pasoPerfil + 1} de {pasosPerfil.length}: {pasosPerfil[pasoPerfil]}
+                                </Typography>
+                                <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        mb: 1
+                      }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                    Avance del perfil
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                    {camposObligatoriosCompletados} de {camposObligatoriosTotales} campos ({progresoPerfil}%)
+                                  </Typography>
+                                </Box>
+                                <LinearProgress variant="determinate" value={progresoPerfil} color={progresoPerfil === 100 ? 'success' : 'primary'} sx={{ height: 6, borderRadius: 1 }} />
+                              </Box>
+                            </Grid>
+                            {mensajePasoIncompleto && <Grid item xs={12}>
+                              <Typography variant="body2" sx={{
+                      mb: 2,
+                      color: '#d32f2f',
+                      fontWeight: 700
+                      }}>
+                                {mensajePasoIncompleto}
+                              </Typography>
+                            </Grid>}
+                            {pasoPerfil === 0 && <>
                             <Grid item xs={12} sm={12}>
-                                <Divider textAlign="left" sx={{
-                m: '2rem 0 1rem 0'
-              }}>Campos Generales</Divider>
+                                <Divider textAlign="left" sx={estiloTituloSeccion}>Campos Generales</Divider>
                                 <Typography variant="body2" sx={{
                 m: '0 0 2rem 0',
                 color: 'silver'
@@ -569,19 +655,10 @@ function Perfil() {
                                     </ListItemButton>
                                 </List>
                             </Grid>
-                            <Grid item xs={12} sm={12}>
-                                <Divider textAlign="left" sx={{
-                m: '2rem 0 1rem 0'
-              }}>Campos Obligatorios</Divider>
-                                <Typography variant="body2" sx={{
-                m: '0 0 2rem 0',
-                color: 'silver'
-              }}>Para poder solicitar préstamos, primero debes llenar todos los campos obligatorios, despues se hara una revisión y se aprobara tu cuenta para poder hacer esa solicitud.</Typography>
-                            </Grid>
+                            </>}
+                            {pasoPerfil === 1 && <>
                             <Grid item xs={12}>
-                                <Divider textAlign="left" sx={{
-                m: '1rem 0 0'
-              }}>Información bancaria y de ingresos</Divider>
+                                <Divider textAlign="left" sx={estiloTituloSeccion}>Información bancaria y de ingresos</Divider>
                             </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
@@ -688,10 +765,10 @@ function Perfil() {
                             </List>
 
                             </Grid>
+                            </>}
+                            {pasoPerfil === 2 && <>
                             <Grid item xs={12}>
-                              <Divider textAlign="left" sx={{
-                      m: '1rem 0 0'
-                      }}>Situación personal y vivienda</Divider>
+                                <Divider textAlign="left" sx={estiloTituloSeccion}>Situación personal y vivienda</Divider>
                             </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
@@ -813,10 +890,10 @@ function Perfil() {
                             {/** FIN Bloquea la edicion en tipo de dependientes si numero de dependientes es 0 **/}
 
                             
+                            </>}
+                            {pasoPerfil === 3 && <>
                             <Grid item xs={12}>
-                              <Divider textAlign="left" sx={{
-                      m: '1rem 0 0'
-                      }}>Formación y empleo</Divider>
+                                <Divider textAlign="left" sx={estiloTituloSeccion}>Formación y empleo</Divider>
                             </Grid>
                             <Grid item xs={12} sm={6}>
                             <List>
@@ -956,11 +1033,11 @@ function Perfil() {
                             </Grid>
 
 
+                            </>}
+                            {pasoPerfil === 4 && <>
                             {/* Seccion de Referencias Personales */}
                             <Grid item xs={12} sm={12}>
-                                <Divider textAlign="left" sx={{
-                m: '2rem 0 1rem 0'
-              }}>Referencias Personales</Divider>
+                                <Divider textAlign="left" sx={estiloTituloSeccion}>Referencias Personales</Divider>
                                 <Typography variant="body2" sx={{
                 m: '0 0 2rem 0',
                 color: 'silver'
@@ -1080,11 +1157,11 @@ function Perfil() {
                             </Grid>
 
 
+                            </>}
+                            {pasoPerfil === 5 && <>
                             {/* Seccion de Referencias Laborales  */}
                             <Grid item xs={12} sm={12}>
-                                <Divider textAlign="left" sx={{
-                m: '2rem 0 1rem 0'
-              }}>Referencias Laborales</Divider>
+                                <Divider textAlign="left" sx={estiloTituloSeccion}>Referencias Laborales</Divider>
                                 <Typography variant="body2" sx={{
                 m: '0 0 2rem 0',
                 color: 'silver'
@@ -1204,11 +1281,11 @@ function Perfil() {
                             </Grid>
 
 
+                            </>}
+                            {pasoPerfil === 6 && <>
                             {/* Seccion de Documentos  */}
                             <Grid item xs={12} sm={12}>
-                                <Divider textAlign="left" sx={{
-                m: '2rem 0 1rem 0'
-              }}>Documentos</Divider>
+                                <Divider textAlign="left" sx={estiloTituloSeccion}>Documentos</Divider>
                                 <Typography variant="body2" sx={{
                 m: '0 0 2rem 0',
                 color: 'silver'
@@ -1315,9 +1392,7 @@ function Perfil() {
                             
 
                             <Grid item xs={12} sm={12}>
-                                <Divider textAlign="left" sx={{
-                m: '2rem 0 1rem 0'
-              }}>Validación de datos</Divider>
+                                <Divider textAlign="left" sx={estiloTituloSeccion}>Validación de datos</Divider>
                                 <Typography variant="body2" sx={{
                 m: '0 0 2rem 0',
                 color: 'silver'
@@ -1525,6 +1600,19 @@ function Perfil() {
                                 </DialogActions>
                             </Dialog>
                             </Grid>
+                              </>}
+                              <Grid item xs={12} sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        mt: 3
+                      }}>
+                                <Button disabled={pasoPerfil === 0} onClick={() => cambiarPasoPerfil(pasoPerfil - 1)} variant="outlined">
+                                  Anterior
+                                </Button>
+                                {pasoPerfil < pasosPerfil.length - 1 && <Button onClick={avanzarPasoPerfil} variant="contained">
+                                  Siguiente
+                                </Button>}
+                              </Grid>
                             {/* <Grid item xs={12} sm={6}>
                              <List>
                              <ListItemButton onClick={()=>{set_moduloEditarActivo('documentos'); set_openEditarCampos(true);}}>
