@@ -806,7 +806,7 @@ function Aplicar2() {
             color: 'red',
             paddingTop: '1rem'
           }}>
-                                Queremos agradecerte por haber confiado en nosotros con tu primer préstamo. Por el momento no es posible aprobar una nueva solicitud, pero más adelante tu perfil podrá ser revisado nuevamente. Te invitamos a volver a intentarlo en 3 meses. Gracias por tu confianza y esperamos poder acompañarte otra vez en el futuro.
+                                Queremos agradecerte por haber confiado en nosotros con tu primer préstamo. Por el momento no es posible aprobar una nueva solicitud, pero más adelante tu perfil podrá ser revisado nuevamente. Te invitamos a volver a intentarlo en 6 meses. Gracias por tu confianza y esperamos poder acompañarte otra vez en el futuro.
                             </Typography>
                             <Divider sx={{
             m: '1rem 0'

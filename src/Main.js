@@ -242,13 +242,13 @@ function Main() {
     2: "Tu recibo público no es válido en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
     3: "No pudimos confirmar tus documentos en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
     4: "No pudimos confirmar tu DNI en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-    5: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-    7: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-    8: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-    9: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-    10: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-    11: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-    12: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+    5: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+    7: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+    8: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+    9: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+    10: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+    11: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
+    12: "Por ahora no fue posible aprobar tu préstamo tras el analisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
     13: "Faltan documentos requeridos. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
     14: "Validación de fotografía selfie fallida. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
     15: "Recibo público no es válido. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
@@ -256,9 +256,9 @@ function Main() {
     17: "Referencias no son validas. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
     18: "No pudimos validar tu identidad. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
     19: "Cuenta de banco no es valida, Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
-    21: "Solicitud no aprobada por ahora no fue posible aprobar tu préstamo tras el análisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación.",
-    22: "Solicitud no aprobada por ahora no fue posible aprobar tu préstamo tras el análisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación.",
-    23: "Solicitud no aprobada por ahora no fue posible aprobar tu préstamo tras el análisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 3 meses para una nueva evaluación."
+    21: "Solicitud no aprobada por ahora no fue posible aprobar tu préstamo tras el análisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación.",
+    22: "Solicitud no aprobada por ahora no fue posible aprobar tu préstamo tras el análisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación.",
+    23: "Solicitud no aprobada por ahora no fue posible aprobar tu préstamo tras el análisis de tu perfil. Tu situación puede mejorar con el tiempo, por lo que te invitamos a volver a intentarlo en 6 meses para una nueva evaluación."
   };
   const styles = {
     container: {
@@ -418,7 +418,7 @@ function Main() {
             timeZone: "America/Tegucigalpa"
           }));
           const claveHoy = `${fechaHN.getFullYear()}-${String(fechaHN.getMonth() + 1).padStart(2, '0')}-${String(fechaHN.getDate()).padStart(2, '0')}`;
-          const fechasFeriadoAnuncio = new Set(["2026-08-15", "2026-08-16","2026-08-22", "2026-08-23", "2026-08-29", "2026-08-30"]);
+          const fechasFeriadoAnuncio = new Set(["2026-09-05", "2026-09-06","2026-09-12", "2026-09-13", "2026-09-19", "2026-09-20", "2026-09-26", "2026-09-27"]);
           const esFeriadoAnuncio = fechasFeriadoAnuncio.has(claveHoy);
           if (usuarioDetalle.status === "1" && esFeriadoAnuncio) {
             return <div style={styles.container}>
@@ -474,7 +474,7 @@ function Main() {
 
             // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
             const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-            const fechasFeriado = new Set(["2026-08-15", "2026-08-016", "2026-08-22", "2026-08-23", "2026-08-29", "2026-08-30"]);
+            const fechasFeriado = new Set(["2026-09-05", "2026-09-06","2026-09-12", "2026-09-13", "2026-09-19", "2026-09-20", "2026-09-26", "2026-09-27"]);
             const esFeriado = fechasFeriado.has(claveFecha);
             if (esFeriado) {
               return <Link className="tilebotonpri disabled" style={{
