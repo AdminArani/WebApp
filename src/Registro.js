@@ -1059,7 +1059,7 @@ function VerticalLinearStepper2() {
                             <Grid item xs={12} sm={12}>
                                 <Typography>
                                     <Checkbox checked={inputAceptoCondiciones} onChange={handleChange_inputAceptoCondiciones} />
-                                    Acepto <a href="https://aranih.com/politicadeprivacidad.html" target="_blank" rel="noopener noreferrer">politica de privacidad</a>, <a href="https://aranih.com/terminosycondiciones.html" target="_blank" rel="noopener noreferrer">condiciones.</a>
+                                    Acepto <a href="https://aranih.com/politicadeprivacidad.html" target="_blank" rel="noopener noreferrer">politica de privacidad</a>, <a href="https://aranih.com/terminosycondiciones.php" target="_blank" rel="noopener noreferrer">condiciones.</a>
                                 </Typography>
                                 <Dialog open={ventanaCondicionesOpen} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
                                     <DialogTitle id="alert-dialog-title">{"Terminos y condiciones"}</DialogTitle>

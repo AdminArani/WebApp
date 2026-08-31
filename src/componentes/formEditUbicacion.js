@@ -47,11 +47,10 @@ function FormEditUbicacion({
     textoAyuda: ""
   });
   function handleChange_inputMunicipio(e, newValue) {
-    if (!newValue) return false;
-    let valor = newValue;
+    let valor = newValue || '';
     let validado = false;
     let texto = "Seleccione una opción.";
-    if (valor.length >= 0) {
+    if (valor.length >= 1) {
       validado = true;
       texto = "";
     }
@@ -62,8 +61,10 @@ function FormEditUbicacion({
       blur: inputMunicipio.blur
     });
     set_inputLocalidad({
-      ...inputMunicipio,
-      validado: false
+      valor: '',
+      validado: false,
+      textoAyuda: "Seleccione una opción.",
+      blur: inputLocalidad.blur
     });
   }
   const [inputLocalidad, set_inputLocalidad] = useState({
@@ -72,8 +73,7 @@ function FormEditUbicacion({
     textoAyuda: ""
   });
   function handleChange_inputLocalidad(e, newValue) {
-    if (!newValue) return false;
-    let valor = newValue;
+    let valor = newValue || '';
     let validado = false;
     let texto = "Seleccione una opción.";
     if (valor.length >= 1) {
@@ -220,7 +220,7 @@ function FormEditUbicacion({
                 </Grid>
                 <Grid item xs={12} sm={6}>
                     <FormControl fullWidth>
-                        <Autocomplete disablePortal={false} id="combo-box-demo" onChange={(e, newdata) => handleChange_inputMunicipio(e, newdata.MunCod)} options={usuarioDetalleFullR.muns.filter(element => element.DepCod === inputDepartamento.valor)} getOptionLabel={option => option.MunDsc} renderInput={params => <TextField inputProps={params.inputProps} onBlur={() => {
+                        <Autocomplete disablePortal={false} id="combo-box-demo" onChange={(e, newdata) => handleChange_inputMunicipio(e, newdata?.MunCod ?? null)} options={usuarioDetalleFullR.muns.filter(element => element.DepCod === inputDepartamento.valor)} getOptionLabel={option => option.MunDsc} renderInput={params => <TextField inputProps={params.inputProps} onBlur={() => {
             set_inputMunicipio({
               ...inputMunicipio,
               blur: true
@@ -233,7 +233,7 @@ function FormEditUbicacion({
                 </Grid>
                 <Grid item xs={12} sm={12}>
                     <FormControl fullWidth>
-                        <Autocomplete disablePortal={false} id="combo-box-demo" onChange={(e, newdata) => handleChange_inputLocalidad(e, newdata.LocCod)} options={usuarioDetalleFullR.ubs.filter(element => element.MunCod === inputMunicipio.valor && element.DepCod === inputDepartamento.valor)} getOptionLabel={option => option.LocDsc} renderInput={params => <TextField onBlur={() => {
+                        <Autocomplete disablePortal={false} id="combo-box-demo" onChange={(e, newdata) => handleChange_inputLocalidad(e, newdata?.LocCod ?? null)} options={usuarioDetalleFullR.ubs.filter(element => element.MunCod === inputMunicipio.valor && element.DepCod === inputDepartamento.valor)} getOptionLabel={option => option.LocDsc} renderInput={params => <TextField onBlur={() => {
             set_inputLocalidad({
               ...inputLocalidad,
               blur: true

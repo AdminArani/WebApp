@@ -268,6 +268,7 @@ function showSupportModal({
   statusCode,
   requestUrl
 }) {
+  const isNetworkError = statusCode === "de red";
   return new Promise(resolve => {
     const container = document.createElement("div");
     document.body.appendChild(container);
@@ -279,29 +280,45 @@ function showSupportModal({
     };
     root.render(<Dialog open onClose={() => closeModal(false)} maxWidth="sm" fullWidth aria-labelledby="http-error-dialog-title">
                 <DialogTitle id="http-error-dialog-title">
-                    Error HTTP {statusCode}
+                    {isNetworkError ? "Estamos recibiendo muchas solicitudes" : `Error HTTP ${statusCode}`}
                 </DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
-                        Se detecto un error HTTP {statusCode}. Por favor toma una captura de pantalla para soporte.
-                    </DialogContentText>
-                    <DialogContentText sx={{
-          mt: 2
-        }}>
-                        Endpoint: {requestUrl}
-                    </DialogContentText>
-                    <DialogContentText sx={{
-          mt: 2
-        }}>
-                        Si deseas enviarnos el reporte ahora, presiona "Enviar correo".
-                    </DialogContentText>
+                    {isNetworkError ? <>
+                        <DialogContentText>
+                            En este momento tenemos una alta demanda y algunos procesos pueden tardar más de lo habitual.
+                        </DialogContentText>
+                        <DialogContentText sx={{
+            mt: 2
+          }}>
+                            Por favor, intenta nuevamente dentro de 1 hora. Entendemos que deseas continuar lo antes posible y agradecemos tu paciencia.
+                        </DialogContentText>
+                        <DialogContentText sx={{
+            mt: 2
+          }}>
+                            Este inconveniente ya fue registrado para seguimiento.
+                        </DialogContentText>
+                      </> : <>
+                        <DialogContentText>
+                            Se detecto un error HTTP {statusCode}. Por favor toma una captura de pantalla para soporte.
+                        </DialogContentText>
+                        <DialogContentText sx={{
+            mt: 2
+          }}>
+                            Endpoint: {requestUrl}
+                        </DialogContentText>
+                        <DialogContentText sx={{
+            mt: 2
+          }}>
+                            Si deseas enviarnos el reporte ahora, presiona "Reportar problema".
+                        </DialogContentText>
+                      </>}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => closeModal(false)} color="inherit">
                         Cerrar
                     </Button>
                     <Button onClick={() => closeModal(true)} variant="contained">
-                        Enviar correo
+                        Reportar problema
                     </Button>
                 </DialogActions>
             </Dialog>);
@@ -365,6 +382,12 @@ export function installHttp405Handler({
       void showErrorFlow({
         supportEmail,
         statusCode: error.response.status,
+        requestUrl: error?.config?.url || "desconocida"
+      });
+    } else if (!error?.response) {
+      void showErrorFlow({
+        supportEmail,
+        statusCode: "de red",
         requestUrl: error?.config?.url || "desconocida"
       });
     }
