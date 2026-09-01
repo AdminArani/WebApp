@@ -253,9 +253,13 @@ function Main() {
     localStorage.removeItem('arani_session_id');
   };
 
-  const abrirLandBot = () => {
-    // eslint-disable-next-line
-    myLandbot.open();
+  const abrirLandBot = async () => {
+    try {
+      const landbot = await window.initLandbot();
+      landbot.open();
+    } catch (error) {
+      console.error('No se pudo abrir el chat:', error);
+    }
   };
 
   const mensajesErrores = {
