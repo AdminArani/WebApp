@@ -20,6 +20,7 @@ function Main() {
   const gContext = useContext(AppContext);
   const [showAplicarLink, setShowAplicarLink] = useState(false);
   const [ubicacion, setUbicacion] = useState('');
+  const [cargandoUbicacion, setCargandoUbicacion] = useState(false);
   const [loading, setLoading] = useState(true);
   const [usuarioDetalle, set_usuarioDetalle] = useState({});
   const [usuarioDetalleFullR, set_usuarioDetalleFullR] = useState(false);
@@ -94,14 +95,30 @@ function Main() {
       if (typeof callback === 'function') callback();
     }).catch(err => {});
   }
-  async function guardarUbicacion(customerId) {
-    navigator.geolocation.getCurrentPosition(async position => {
-      const {
-        latitude,
-        longitude
-      } = position.coords;
-      const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=es`;
+  async function guardarUbicacion(customerId, personCode) {
+    // Mostrar "Cargando ubicación..." inmediatamente
+    setCargandoUbicacion(true);
+    setUbicacion('Cargando ubicación...');
+
+    // Flag local para rastrear si la ubicación fue obtenida
+    let ubicacionObtenida = false;
+
+    // Crear un timeout de 30 segundos para mostrar error si no obtiene ubicación
+    const timeoutId = setTimeout(() => {
+      if (!ubicacionObtenida) {
+        setCargandoUbicacion(false);
+        setUbicacion('No se pudo encontrar la ubicación. Por favor, verifica que tu navegador tenga permisos de geolocalización.');
+      }
+    }, 30000);
+
+    // Success handler
+    const onSuccess = async (position) => {
+      ubicacionObtenida = true;
+      clearTimeout(timeoutId);
       try {
+        const { latitude, longitude } = position.coords;
+        const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=es`;
+        
         const response = await fetch(apiUrl);
         const data = await response.json();
         const normalizarTexto = (valor = '') => valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -176,7 +193,6 @@ function Main() {
           body: JSON.stringify({
             idClient: customerId,
             ip: ip,
-            // Enviar la IP en lugar del DNI
             latitude: latitude,
             longitude: longitude,
             navegador: navegador,
@@ -186,17 +202,41 @@ function Main() {
 
         // Verificar el estado de la respuesta
         if (!postResponse.ok) {
-          const errorMessage = await postResponse.text(); // Obtener el cuerpo de la respuesta como texto
+          const errorMessage = await postResponse.text();
           console.error('Error en la respuesta del API:', errorMessage);
           throw new Error(`HTTP error! status: ${postResponse.status}`);
         }
 
         // Intentar analizar la respuesta como JSON
         const postData = await postResponse.json();
-        // Manejo de la respuesta
+        setCargandoUbicacion(false);
       } catch (error) {
-        console.error('Bienvenido:', error);
+        ubicacionObtenida = true;
+        clearTimeout(timeoutId);
+        setCargandoUbicacion(false);
+        console.error('Error al guardar ubicación:', error);
+        setUbicacion('No se pudo encontrar la ubicación. Por favor, verifica que tu navegador tenga permisos de geolocalización.');
       }
+    };
+
+    // Error handler
+    const onError = (error) => {
+      ubicacionObtenida = true;
+      clearTimeout(timeoutId);
+      setCargandoUbicacion(false);
+      console.error('Error de geolocalización:', error);
+      const errorMessages = {
+        1: 'Permiso denegado. Por favor, habilita la geolocalización en tu navegador.',
+        2: 'No se pudo obtener la posición. Por favor, intenta de nuevo.',
+        3: 'La solicitud de geolocalización tardó demasiado. Por favor, intenta de nuevo.'
+      };
+      setUbicacion(errorMessages[error.code] || 'No se pudo encontrar la ubicación. Por favor, verifica que tu navegador tenga permisos de geolocalización.');
+    };
+
+    // Llamar a getCurrentPosition con ambos handlers
+    navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+      timeout: 30000, // 30 segundos de timeout
+      enableHighAccuracy: false
     });
   }
 
@@ -205,10 +245,6 @@ function Main() {
     validarPerfilEnCore(() => {});
   }, []);
 
-  // useEffect para llamar a la función validarPerfilEnCore al cargar el componente
-  useEffect(() => {
-    validarPerfilEnCore(() => {});
-  }, []);
   const salir = () => {
     gContext.set_logeado({
       estado: false,
@@ -216,26 +252,12 @@ function Main() {
     });
     localStorage.removeItem('arani_session_id');
   };
+
   const abrirLandBot = () => {
     // eslint-disable-next-line
     myLandbot.open();
   };
-  const [ubicacionNoDisponible, setUbicacionNoDisponible] = useState(false);
-  useEffect(() => {
-    const fetchUbicacion = async () => {
-      setUbicacion('Cargando ubicación...'); // Mostrar mensaje de carga
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const ubicacionExistente = false; // Cambia esto según el resultado de tu API
 
-      if (!ubicacionExistente) {
-        setUbicacion('Para continuar con el proceso de solicitud de préstamo en Arani App, es necesario que el navegador acceda a tu ubicación en tu celular.');
-      } else {
-        setUbicacion('Ubicación obtenida con éxito');
-      }
-      setLoading(false);
-    };
-    fetchUbicacion();
-  }, []);
   const mensajesErrores = {
     0: "Vas muy bien! Ya pasaste a la segunda etapa",
     1: "No pudimos confirmar tu foto selfie en tu perfil. Para más detalles, <a href='https://www.arani.hn/erroresperfil.php' target='_blank'>haz clic aquí</a>.",
