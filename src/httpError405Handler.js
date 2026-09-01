@@ -11,7 +11,8 @@ let isInstalled = false;
 let lastNotificationAt = 0;
 let isModalOpen = false;
 let currentUserContext = null;
-const NOTIFICATION_COOLDOWN_MS = 15000;
+const NOTIFICATION_COOLDOWN_MS = 60000; // 60 segundos para evitar spam de errores de red
+let networkErrorCounts = {}; // Rastrear errores de red por endpoint
 function getAllowedErrorReportHosts() {
   const hosts = new Set([window.location.hostname, "app.aranih.com", "aranih-com.creditonline.eu"]);
   const apiUrl = safeString(process.env.REACT_APP_API_URL);
@@ -69,6 +70,33 @@ function safeString(value) {
     return "";
   }
   return String(value).trim();
+}
+function isTimeoutError(error) {
+  if (!error) return false;
+  // Detectar timeout de axios
+  if (error.code === 'ECONNABORTED') return true;
+  // Detectar timeout en mensaje
+  const message = safeString(error?.message || '').toLowerCase();
+  if (message.includes('timeout')) return true;
+  // Detectar timeout en fetch (AbortError)
+  if (error.name === 'AbortError') return true;
+  return false;
+}
+function shouldReportNetworkError(error, requestUrl) {
+  // No reportar timeouts como errores críticos de red
+  if (isTimeoutError(error)) {
+    return false;
+  }
+  // No reportar errores cuando el usuario está offline
+  if (!navigator.onLine) {
+    return false;
+  }
+  // Solo reportar errores de red "reales" si se repiten
+  const normalized = safeString(requestUrl);
+  const key = normalized || 'desconocida';
+  networkErrorCounts[key] = (networkErrorCounts[key] || 0) + 1;
+  // Solo reportar si sucede 3+ veces en la misma URL
+  return networkErrorCounts[key] >= 3;
 }
 function parseBodyToObject(body) {
   if (!body) {
@@ -385,11 +413,14 @@ export function installHttp405Handler({
         requestUrl: error?.config?.url || "desconocida"
       });
     } else if (!error?.response) {
-      void showErrorFlow({
-        supportEmail,
-        statusCode: "de red",
-        requestUrl: error?.config?.url || "desconocida"
-      });
+      // Solo reportar errores de red si realmente son críticos, no timeouts
+      if (shouldReportNetworkError(error, error?.config?.url)) {
+        void showErrorFlow({
+          supportEmail,
+          statusCode: "de red",
+          requestUrl: error?.config?.url || "desconocida"
+        });
+      }
     }
     return Promise.reject(error);
   });
@@ -417,11 +448,14 @@ export function installHttp405Handler({
       }
       return response;
     } catch (error) {
-      void showErrorFlow({
-        supportEmail,
-        statusCode: "de red",
-        requestUrl: getRequestUrl(args[0])
-      });
+      // Solo reportar errores de red si realmente son críticos, no timeouts
+      if (shouldReportNetworkError(error, getRequestUrl(args[0]))) {
+        void showErrorFlow({
+          supportEmail,
+          statusCode: "de red",
+          requestUrl: getRequestUrl(args[0])
+        });
+      }
       throw error;
     }
   };
