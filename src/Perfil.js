@@ -509,7 +509,11 @@ function Perfil() {
                       backgroundColor: '#ffffff',
                       borderBottom: '1px solid #e0e0e0'
                       }}>
-                                <Typography variant="body2" sx={{ mb: 1, color: '#666666' }}>
+                                <Typography variant="h8" sx={{
+                          mb: 1,
+                          color: '#1976d2',
+                          fontWeight: 600
+                        }}>
                                   Paso {pasoPerfil + 1} de {pasosPerfil.length}: {pasosPerfil[pasoPerfil]}
                                 </Typography>
                                 <Box sx={{
@@ -521,7 +525,7 @@ function Perfil() {
                                     Avance del perfil
                                   </Typography>
                                   <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                                    {camposObligatoriosCompletados} de {camposObligatoriosTotales} campos ({progresoPerfil}%)
+                                    {progresoPerfil}%
                                   </Typography>
                                 </Box>
                                 <LinearProgress variant="determinate" value={progresoPerfil} color={progresoPerfil === 100 ? 'success' : 'primary'} sx={{ height: 6, borderRadius: 1 }} />
@@ -1444,7 +1448,11 @@ function Perfil() {
                                         ¿Estás seguro que deseas enviar tus datos a validar?
                                     </Typography>
                                 </DialogContent>
-                                <DialogActions>
+                                <DialogActions sx={{
+                                  flexDirection: 'row-reverse',
+                                  justifyContent: 'flex-start',
+                                  gap: 1
+                                }}>
                                     <Button onClick={async () => {
                     // Datos reales que se van a enviar
                     const requestBody = {
