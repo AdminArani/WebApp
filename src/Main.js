@@ -139,7 +139,7 @@ function Main() {
         setUbicacion(ubicacionTexto);
 
         // Lista de ubicaciones permitidas
-        const ubicacionesPermitidas = ["Tegucigalpa, Honduras", "Comayagüela, Honduras", "Valle de Angeles, Honduras", "Choloma, Honduras", "La Lima, Honduras", "Villanueva, Honduras", "El Progreso, Honduras", "San Pedro Sula, Honduras", "Puerto Cortés, Honduras", "El Progreso, Honduras", "Danlí, Honduras", "Danlì, Honduras", "Danli, Honduras", "Choluteca, Honduras", "Comayagua, Honduras", "Siguatepeque, Honduras", "La Ceiba, Honduras", "La Paz, Honduras", "Santa Rosa de Copán, Honduras", "Gracias, Honduras", "Roatán, Honduras", "French Harbour, Honduras", "Santa Rosa, Honduras", "Intibucá, Honduras"];
+        const ubicacionesPermitidas = ["Tegucigalpa, Honduras", "Comayagüela, Honduras", "Valle de Angeles, Honduras", "Choloma, Honduras", "La Lima, Honduras", "Villanueva, Honduras", "El Progreso, Honduras", "San Pedro Sula, Honduras", "Puerto Cortés, Honduras", "El Progreso, Honduras", "Danlí, Honduras", "Danlì, Honduras", "Danli, Honduras", "Choluteca, Honduras", "Comayagua, Honduras", "Siguatepeque, Honduras", "La Ceiba, Honduras", "La Paz, Honduras", "Santa Rosa de Copán, Honduras", "Gracias, Honduras", "Roatán, Honduras", "French Harbour, Honduras", "Santa Rosa, Honduras","Tela, Honduras" ,"Intibucá, Honduras" ];
         const ubicacionesPermitidasNormalizadas = ubicacionesPermitidas.map(normalizarTexto);
         const ubicacionTextoNormalizada = normalizarTexto(ubicacionTexto);
 

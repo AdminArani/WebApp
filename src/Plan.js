@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Box, Container, Modal, Button, Chip, Dialog, DialogActions, DialogContent, TextField, Divider, Grid, List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
+import { Box, Container, Modal, Button, Chip, Dialog, DialogActions, DialogContent, TextField, Divider, Grid, List, ListItem, ListItemText, Paper, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import axios from "axios";
 import numeral from "numeral";
 import moment from "moment";
@@ -39,6 +39,7 @@ function Plan() {
   const [errorMessage, setErrorMessage] = useState('');
   const [ubicacion, setUbicacion] = useState('');
   const [montoPago, setMontoPago] = useState('');
+  const [tipoPagoBAC, setTipoPagoBAC] = useState('parcial'); // parcial | completo
   const [numReferencia, setNumReferencia] = useState('');
   const [openModalComprobante, setOpenModalComprobante] = useState(false);
   const [openModalBAC, setOpenModalBAC] = useState(false);
@@ -289,6 +290,15 @@ function Plan() {
   const handleMontoPagoChange = event => {
     setMontoPago(event.target.value); // Actualiza el estado cuando cambia el input
   };
+  const handleTipoPagoBACChange = (event, nuevoTipo) => {
+    if (!nuevoTipo) return;
+    setTipoPagoBAC(nuevoTipo);
+    if (nuevoTipo === 'completo') {
+      setMontoPago(numeral(prestamoSeleccionado.debt).format('0.00'));
+    } else {
+      setMontoPago('');
+    }
+  };
   const [estadoReferencia, setEstadoReferencia] = useState('');
   const [clienteData, setClienteData] = useState(null);
   {/* Validar perfil en core  */}
@@ -381,7 +391,32 @@ function Plan() {
       handleOpenModal();
     }
   };
-  const enviarComprobante = clienteData => {
+  const enviarPagoAdelantadoBAC = (clienteData, nombreCompleto) => {
+    // Los navegadores eliminan el body en peticiones GET, por eso se usa POST para que el servidor reciba los datos
+    return axios.request({
+      url: 'https://app.aranih.com/api/chatbot/pagosBac/pagosAdelantados.php',
+      method: 'post',
+      headers: {
+        'Authorization': 'Bearer 70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa',
+        'Content-Type': 'application/json'
+      },
+      data: {
+        idCliente: clienteData.customer_id,
+        identidadCliente: clienteData.person_code,
+        nombreCliente: nombreCompleto,
+        correoElectronico: clienteData.email,
+        celular: String(clienteData.mob_phone || '').replace(/^\+?504/, ''),
+        identificadorPrestamo: pagoseleccionado.container_id,
+        fechaPago: fechaHoyUTC6,
+        montoPrestamo: Number(prestamoSeleccionado.debt),
+        montoPago: parseFloat(montoPago),
+        validado: 'pendiente',
+        comentario: '',
+        usuarioValidador_id: 1
+      }
+    });
+  };
+  const enviarComprobante = async clienteData => {
     setCargandoEnvio(true);
     setExitoEnvio(false);
     const formData = new FormData();
@@ -423,12 +458,18 @@ function Plan() {
     formData.append('fechaCuota', schedule_date);
     formData.append('horaRegistro', HoraHoy);
     formData.forEach((value, key) => {});
-    axios.post('https://app.aranih.com/api/chatbot/pagosBac/postBacPago.php', formData, {
-      headers: {
-        'Authorization': '70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa',
-        'Content-Type': 'multipart/form-data'
+    try {
+      const solicitudes = [axios.post('https://app.aranih.com/api/chatbot/pagosBac/postBacPago.php', formData, {
+        headers: {
+          'Authorization': '70f5c0e10e6a43072595dc67c5ee4b2a68371abdc3c8438120d774ed9ac706aa',
+          'Content-Type': 'multipart/form-data'
+        }
+      })];
+      if (tipoPagoBAC === 'completo') {
+        solicitudes.push(enviarPagoAdelantadoBAC(clienteData, nombreCompleto));
       }
-    }).then(response => {
+      // Se espera a que ambas solicitudes finalicen antes de continuar
+      await Promise.all(solicitudes);
       setFotoComprobante(null);
       setExitoEnvio(true);
       setTimeout(() => {
@@ -437,14 +478,14 @@ function Plan() {
       setTimeout(() => {
         setExitoEnvio(false);
       }, 1000);
-    }).catch(error => {
+    } catch (error) {
       console.error('Error al enviar el comprobante:', error.response ? error.response.data : error.message);
       setTimeout(() => {
         setOpenModalBAC(false);
       }, 1000);
-    }).finally(() => {
+    } finally {
       setCargandoEnvio(false);
-    });
+    }
   };
 
   // Manejar la apertura del modal:
@@ -1565,14 +1606,23 @@ function Plan() {
                 <Dialog open={openModalBAC} onClose={() => {
           setOpenModalBAC(false);
           setExitoEnvio(false); // Resetea el mensaje de éxito al cerrar el modal
+          setTipoPagoBAC('parcial');
         }}>
                 <DialogContent>
                     <Typography variant="h5">Subir Archivo BAC</Typography>
                     <Typography variant="body2" sx={{
               mb: 2
             }}>Adjunte su comprobante de pago BAC.</Typography>
+                    <ToggleButtonGroup value={tipoPagoBAC} exclusive onChange={handleTipoPagoBACChange} fullWidth sx={{
+              mt: 1
+            }}>
+                        <ToggleButton value="parcial">Pago parcial</ToggleButton>
+                        <ToggleButton value="completo" disabled={pagosrealizadosnum > 0}>Pago completo</ToggleButton>
+                    </ToggleButtonGroup>
                     {/* Input para el montoPago */}
-                    <TextField label="Monto a Pagar" value={montoPago} onChange={handleMontoPagoChange} type="number" fullWidth sx={{
+                    <TextField label="Monto a Pagar" value={montoPago} onChange={handleMontoPagoChange} type="number" fullWidth InputProps={{
+              readOnly: tipoPagoBAC === 'completo'
+            }} sx={{
               mt: 2
             }} />
 

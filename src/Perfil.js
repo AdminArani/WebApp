@@ -946,7 +946,7 @@ function Perfil() {
                                     <ListItemIcon>
                                         <span className="material-symbols-outlined">apartment</span>
                                     </ListItemIcon>
-                                    <ListItemText primary={usuarioDetalle.workplace || "----"} secondary="* Lugar de trabajo" />
+                                    <ListItemText primary={usuarioDetalle.workplace || "----"} secondary="* Nombre Empresa o Negocio" />
 
                                 </ListItemButton>
                             </List>
