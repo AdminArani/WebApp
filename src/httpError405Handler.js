@@ -292,11 +292,7 @@ function buildMailToLink(supportEmail, statusCode, requestUrl) {
   const body = encodeURIComponent(bodyLines.join("\n"));
   return `mailto:${supportEmail}?subject=${subject}&body=${body}`;
 }
-function showSupportModal({
-  statusCode,
-  requestUrl
-}) {
-  const isNetworkError = statusCode === "de red";
+function showSupportModal() {
   return new Promise(resolve => {
     const container = document.createElement("div");
     document.body.appendChild(container);
@@ -308,10 +304,10 @@ function showSupportModal({
     };
     root.render(<Dialog open onClose={() => closeModal(false)} maxWidth="sm" fullWidth aria-labelledby="http-error-dialog-title">
                 <DialogTitle id="http-error-dialog-title">
-                    {isNetworkError ? "Estamos recibiendo muchas solicitudes" : `Error HTTP ${statusCode}`}
+            Estamos recibiendo muchas solicitudes
                 </DialogTitle>
                 <DialogContent>
-                    {isNetworkError ? <>
+            <>
                         <DialogContentText>
                             En este momento tenemos una alta demanda y algunos procesos pueden tardar más de lo habitual.
                         </DialogContentText>
@@ -325,21 +321,7 @@ function showSupportModal({
           }}>
                             Este inconveniente ya fue registrado para seguimiento.
                         </DialogContentText>
-                      </> : <>
-                        <DialogContentText>
-                            Se detecto un error HTTP {statusCode}. Por favor toma una captura de pantalla para soporte.
-                        </DialogContentText>
-                        <DialogContentText sx={{
-            mt: 2
-          }}>
-                            Endpoint: {requestUrl}
-                        </DialogContentText>
-                        <DialogContentText sx={{
-            mt: 2
-          }}>
-                            Si deseas enviarnos el reporte ahora, presiona "Reportar problema".
-                        </DialogContentText>
-                      </>}
+                    </>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => closeModal(false)} color="inherit">
@@ -368,10 +350,7 @@ async function showErrorFlow({
   lastNotificationAt = now;
   isModalOpen = true;
   try {
-    const shouldOpenEmail = await showSupportModal({
-      statusCode,
-      requestUrl
-    });
+    const shouldOpenEmail = await showSupportModal();
     if (shouldOpenEmail) {
       window.location.href = buildMailToLink(supportEmail, statusCode, requestUrl);
     }
