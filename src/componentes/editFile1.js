@@ -98,6 +98,18 @@ function FormEditFile1({
                         <input hidden onChange={enviarArchivo1} accept=".png, .jpg, .jpeg" multiple type="file" />
             
                     </Button>
+                  </Grid>
+                  <Grid item xs={12} sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              mt: 2
+              }}>
+                    <Button onClick={reiniciarpantalla} sx={{
+                mt: 1,
+                mr: 1
+              }}>
+                      Cerrar
+                    </Button>
                 </Grid>
             </Grid>
         </Box>;
