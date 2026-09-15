@@ -57,7 +57,7 @@ function FormEditTipoIngreso({
         sid: gContext.logeado?.token,
         array: {
           income_status: inputTipoIngresos.valor,
-          business_type: inputTipoNegocio.valor
+          business_type: inputTipoIngresos.valor === 'asalariado' ? '' : inputTipoNegocio.valor
         }
       }
     }).then(res => {
