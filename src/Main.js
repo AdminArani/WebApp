@@ -444,7 +444,7 @@ function Main() {
             timeZone: "America/Tegucigalpa"
           }));
           const claveHoy = `${fechaHN.getFullYear()}-${String(fechaHN.getMonth() + 1).padStart(2, '0')}-${String(fechaHN.getDate()).padStart(2, '0')}`;
-          const fechasFeriadoAnuncio = new Set(["2026-09-05", "2026-09-06","2026-09-12", "2026-09-13", "2026-09-19", "2026-09-20", "2026-09-26", "2026-09-27"]);
+          const fechasFeriadoAnuncio = new Set(["2026-10-03", "2026-10-04","2026-10-10", "2026-10-11", "2026-10-17", "2026-10-18", "2026-10-24", "2026-10-25", "2026-10-31", "2026-11-01"]);
           const esFeriadoAnuncio = fechasFeriadoAnuncio.has(claveHoy);
           if (usuarioDetalle.status === "1" && esFeriadoAnuncio) {
             return <div style={styles.container}>
