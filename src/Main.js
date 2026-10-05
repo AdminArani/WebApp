@@ -16,6 +16,12 @@ import BarraApp from "./componentes/BarraApp.js";
 import ModalDatosFaltantes from "./componentes/ModalDatosFaltantes";
 import axios from "axios";
 import { orange } from "@mui/material/colors";
+
+const fechasSinSolicitudesNiDesembolsos = new Set([
+  "2026-10-03", "2026-10-04", "2026-10-10", "2026-10-11", "2026-10-17",
+  "2026-10-18", "2026-10-24", "2026-10-25", "2026-10-31", "2026-11-01"
+]);
+
 function Main() {
   const gContext = useContext(AppContext);
   const [showAplicarLink, setShowAplicarLink] = useState(false);
@@ -444,8 +450,7 @@ function Main() {
             timeZone: "America/Tegucigalpa"
           }));
           const claveHoy = `${fechaHN.getFullYear()}-${String(fechaHN.getMonth() + 1).padStart(2, '0')}-${String(fechaHN.getDate()).padStart(2, '0')}`;
-          const fechasFeriadoAnuncio = new Set(["2026-10-03", "2026-10-04","2026-10-10", "2026-10-11", "2026-10-17", "2026-10-18", "2026-10-24", "2026-10-25", "2026-10-31", "2026-11-01"]);
-          const esFeriadoAnuncio = fechasFeriadoAnuncio.has(claveHoy);
+          const esFeriadoAnuncio = fechasSinSolicitudesNiDesembolsos.has(claveHoy);
           if (usuarioDetalle.status === "1" && esFeriadoAnuncio) {
             return <div style={styles.container}>
                                     <Typography style={styles.text}>
@@ -500,10 +505,9 @@ function Main() {
 
             // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
             const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-            const fechasFeriado = new Set(["2026-09-05", "2026-09-06","2026-09-12", "2026-09-13", "2026-09-19", "2026-09-20", "2026-09-26", "2026-09-27"]);
-            const esFeriado = fechasFeriado.has(claveFecha);
+            const esFeriado = fechasSinSolicitudesNiDesembolsos.has(claveFecha);
             if (esFeriado) {
-              return <Link className="tilebotonpri disabled" style={{
+              return <Link to="#" onClick={e => e.preventDefault()} aria-disabled="true" tabIndex={-1} className="tilebotonpri disabled" style={{
                 display: 'flex',
                 justifyContent: 'flex-start',
                 alignItems: 'center',
