@@ -209,6 +209,7 @@ function TerminarRegistroForm({
     axios.request({
       url: `${config.apiUrl}/api/app/register2.php`,
       method: "post",
+      timeout: 0,
       withCredentials: true,
       data: {
         sid: gContext.logeado.token,
@@ -228,7 +229,10 @@ function TerminarRegistroForm({
       if (res.data.status === "OK") {
         set_seRegistro(true);
       }
-    }).catch(err => {});
+    }).catch(err => {
+      set_cargandoRegister2(false);
+      console.error("Error al completar el registro:", err);
+    });
   }
   useEffect(() => {
     set_botonEnviarHabilitado(false);
@@ -451,7 +455,7 @@ function TerminarRegistroForm({
               mt: 1,
               mr: 1
             }}>{cargandoRegister2 ? "Enviando..." : "Guardar datos"}</Button>
-                        <Button onClick={cerrar} variant="contained" sx={{
+                        <Button onClick={cerrar} disabled={cargandoRegister2} variant="contained" sx={{
               mt: 1,
               mr: 1
             }}>Cancelar</Button>
