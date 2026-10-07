@@ -17,10 +17,28 @@ import ModalDatosFaltantes from "./componentes/ModalDatosFaltantes";
 import axios from "axios";
 import { orange } from "@mui/material/colors";
 
-const fechasSinSolicitudesNiDesembolsos = new Set([
-  "2026-10-03", "2026-10-04", "2026-10-10", "2026-10-11", "2026-10-17",
-  "2026-10-18", "2026-10-24", "2026-10-25", "2026-10-31", "2026-11-01"
-]);
+const feriadosSinServicio = {
+  "2026-10-06": { nombre: "Morazánico", desde: "12:00" },
+  "2026-10-08": { nombre: "Morazánico" },
+  "2026-10-09": { nombre: "Morazánico" }
+};
+
+const obtenerFechaHonduras = () => {
+  return new Date(new Date().toLocaleString("en-US", {
+    timeZone: "America/Tegucigalpa"
+  }));
+};
+
+const obtenerClaveFecha = fecha => `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
+
+const obtenerMensajeCierre = (claveFecha, esFinDeSemana, esFeriado) => {
+  const feriado = feriadosSinServicio[claveFecha];
+  if (feriado && esFeriado) {
+    const inicio = feriado.desde ? ` desde las ${feriado.desde} (hora de Honduras)` : '';
+    return `Por motivo del Feriado ${feriado.nombre}, hoy no se procesan solicitudes ni desembolsos de préstamos${inicio}.`;
+  }
+  return esFinDeSemana ? "Te recordamos que los fines de semana no se realizan solicitudes ni desembolsos de préstamos." : "";
+};
 
 function Main() {
   const gContext = useContext(AppContext);
@@ -43,6 +61,7 @@ function Main() {
   const [usuarioAprobadoManual, set_usuarioAprobadoManual] = useState(false);
   const [urlImagenPerfilTerminada, set_urlImagenPerfilTerminada] = useState(false);
   const [datosEnviadosArevision, set_datosEnviadosArevision] = useState(false);
+  const [actualizacionHorario, setActualizacionHorario] = useState(0);
 
   //aviso inicio//
 
@@ -336,6 +355,30 @@ function Main() {
 
     setShowModal(false);
   };
+  const fechaActualHonduras = obtenerFechaHonduras();
+  const fechaHoyHonduras = obtenerClaveFecha(fechaActualHonduras);
+  const esFinDeSemana = fechaActualHonduras.getDay() === 0 || fechaActualHonduras.getDay() === 6;
+  const feriadoHoy = feriadosSinServicio[fechaHoyHonduras];
+  const minutosActuales = fechaActualHonduras.getHours() * 60 + fechaActualHonduras.getMinutes();
+  const [horaInicioFeriado, minutoInicioFeriado] = (feriadoHoy?.desde || "00:00").split(":").map(Number);
+  const esFeriado = Boolean(feriadoHoy) && minutosActuales >= horaInicioFeriado * 60 + minutoInicioFeriado;
+  const esDiaSinServicio = esFinDeSemana || esFeriado;
+  const mensajeCierreHoy = obtenerMensajeCierre(fechaHoyHonduras, esFinDeSemana, esFeriado);
+  useEffect(() => {
+    const proximaActualizacion = new Date(fechaActualHonduras);
+    proximaActualizacion.setHours(24, 0, 0, 0);
+
+    if (feriadoHoy?.desde) {
+      const fechaInicioFeriado = new Date(fechaActualHonduras);
+      fechaInicioFeriado.setHours(horaInicioFeriado, minutoInicioFeriado, 0, 0);
+      if (fechaInicioFeriado > fechaActualHonduras && fechaInicioFeriado < proximaActualizacion) {
+        proximaActualizacion.setTime(fechaInicioFeriado.getTime());
+      }
+    }
+
+    const timer = setTimeout(() => setActualizacionHorario(Date.now()), proximaActualizacion.getTime() - fechaActualHonduras.getTime());
+    return () => clearTimeout(timer);
+  }, [actualizacionHorario, fechaHoyHonduras, feriadoHoy?.desde, horaInicioFeriado, minutoInicioFeriado]);
   return <Container disableGutters sx={{
     minHeight: '100vh',
     display: "flex",
@@ -444,40 +487,12 @@ function Main() {
                         </>}
 
                     {/* Anuncio para fechas especiales mostrar a todos los usuarios */}
-                    {(() => {
-          const fechaActual = new Date();
-          const fechaHN = new Date(fechaActual.toLocaleString("en-US", {
-            timeZone: "America/Tegucigalpa"
-          }));
-          const claveHoy = `${fechaHN.getFullYear()}-${String(fechaHN.getMonth() + 1).padStart(2, '0')}-${String(fechaHN.getDate()).padStart(2, '0')}`;
-          const esFeriadoAnuncio = fechasSinSolicitudesNiDesembolsos.has(claveHoy);
-          if (usuarioDetalle.status === "1" && esFeriadoAnuncio) {
-            return <div style={styles.container}>
-                                    <Typography style={styles.text}>
-                                        Queremos recordarte que los días sábado y domingo no se procesan solicitudes
-                                    </Typography>
-                                    <Typography style={{
-                ...styles.text,
-                marginTop: '8px'
-              }}>
-                                        ni desembolsos de préstamos. 
-                                    </Typography>
-                                    <Typography style={{
-                ...styles.text,
-                marginTop: '8px'
-              }}>
-                                        ! De lunes a viernes estaremos encantados de ayudarte !
-                                    </Typography>
-                                    <Typography style={{
-                ...styles.text,
-                marginTop: '8px'
-              }}>
-                                        Gracias por tu comprensión 💛
-                                    </Typography>
-                                </div>;
-          }
-          return null; // No mostrar nada si no está dentro del rango de fechas
-        })()}
+                    {usuarioDetalle.status === "1" && esDiaSinServicio && <div style={styles.container}>
+                      <Typography style={styles.text}>{mensajeCierreHoy}</Typography>
+                      <Typography style={{ ...styles.text, marginTop: '8px' }}>
+                        Gracias por tu comprensión.
+                      </Typography>
+                    </div>}
     
 
                     <div className="contetilebotonpri">
@@ -495,18 +510,7 @@ function Main() {
 
                         {/* Si el usuario está en la ubicación deseada, muestra el enlace de aplicar */}
                         {(() => {
-            const fechaActual = new Date();
-            const fechaUTC6 = new Date(fechaActual.toLocaleString("en-US", {
-              timeZone: "America/Tegucigalpa"
-            }));
-            const anio = fechaUTC6.getFullYear();
-            const mes = fechaUTC6.getMonth() + 1; // Los meses en JavaScript son base 0
-            const dia = fechaUTC6.getDate();
-
-            // Verificar si estamos en fechas específicas de feriado (YYYY-MM-DD)
-            const claveFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-            const esFeriado = fechasSinSolicitudesNiDesembolsos.has(claveFecha);
-            if (esFeriado) {
+            if (esDiaSinServicio) {
               return <Link to="#" onClick={e => e.preventDefault()} aria-disabled="true" tabIndex={-1} className="tilebotonpri disabled" style={{
                 display: 'flex',
                 justifyContent: 'flex-start',
@@ -525,7 +529,7 @@ function Main() {
                                         <div className="tilebotonpri-desc" style={{
                     textAlign: 'left'
                   }}>
-                                            Te recordamos que los fines de semana no se realizan solicitudes ni desembolsos de préstamos.
+                                            {mensajeCierreHoy}
                                         </div>
                                     </div>
                                     <div className="tilebotonpri-icon" style={{

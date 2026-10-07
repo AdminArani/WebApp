@@ -262,6 +262,10 @@ function Perfil() {
 
   // Modal de éxito
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [enviandoValidacion, setEnviandoValidacion] = useState(false);
+  const [enviandoConfirmacionRevision, setEnviandoConfirmacionRevision] = useState(false);
+  const [errorValidacion, setErrorValidacion] = useState('');
+  const [errorConfirmacionRevision, setErrorConfirmacionRevision] = useState('');
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -393,6 +397,112 @@ function Perfil() {
       }
     }
   }, [pasoPerfil]);
+  const confirmarValidacionPerfil = async () => {
+    setEnviandoValidacion(true);
+    setErrorValidacion('');
+    const requestBody = {
+      data: {
+        age: usuarioDetalle.age,
+        userType: "cliente",
+        income: usuarioDetalle.income,
+        workExperienceMonths: moment().diff(moment(usuarioDetalle.work_experience, "YYYY-MM-DD"), 'months'),
+        education: usuarioDetalle.education,
+        workType: usuarioDetalle.income_status,
+        documentsUploaded: usuarioDetalle.file1 && usuarioDetalle.file2 && usuarioDetalle.file3 && usuarioDetalle.file4 ? 1 : 0,
+        selfieValidationPassed: usuarioDetalle.file4 ? 1 : 0,
+        rpValidationPassed: 1,
+        rpTime: 1,
+        referralsUploaded: 1,
+        identityValidationPassed: 1,
+        bankAccountValid: 1
+      }
+    };
+    const codigosPorResultado = {
+      "Age Requirement Not Met": 7,
+      "User Type not Eligible": 8,
+      "Income Below Minimum Requirement": 9,
+      "Insufficient Work Experience": 10,
+      "Education Invalid": 11,
+      "Work Type Failed": 12,
+      "Missing Required Documents": 13,
+      "Selfie Validation Failed": 14,
+      "RP Validation Failed": 15,
+      "RP Time Failed": 16,
+      "Referrals Failed": 17,
+      "Identity Validation Failed": 18,
+      "Invalid Bank Account": 19,
+      "Approve": 20
+    };
+
+    try {
+      const response = await axios.post(`${config.apiUrl}/api/DecisionRules/sendRule.php`, requestBody, {
+        timeout: 0,
+        headers: {
+          Authorization: "XQRajfkf11HO01h1JhaYLeMLuZ3qkQLaGAUrowEidQqcgEFhYv4V4rk7Xsi5Q9bh",
+          "Content-Type": "application/json"
+        }
+      });
+      const resultado = typeof response.data === "string"
+        ? response.data
+        : response.data?.message || response.data?.result || response.data?.status || response.data?.error || response.data?.[0];
+      const errorCode = codigosPorResultado[resultado];
+
+      if (errorCode === undefined) {
+        throw new Error("La respuesta de DecisionRules no contiene un resultado reconocido.");
+      }
+
+      const updateResponse = await axios.request({
+        url: `${config.apiUrl}/api/app/putProfile.php`,
+        method: "post",
+        timeout: 0,
+        data: {
+          sid: gContext.logeado?.token,
+          array: {
+            errores_perfil: errorCode
+          }
+        }
+      });
+
+      if (updateResponse.data.status !== "OK") {
+        throw new Error("No se pudo guardar el resultado de la evaluación en el perfil.");
+      }
+
+      setOpenConfirmModal(false);
+      setSuccessDialogOpen(true);
+    } catch (error) {
+      console.error("Error al completar la validación del perfil:", error);
+      setErrorValidacion("No se pudo completar la validación. Revisa tu conexión e inténtalo de nuevo.");
+    } finally {
+      setEnviandoValidacion(false);
+    }
+  };
+  const finalizarEnvioRevision = async () => {
+    setEnviandoConfirmacionRevision(true);
+    setErrorConfirmacionRevision('');
+    try {
+      const response = await axios.request({
+        url: `${config.apiUrl}/api/app/send_confirmdata.php`,
+        method: "post",
+        timeout: 0,
+        data: {
+          sid: gContext.logeado.token
+        }
+      });
+
+      if (response.data.status !== "OK") {
+        throw new Error("El endpoint no confirmó el envío de los datos.");
+      }
+
+      set_datosEnviadosArevision(true);
+      setSuccessDialogOpen(false);
+      navigate("/");
+    } catch (error) {
+      console.error("Error al enviar los datos a revisión:", error);
+      setErrorConfirmacionRevision("No se pudo finalizar el envío. Inténtalo de nuevo.");
+    } finally {
+      setEnviandoConfirmacionRevision(false);
+    }
+  };
   useEffect(() => {}, [cargando, cargando2, apiCamposConstructor, faltaTerminarRegistro]);
   return <Container disableGutters sx={{
     minHeight: '100vh',
@@ -1441,119 +1551,26 @@ function Perfil() {
                                 </Button>
 
                                 {/* Modal de confirmación */}
-                                 <Dialog open={openConfirmModal} onClose={() => setOpenConfirmModal(false)}>
+                                 <Dialog open={openConfirmModal} onClose={() => {
+                                  if (!enviandoValidacion) setOpenConfirmModal(false);
+                                }}>
                                 <DialogTitle>Confirmación</DialogTitle>
                                 <DialogContent>
                                     <Typography>
                                         ¿Estás seguro que deseas enviar tus datos a validar?
                                     </Typography>
+                                    {errorValidacion && <Typography color="error" sx={{ mt: 2 }}>{errorValidacion}</Typography>}
                                 </DialogContent>
                                 <DialogActions sx={{
                                   flexDirection: 'row-reverse',
                                   justifyContent: 'flex-start',
                                   gap: 1
                                 }}>
-                                    <Button onClick={async () => {
-                    // Datos reales que se van a enviar
-                    const requestBody = {
-                      data: {
-                        age: usuarioDetalle.age,
-                        userType: "cliente",
-                        income: usuarioDetalle.income,
-                        workExperienceMonths: moment().diff(moment(usuarioDetalle.work_experience, "YYYY-MM-DD"), 'months'),
-                        education: usuarioDetalle.education,
-                        workType: usuarioDetalle.income_status,
-                        documentsUploaded: usuarioDetalle.file1 && usuarioDetalle.file2 && usuarioDetalle.file3 && usuarioDetalle.file4 ? 1 : 0,
-                        selfieValidationPassed: usuarioDetalle.file4 ? 1 : 0,
-                        rpValidationPassed: 1,
-                        rpTime: 1,
-                        referralsUploaded: 1,
-                        identityValidationPassed: 1,
-                        bankAccountValid: 1
-                      }
-                    };
-                    try {
-                      // POST real al endpoint
-                      const response = await axios.post(`${config.apiUrl}/api/DecisionRules/sendRule.php`, requestBody, {
-                        headers: {
-                          Authorization: "XQRajfkf11HO01h1JhaYLeMLuZ3qkQLaGAUrowEidQqcgEFhYv4V4rk7Xsi5Q9bh",
-                          "Content-Type": "application/json"
-                        }
-                      });
-
-                      // Imprimir la respuesta completa para inspección
-
-                      // Verificar si response.data es un string o un objeto
-                      let resultado = null;
-                      if (typeof response.data === "string") {
-                        resultado = response.data; // Usar directamente el string
-                      } else if (typeof response.data === "object" && response.data !== null) {
-                        resultado = response.data.message || response.data.result || response.data.status || response.data.error || response.data[0];
-                      }
-                      let errorCode = null;
-                      if (resultado === "Age Requirement Not Met") {
-                        errorCode = 7;
-                      } else if (resultado === "User Type not Eligible") {
-                        errorCode = 8;
-                      } else if (resultado === "Income Below Minimum Requirement") {
-                        errorCode = 9;
-                      } else if (resultado === "Insufficient Work Experience") {
-                        errorCode = 10;
-                      } else if (resultado === "Education Invalid") {
-                        errorCode = 11;
-                      } else if (resultado === "Work Type Failed") {
-                        errorCode = 12;
-                      } else if (resultado === "Missing Required Documents") {
-                        errorCode = 13;
-                      } else if (resultado === "Selfie Validation Failed") {
-                        errorCode = 14;
-                      } else if (resultado === "RP Validation Failed") {
-                        errorCode = 15;
-                      } else if (resultado === "RP Time Failed") {
-                        errorCode = 16;
-                      } else if (resultado === "Referrals Failed") {
-                        errorCode = 17;
-                      } else if (resultado === "Identity Validation Failed") {
-                        errorCode = 18;
-                      } else if (resultado === "Invalid Bank Account") {
-                        errorCode = 19;
-                      } else if (resultado === "Approve") {
-                        errorCode = 20;
-                      }
-                      if (errorCode !== null) {
-                        // Actualizar errores_perfil
-                        try {
-                          const updateResponse = await axios.request({
-                            url: `${config.apiUrl}/api/app/putProfile.php`,
-                            method: "post",
-                            data: {
-                              sid: gContext.logeado?.token,
-                              array: {
-                                errores_perfil: errorCode
-                              }
-                            }
-                          });
-                        } catch (updateError) {
-                          console.error("Error al actualizar errores_perfil:", updateError);
-                        }
-                      } else {
-                        console.warn("No se determinó un código de error válido.");
-                      }
-
-                      // Cerrar confirmación
-                      setOpenConfirmModal(false);
-
-                      // Abrir modal de éxito
-                      setSuccessDialogOpen(true);
-                    } catch (error) {
-                      console.error("Error al enviar los datos al endpoint DecisionRules:", error);
-                    }
-                  }} variant="contained" color="primary">
-
-                                        Confirmo
+                                    <Button onClick={confirmarValidacionPerfil} disabled={enviandoValidacion} variant="contained" color="primary">
+                                        {enviandoValidacion ? "Validando..." : "Confirmo"}
                                     </Button>
 
-                                    <Button onClick={() => setOpenConfirmModal(false)} variant="contained" color="warning">
+                                    <Button onClick={() => setOpenConfirmModal(false)} disabled={enviandoValidacion} variant="contained" color="warning">
 
                                         Cancelar
                                     </Button>
@@ -1573,37 +1590,15 @@ function Perfil() {
                                             check_circle
                                         </span>
                                         <Typography mt={2}>
-                                            Datos enviados con éxito.
+                                          La evaluación terminó. Pulsa Continuar para completar el envío.
                                         </Typography>
+                                        {errorConfirmacionRevision && <Typography color="error" sx={{ mt: 2 }}>{errorConfirmacionRevision}</Typography>}
                                     </Box>
                                 </DialogContent>
 
                                <DialogActions>
-                                    <Button variant="contained" onClick={async () => {
-                    try {
-                      // Llamada a send_confirmdata.php
-                      const response = await axios.request({
-                        url: `${config.apiUrl}/api/app/send_confirmdata.php`,
-                        method: "post",
-                        data: {
-                          sid: gContext.logeado.token
-                        }
-                      });
-                      if (response.data.status === "OK") {
-                        set_datosEnviadosArevision(true);
-                      } else {
-                        console.error("Error al enviar los datos:", response.data);
-                      }
-
-                      // Navegar a la página principal
-                      setSuccessDialogOpen(false);
-                      navigate("/");
-                    } catch (error) {
-                      console.error("Error en la solicitud:", error.message);
-                    }
-                  }}>
-
-                                        Continuar
+                                    <Button variant="contained" onClick={finalizarEnvioRevision} disabled={enviandoConfirmacionRevision}>
+                                        {enviandoConfirmacionRevision ? "Enviando..." : "Continuar"}
                                     </Button>
                                 </DialogActions>
                             </Dialog>
