@@ -18,7 +18,7 @@ import axios from "axios";
 import { orange } from "@mui/material/colors";
 
 const feriadosSinServicio = {
-  "2026-10-06": { nombre: "Morazánico", desde: "12:00" },
+  "2026-10-07": { nombre: "Morazánico", desde: "12:00" },
   "2026-10-08": { nombre: "Morazánico" },
   "2026-10-09": { nombre: "Morazánico" }
 };
