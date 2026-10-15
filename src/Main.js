@@ -1,7 +1,7 @@
 import config from './config';
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import { Button, Paper, Typography } from "@mui/material";
+import { Button, Chip, Paper, Typography } from "@mui/material";
 import { useContext, useState, useEffect } from "react";
 import { AppContext } from "./App";
 import BarraFinal from "./componentes/BarraFinal";
@@ -15,6 +15,8 @@ import { Link } from "react-router-dom";
 import BarraApp from "./componentes/BarraApp.js";
 import ModalDatosFaltantes from "./componentes/ModalDatosFaltantes";
 import axios from "axios";
+import numeral from "numeral";
+import moment from "moment";
 import { orange } from "@mui/material/colors";
 
 const feriadosSinServicio = {
@@ -62,6 +64,34 @@ function Main() {
   const [urlImagenPerfilTerminada, set_urlImagenPerfilTerminada] = useState(false);
   const [datosEnviadosArevision, set_datosEnviadosArevision] = useState(false);
   const [actualizacionHorario, setActualizacionHorario] = useState(0);
+  const [prestamoActivo, set_prestamoActivo] = useState(null);
+  const [proximaCuota, set_proximaCuota] = useState(null);
+
+  useEffect(() => {
+    if (String(usuarioDetalle.state) !== "1" || !gContext.logeado?.token) return;
+    const sid = gContext.logeado.token;
+    let cancelado = false;
+    axios.post(`${config.apiUrl}/api/app/getCustomerOfferList.php`, { sid }).then(res => {
+      if (cancelado || res.data.status !== "OK") return;
+      const prestamo = Object.values(res.data.payload || {}).find(p => [1, 3, 5, 8].includes(p.status));
+      if (!prestamo) return;
+      set_prestamoActivo(prestamo);
+      return axios.post(`${config.apiUrl}/api/app/getBorrowerRepaymentSchedule.php`, { sid, ContainerId: prestamo.container_id }).then(r => {
+        if (cancelado || r.data.status !== "OK") return;
+        const v = x => Number(x || 0);
+        const pendientes = Object.values(r.data.payload || {}).filter(p => ![1, 6].includes(parseInt(p.status, 10))).sort((a, b) => new Date(a.schedule_date) - new Date(b.schedule_date));
+        const p = pendientes[0];
+        if (!p) return;
+        set_proximaCuota({
+          fecha: p.schedule_date,
+          monto: v(p.charge) - v(p.charge_covered) + v(p.administrator_fee) - v(p.administrator_fee_covered) + v(p.amount) - v(p.amount_covered) + v(p.late_fee) - v(p.cinterest_covered)
+        });
+      });
+    }).catch(() => {});
+    return () => {
+      cancelado = true;
+    };
+  }, [usuarioDetalle.state, gContext.logeado?.token]);
 
   //aviso inicio//
 
@@ -495,7 +525,49 @@ function Main() {
                     </div>}
     
 
-                    <div className={`contetilebotonpri${String(usuarioDetalle.state) === "0" ? " state-cero" : String(usuarioDetalle.status) === "1" ? " aplicar-primero" : String(usuarioDetalle.status) === "0" ? " status-cero" : ""}`}>
+                    {String(usuarioDetalle.state) === "1" && prestamoActivo && <div className="bloqueprestamopdt" style={{
+          padding: '2rem 1.5rem',
+          marginBottom: '1rem'
+        }}>
+                        <span className="material-symbols-outlined iconodefondogrande">payments</span>
+                        <div className="bloqueprestamopdt-tit">
+                            <span>Tienes un préstamo activo · N.º {prestamoActivo.container_id}</span>
+                            <h4 style={{
+              paddingBottom: '1rem'
+            }}><span>Lps. </span>{numeral(prestamoActivo.debt).format('0,0.00')}</h4>
+                        </div>
+                        {proximaCuota && <Box className="bloqueprestamopdt-dtll" sx={{
+            position: 'relative',
+            zIndex: 5
+          }}>
+                            <Chip size="small" variant="outlined" sx={{
+              color: '#FFFFFF'
+            }} label={"Próxima cuota: " + moment(proximaCuota.fecha).format("LL")} />
+                            <Chip size="small" variant="outlined" sx={{
+              color: '#FFFFFF'
+            }} label={"Monto: Lps. " + numeral(proximaCuota.monto).format('0,0.00')} />
+                        </Box>}
+                        <Box sx={{
+            position: 'relative',
+            zIndex: 5,
+            display: 'flex',
+            justifyContent: 'center',
+            mt: 2
+          }}>
+                            <Button component={Link} to="/plan" variant="contained" sx={{
+              backgroundColor: '#EB9180',
+              color: '#ffffff',
+              fontWeight: 700,
+              boxShadow: 'none',
+              '&:hover': {
+                backgroundColor: '#e07f6b',
+                boxShadow: 'none'
+              }
+            }}>Pagar mi préstamo</Button>
+                        </Box>
+                    </div>}
+
+                    <div className={`contetilebotonpri${String(usuarioDetalle.state) === "0" && String(usuarioDetalle.status) === "0" ? "" : String(usuarioDetalle.state) === "0" ? " state-cero" : String(usuarioDetalle.status) === "1" ? " aplicar-primero" : String(usuarioDetalle.status) === "0" ? " status-cero" : ""}`}>
                         {["21", "22", "23"].includes(usuarioDetalle?.errores_perfil) ? <Link to="#" className="tilebotonpri disabled" aria-disabled="true" tabIndex={-1} onClick={e => e.preventDefault()}>
 
                                 <div className="tilebotonpri-tit">Perfil</div>
