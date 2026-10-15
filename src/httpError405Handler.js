@@ -259,9 +259,20 @@ function getNormalizedUserContext() {
     status
   };
 }
+function getEndpointName(requestUrl) {
+  const raw = safeString(requestUrl);
+  if (!raw || raw === "desconocida") {
+    return "desconocida";
+  }
+  try {
+    return new URL(raw, window.location.origin).pathname;
+  } catch (_) {
+    return raw.split(/[?#]/)[0];
+  }
+}
 function buildMailToLink(supportEmail, statusCode, requestUrl) {
   const subject = encodeURIComponent(`[WebApp] Error ${statusCode} reportado`);
-  const bodyLines = ["Hola equipo,", "", `Estoy reportando un error ${statusCode} en la app.`, "Adjunto captura de pantalla.", "", `Fecha y hora: ${new Date().toISOString()}`, `Ruta actual: ${window.location.href}`, `Endpoint: ${requestUrl}`, `Navegador: ${navigator.userAgent}`];
+  const bodyLines = ["Hola equipo,", "", `Estoy reportando un error ${statusCode} en la app.`, "Adjunto captura de pantalla.", "", `Fecha y hora: ${new Date().toISOString()}`, `Ruta actual: ${window.location.href}`, `Endpoint: ${getEndpointName(requestUrl)}`, `Navegador: ${navigator.userAgent}`];
   const userCtx = getNormalizedUserContext();
   if (userCtx && (userCtx.customerId || userCtx.fullName || userCtx.email || userCtx.phone || userCtx.personCode || userCtx.activeCreditsAmountSum || userCtx.erroresPerfil || userCtx.status)) {
     bodyLines.push("");

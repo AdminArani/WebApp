@@ -495,7 +495,7 @@ function Main() {
                     </div>}
     
 
-                    <div className="contetilebotonpri">
+                    <div className={`contetilebotonpri${String(usuarioDetalle.state) === "0" ? " state-cero" : String(usuarioDetalle.status) === "1" ? " aplicar-primero" : String(usuarioDetalle.status) === "0" ? " status-cero" : ""}`}>
                         {["21", "22", "23"].includes(usuarioDetalle?.errores_perfil) ? <Link to="#" className="tilebotonpri disabled" aria-disabled="true" tabIndex={-1} onClick={e => e.preventDefault()}>
 
                                 <div className="tilebotonpri-tit">Perfil</div>
@@ -715,18 +715,18 @@ function Main() {
                         
 
                         {/* Otros componentes Link aquí */}
-                        <div className="tilebotonpri" onClick={abrirLandBot}>
+                        {/* <div className="tilebotonpri" onClick={abrirLandBot}>
                             <div className="tilebotonpri-tit">Chat</div>
                             <div className="tilebotonpri-desc">Centro de ayuda de Arani.</div>
                             <div className="tilebotonpri-estado"></div>
                             <div className="tilebotonpri-icon"><img alt="" src={tile_chat} /></div>
-                        </div>
-                        <div className="tilebotonpri disabled">
+                        </div> */}
+                        {/* <div className="tilebotonpri disabled">
                             <div className="tilebotonpri-tit">Referir</div>
                             <div className="tilebotonpri-desc">Invita a personas y gana recompesas.</div>
                             <div className="tilebotonpri-estado"></div>
                             <div className="tilebotonpri-icon"><img alt="" src={tile_referir} /></div>
-                        </div>
+                        </div> */}
                     </div>
                     <Button onClick={salir} variant="contained" sx={{
           mt: 3

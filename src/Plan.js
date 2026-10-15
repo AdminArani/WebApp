@@ -127,9 +127,7 @@ function Plan() {
           }
         }
       }
-    }).catch(err => {
-      navigate("/login");
-    });
+    }).catch(err => {});
   }
   function cargarListaPrestamos() {
     if (cargando) return false;
@@ -141,7 +139,7 @@ function Plan() {
         sid: gContext.logeado?.token
       }
     }).then(res => {
-      // set_cargando(false);
+      set_cargando(false);
       if (res.data.status === "ER") {}
       if (res.data.status === "ERS") {
         localStorage.removeItem('arani_session_id');
@@ -171,12 +169,14 @@ function Plan() {
           }
         }
         set_prestamoSeleccionado(elementThis);
-        cargarCalendarioPagos(elementThis.container_id);
-        set_contratoPrestamo(res.data.payload[elementThis.container_id]?.contract_content);
+        if (elementThis) {
+          cargarCalendarioPagos(elementThis.container_id);
+          set_contratoPrestamo(res.data.payload[elementThis.container_id]?.contract_content);
+        }
       }
       if (res.data.status === 500) {}
     }).catch(err => {
-      navigate("/login");
+      set_cargando(false);
     });
   }
   function cargarCalendarioPagos(idPrestamo) {
@@ -212,7 +212,7 @@ function Plan() {
         set_pagosrealizadosnum(numpagosrealizados);
       }
     }).catch(err => {
-      navigate("/login");
+      set_cargando(false);
     });
   }
 
@@ -232,6 +232,7 @@ function Plan() {
   useEffect(() => {
     if (prestamoSeleccionado && pricelistData && productsArr) {
       let productoSeleccionado = productsArr.find(element => element.ProCod + "" === prestamoSeleccionado.product_id + "");
+      if (!productoSeleccionado) return;
       set_productoSeleccionado(productoSeleccionado);
 
       var interesPeriodo = pricelistData.interest;
@@ -1053,11 +1054,6 @@ function Plan() {
       return fechaPago.isAfter(max) ? fechaPago : max;
     }, moment(listaPagos[0].schedule_date));
   }
-  useEffect(() => {
-    if (prestamoSeleccionado) {
-      obtenerCalendarioPagos(prestamoSeleccionado.container_id);
-    }
-  }, [prestamoSeleccionado]);
   return <Container disableGutters sx={{
     minHeight: '100vh',
     display: "flex",
