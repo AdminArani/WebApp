@@ -66,6 +66,7 @@ function Main() {
   const [actualizacionHorario, setActualizacionHorario] = useState(0);
   const [prestamoActivo, set_prestamoActivo] = useState(null);
   const [proximaCuota, set_proximaCuota] = useState(null);
+  const [fechaFinalPrestamo, set_fechaFinalPrestamo] = useState(null);
 
   useEffect(() => {
     if (String(usuarioDetalle.state) !== "1" || !gContext.logeado?.token) return;
@@ -76,10 +77,17 @@ function Main() {
       const prestamo = Object.values(res.data.payload || {}).find(p => [1, 3, 5, 8].includes(p.status));
       if (!prestamo) return;
       set_prestamoActivo(prestamo);
+      axios.post(`${config.apiUrl}/api/app/getWalletInfo.php`, { sid }).then(w => {
+        if (!cancelado && w.data.status === "OK") set_walletData(w.data.payload.data);
+      }).catch(() => {});
       return axios.post(`${config.apiUrl}/api/app/getBorrowerRepaymentSchedule.php`, { sid, ContainerId: prestamo.container_id }).then(r => {
         if (cancelado || r.data.status !== "OK") return;
         const v = x => Number(x || 0);
-        const pendientes = Object.values(r.data.payload || {}).filter(p => ![1, 6].includes(parseInt(p.status, 10))).sort((a, b) => new Date(a.schedule_date) - new Date(b.schedule_date));
+        const cuotas = Object.values(r.data.payload || {});
+        if (cuotas.length) {
+          set_fechaFinalPrestamo(cuotas.reduce((max, c) => moment(c.schedule_date).isAfter(max) ? moment(c.schedule_date) : max, moment(cuotas[0].schedule_date)));
+        }
+        const pendientes = cuotas.filter(p => ![1, 6].includes(parseInt(p.status, 10))).sort((a, b) => new Date(a.schedule_date) - new Date(b.schedule_date));
         const p = pendientes[0];
         if (!p) return;
         set_proximaCuota({
@@ -525,7 +533,19 @@ function Main() {
                     </div>}
     
 
-                    {String(usuarioDetalle.state) === "1" && prestamoActivo && <div className="bloqueprestamopdt" style={{
+                    {String(usuarioDetalle.state) === "1" && prestamoActivo && Number(walletData?.amount_wallet_balance) >= Number(prestamoActivo.debt) && <div style={styles.containerOk}>
+                        <Typography style={{
+            ...styles.textOk,
+            color: '#2e9e4f'
+          }}>
+                            Tu pago ya fue recibido y está pendiente de ser aplicado.
+                            <br />
+                            No tienes que hacer nada más, solo esperar la fecha de aplicación.
+                            {fechaFinalPrestamo && <><br />Fecha final de tu préstamo: {fechaFinalPrestamo.format("LL")}</>}
+                        </Typography>
+                    </div>}
+
+                    {String(usuarioDetalle.state) === "1" && prestamoActivo && !(Number(walletData?.amount_wallet_balance) >= Number(prestamoActivo.debt)) && <div className="bloqueprestamopdt" style={{
           padding: '2rem 1.5rem',
           marginBottom: '1rem'
         }}>
