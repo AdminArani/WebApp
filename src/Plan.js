@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Box, Container, Modal, Button, Chip, Dialog, DialogActions, DialogContent, TextField, Divider, Grid, List, ListItem, ListItemText, Paper, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, Container, Modal, Button, Chip, Dialog, DialogActions, DialogContent, TextField, Divider, Grid, List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
 import axios from "axios";
 import numeral from "numeral";
 import moment from "moment";
@@ -487,6 +487,17 @@ function Plan() {
     } finally {
       setCargandoEnvio(false);
     }
+  };
+
+  const cerrarModalBAC = () => {
+    setOpenModalBAC(false);
+    setExitoEnvio(false);
+    setCargandoEnvio(false);
+    setTipoPagoBAC('parcial');
+    setMontoPago('');
+    setNumReferencia('');
+    setEstadoReferencia('');
+    setFotoComprobante(null);
   };
 
   // Manejar la apertura del modal:
@@ -1599,22 +1610,56 @@ function Plan() {
                 </Dialog>
 
                 {/* Modal para BAC */}
-                <Dialog open={openModalBAC} onClose={() => {
-          setOpenModalBAC(false);
-          setExitoEnvio(false); // Resetea el mensaje de éxito al cerrar el modal
-          setTipoPagoBAC('parcial');
-        }}>
+                <Dialog open={openModalBAC} onClose={cerrarModalBAC}>
                 <DialogContent>
                     <Typography variant="h5">Subir Archivo BAC</Typography>
                     <Typography variant="body2" sx={{
               mb: 2
             }}>Adjunte su comprobante de pago BAC.</Typography>
-                    <ToggleButtonGroup value={tipoPagoBAC} exclusive onChange={handleTipoPagoBACChange} fullWidth sx={{
-              mt: 1
+                    <Box sx={{
+              mt: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1.5
             }}>
-                        <ToggleButton value="parcial">Pago parcial</ToggleButton>
-                        <ToggleButton value="completo" disabled={pagosrealizadosnum > 0}>Pago completo</ToggleButton>
-                    </ToggleButtonGroup>
+                        {[{
+                valor: 'parcial',
+                titulo: 'Pago de cuota',
+                detalle: `Valor de la cuota vigente: L ${numeral(['charge', 'administrator_fee', 'amount', 'late_fee', 'penalty_fee'].reduce((t, k) => t + (parseFloat(pagoseleccionado?.[k]) || 0), 0) - ['charge_covered', 'administrator_fee_covered', 'amount_covered', 'late_fee_covered', 'penalty_covered'].reduce((t, k) => t + (parseFloat(pagoseleccionado?.[k]) || 0), 0)).format('0,0.00')}`,
+                deshabilitado: false
+              }, {
+                valor: 'completo',
+                titulo: 'Pagar todo mi préstamo',
+                detalle: `Se paga el total: L ${numeral(prestamoSeleccionado?.debt).format('0,0.00')}`,
+                deshabilitado: pagosrealizadosnum > 0
+              }].map(op => {
+                const activo = tipoPagoBAC === op.valor;
+                return <Box key={op.valor} role="button" onClick={() => !op.deshabilitado && !activo && handleTipoPagoBACChange(null, op.valor)} sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  p: 1.5,
+                  borderRadius: '12px',
+                  border: '2px solid',
+                  borderColor: activo ? '#4c74e9' : '#d0d0d0',
+                  backgroundColor: activo ? '#eef2fe' : '#ffffff',
+                  opacity: op.deshabilitado ? 0.5 : 1,
+                  cursor: op.deshabilitado ? 'not-allowed' : 'pointer'
+                }}>
+                                <span className="material-symbols-outlined" style={{
+                    color: activo ? '#4c74e9' : '#9e9e9e'
+                  }}>{activo ? 'check_circle' : 'radio_button_unchecked'}</span>
+                                <Box>
+                                    <Typography variant="subtitle1" sx={{
+                      fontWeight: 'bold',
+                      lineHeight: 1.2,
+                      color: activo ? '#4c74e9' : 'inherit'
+                    }}>{op.titulo}</Typography>
+                                    <Typography variant="caption" color="text.secondary">{op.detalle}</Typography>
+                                </Box>
+                            </Box>;
+              })}
+                    </Box>
                     {/* Input para el montoPago */}
                     <TextField label="Monto a Pagar" value={montoPago} onChange={handleMontoPagoChange} type="number" fullWidth InputProps={{
               readOnly: tipoPagoBAC === 'completo'
@@ -1690,8 +1735,12 @@ function Plan() {
                     <Box sx={{
               display: 'flex',
               justifyContent: 'flex-start',
+              gap: 1,
               width: '100%'
             }}>
+                        <Button variant="outlined" onClick={cerrarModalBAC}>
+                            Cancelar
+                        </Button>
                         <Button onClick={() => enviarComprobante(clienteData)} // Usa los datos del cliente obtenidos previamente
               disabled={!fotoComprobante} variant="contained">
 
