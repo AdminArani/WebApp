@@ -48,6 +48,7 @@ function Main() {
   const [ubicacion, setUbicacion] = useState('');
   const [cargandoUbicacion, setCargandoUbicacion] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [aplicando, setAplicando] = useState(false);
   const [usuarioDetalle, set_usuarioDetalle] = useState({});
   const [usuarioDetalleFullR, set_usuarioDetalleFullR] = useState(false);
   const [faltaTerminarRegistro, set_faltaTerminarRegistro] = useState(false);
@@ -424,6 +425,30 @@ function Main() {
     alignItems: "center",
     justifyContent: "center"
   }} component="main" maxWidth="md">
+            {aplicando && <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      zIndex: 2000,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#5b75e7',
+      color: '#fff'
+    }}>
+                    <img src={process.env.PUBLIC_URL + '/araniloader1.gif'} alt="loading" style={{
+        height: '200px',
+        width: '200px'
+      }} />
+                    <Typography variant="h6" sx={{
+        color: '#fff',
+        textAlign: 'center',
+        px: 2
+      }}>Procesando tu solicitud, por favor espera...</Typography>
+                  </div>}
             {loading ? <div style={{
       position: 'fixed',
       top: 0,
@@ -664,6 +689,8 @@ function Main() {
               } else {
                 // IMPORTANTE: detener navegación automática hasta tener respuesta
                 e.preventDefault();
+                if (aplicando) return;
+                setAplicando(true);
                 try {
                   // --- 1) Consultar tipo de cliente PRIMERO para obtener lastLoanDaysLate ---
                   const tipoClientePayload = {
@@ -769,8 +796,7 @@ function Main() {
                   console.error("[Aplicar] Error general (postPriceList/modeloClienteExistente):", error);
                   // NO avanzar a /aplicar2
                 } finally {
-                  // Si no navegó (por return/error), quitar loader aquí
-                  // Si ya navegó, este setLoading podría no ejecutarse antes del unmount, pero no afecta.
+                  setAplicando(false);
                   setLoading(false);
                 }
               }
